@@ -1,0 +1,176 @@
+# Claudinho — curated repos for the GitHub indexer
+#
+# One repo per line, formatted as `owner/repo`.
+# Lines starting with `#` are comments. Blank lines are ignored.
+# To add a repo: just append it. To remove: delete the line.
+# Re-running `npx tsx scripts/index-curated.ts` picks up the change.
+#
+# Don't include orgs (e.g. `anthropics` on its own). For whole-org sweeps
+# use `scripts/index-orgs.ts` instead.
+#
+# History — publishers deliberately excluded:
+#   ComposioHQ/awesome-claude-skills — yielded 842 rows, ~800 auto-generated.
+#   K-Dense-AI/claude-scientific-skills — claims 125+, would dominate.
+#   raintree-technology/claude-starter — claims 40, similar risk.
+
+# === Original curated set (pre-batch-1) ===
+anthropics/skills
+obra/superpowers
+obra/superpowers-skills
+mhattingpete/claude-skills-marketplace
+trailofbits/skills
+michalparkola/tapestry-skills-for-claude-code
+remotion-dev/skills
+mattpocock/skills
+microsoft/azure-skills
+supabase/agent-skills
+
+# === Patrick's batch (2026-05-29) ===
+# (anthropics/skills, anthropics/knowledge-work-plugins, mattpocock/skills,
+# microsoft/azure-skills, obra/superpowers, remotion-dev/skills, supabase/agent-skills,
+# vercel-labs/* — already indexed, skipped)
+# (open.feishu.cn, skills.volces.com — not github paths, skipped)
+
+addyosmani/agent-skills
+# affaan-m/everything-claude-code — DROPPED 2026-05-29. Real repo (178K stars) but
+# publishes the same skills across .claude/ .codex/ .cursor/ .gemini/ etc., yielding
+# ~768 rows that are duplicates of ~80–110 actual skills. Add back once the indexer
+# can filter to a single agent directory.
+agentspace-so/agent-skills
+agentspace-so/runcomfy-agent-skills
+agentspace-so/skills
+anysearch-ai/anysearch-skill
+apify/agent-skills
+apollographql/skills
+ar9av/obsidian-wiki
+arvindrk/extract-design-system
+astronomer/agents
+auth0/agent-skills
+automattic/agent-skills
+axiomhq/skills
+base/skills
+belt-sh/cli
+better-auth/skills
+bitwarden/ai-plugins
+box/box-for-ai
+brave/brave-search-skills
+browser-use/browser-use
+browserbase/skills
+callstackincubator/agent-skills
+charon-fan/agent-playbook
+chrisbanes/skills
+claude-office-skills/skills
+clerk/skills
+clickhouse/agent-skills
+cloudflare/skills
+coderabbitai/skills
+coinbase/agentic-wallet-skills
+coreyhaines31/marketingskills
+dagster-io/skills
+datadog-labs/agent-skills
+dbt-labs/dbt-agent-skills
+degausai/wonda
+denoland/skills
+doany-ai/skills
+elevenlabs/skills
+emilkowalski/skill
+encoredev/skills
+exploreomni/omni-agent-skills
+expo/skills
+eze-is/web-access
+facebook/react
+figma/mcp-server-guide
+firebase/agent-skills
+firecrawl/cli
+firecrawl/skills
+flutter/skills
+forrestchang/andrej-karpathy-skills
+garrytan/gstack
+get-convex/agent-skills
+getsentry/skills
+github/awesome-copilot
+google-gemini/gemini-skills
+google-labs-code/stitch-skills
+google/agents-cli
+googleworkspace/cli
+hashicorp/agent-skills
+heroui-inc/heroui
+heygen-com/hyperframes
+higgsfield-ai/skills
+huggingface/skills
+hugohe3/ppt-master
+inference-sh-skills/skills
+intellectronica/agent-skills
+jakubkrehel/make-interfaces-feel-better
+jeffallan/claude-skills
+juliusbrussee/caveman
+kepano/obsidian-skills
+kotlin/kotlin-agent-skills
+langchain-ai/langchain-skills
+langfuse/skills
+larksuite/cli
+larksuite/meegle-cli
+launchdarkly/agent-skills
+leonxlnx/taste-skill
+livekit/agent-skills
+lllllllama/ai-paper-reproduction-skill
+makenotion/claude-code-notion-plugin
+mapbox/mapbox-agent-skills
+mastra-ai/skills
+mcollina/skills
+mcp-use/mcp-use
+medusajs/medusa-agent-skills
+microsoft/playwright-cli
+minimax-ai/cli
+n8n-io/n8n
+neondatabase/agent-skills
+nextlevelbuilder/ui-ux-pro-max-skill
+nuxt/ui
+openai/skills
+openshift/hypershift
+othmanadi/planning-with-files
+parthjadhav/app-store-screenshots
+pbakaus/impeccable
+planetscale/database-skills
+posthog/skills
+prisma/skills
+projectopensea/opensea-skill
+pulumi/agent-skills
+pytorch/pytorch
+redis/agent-skills
+replicas-group/skill
+resend/resend-skills
+rivet-dev/skills
+roin-orca/skills
+runcomfy-com/skills
+runwayml/skills
+sanity-io/agent-toolkit
+scrapegraphai/just-scrape
+semgrep/skills
+sentry/dev
+shadcn/ui
+shopify/shopify-ai-toolkit
+skills-shell/skills
+sleekdotdesign/agent-skills
+soultrace-ai/soultrace-skill
+spillwavesolutions/design-doc-mermaid
+streamlit/agent-skills
+stripe/ai
+sveltejs/ai-tools
+tavily-ai/skills
+teachingai/full-stack-skills
+temporalio/skill-temporal-developer
+tencent/wechatreading
+tinybirdco/tinybird-agent-skills
+tldraw/tldraw
+triggerdotdev/skills
+tw93/waza
+upstash/context7
+vercel/ai
+warpdotdev/common-skills
+webflow/webflow-skills
+whopio/whop-payments-network-skill
+wix/skills
+wordpress/agent-skills
+wshobson/agents
+xixu-me/skills
