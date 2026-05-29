@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Browse skills — Claudinho",
     description: `Browse and filter ${count} verified Claude skills by role, stage, setup, and publisher.`,
-    url: "https://claudinho.xyz/browse",
+    url: "https://claudinho.xyz/skills",
   },
   twitter: {
     card: "summary_large_image",
@@ -18,6 +18,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BrowseLayout({ children }: { children: React.ReactNode }) {
+export default function SkillsLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

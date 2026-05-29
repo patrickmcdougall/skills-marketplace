@@ -15,7 +15,7 @@ export function Footer({ stats }: FooterProps) {
             <a className="logo" href="/">
               Claudinho
             </a>
-            <span className="brand-tag">pick your skills</span>
+            <span className="brand-tag">pick your lineup of skills</span>
           </div>
           <span className="status-foot">
             All systems · {stats.skills} verified · last run today
@@ -23,10 +23,10 @@ export function Footer({ stats }: FooterProps) {
         </div>
         <div className="col">
           <b>Browse</b>
-          <a href="/browse">All skills</a>
-          <a href="/publishers">Publishers</a>
-          <a href="/browse?sort=newest">New this week</a>
-          <a href="/browse?sort=installs">Most installed</a>
+          <a href="/skills">All skills</a>
+          <a href="/creators">Creators</a>
+          <a href="/skills?sort=newest">New this week</a>
+          <a href="/skills?sort=installs">Most installed</a>
         </div>
         <div className="col">
           <b>About</b>

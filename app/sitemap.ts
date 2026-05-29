@@ -5,9 +5,10 @@ const BASE = "https://claudinho.xyz";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: BASE,                 changeFrequency: "weekly",  priority: 1.0 },
-    { url: `${BASE}/browse`,     changeFrequency: "weekly",  priority: 0.9 },
-    { url: `${BASE}/publishers`, changeFrequency: "weekly",  priority: 0.8 },
+    { url: BASE,                  changeFrequency: "weekly",  priority: 1.0 },
+    { url: `${BASE}/skills`,      changeFrequency: "weekly",  priority: 0.9 },
+    { url: `${BASE}/creators`,    changeFrequency: "weekly",  priority: 0.8 },
+    { url: `${BASE}/search`,      changeFrequency: "weekly",  priority: 0.7 },
   ];
 
   const [slugs, publisherRows] = await Promise.all([
@@ -22,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const publisherRoutes: MetadataRoute.Sitemap = publisherRows.map(({ handle }) => ({
-    url: `${BASE}/publishers/${handle}`,
+    url: `${BASE}/creators/${handle}`,
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));

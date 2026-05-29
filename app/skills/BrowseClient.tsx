@@ -134,14 +134,14 @@ function FilterPublisher({
   return (
     <div className="bp-fsection">
       <h3>
-        <span>Publisher</span>
+        <span>Creator</span>
         {value.length > 0 && <button onClick={onClear}>clear</button>}
       </h3>
       {list.length > 6 && (
         <div className="bp-search">
           <span className="icon">/</span>
           <input
-            placeholder="search publishers"
+            placeholder="search creators"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
@@ -179,7 +179,7 @@ function FilterPublisher({
               textAlign: "left",
             }}
           >
-            No publishers match &ldquo;{q}&rdquo;.
+            No creators match &ldquo;{q}&rdquo;.
           </p>
         )}
       </div>
@@ -233,7 +233,6 @@ function BrowseTopBar({
             <div
               className="bp-sort-menu"
               onClick={(e) => e.stopPropagation()}
-              // close when clicking outside
               onBlur={() => setOpen(false)}
             >
               {SORT_OPTIONS.map((s) => (
@@ -379,7 +378,9 @@ function BrowsePageInner({ initialSkills }: { initialSkills: BrowseSkill[] }) {
     installs: fmtCount(initialSkills.reduce((a, s) => a + s.installs, 0)),
   }), [initialSkills]);
   const searchParams = useSearchParams();
-  const [query, setQuery] = useState("");
+
+  // Initialise from URL params so /search?q=... and /skills?sort=... work.
+  const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
   const [filters, setFilters] = useState<BrowseFilters>({
     shelves: [],
     subShelf: null,
@@ -491,7 +492,7 @@ function BrowsePageInner({ initialSkills }: { initialSkills: BrowseSkill[] }) {
         <div className="bp-search" style={{ marginTop: 16, maxWidth: 480 }}>
           <span className="icon">⌕</span>
           <input
-            placeholder="Search skills, publishers, topics…"
+            placeholder="Search skills, creators, topics…"
             value={query}
             onChange={(e) => { setQuery(e.target.value); setVisible(PAGE_SIZE); }}
             autoComplete="off"

@@ -4,7 +4,7 @@ import { PUBLISHERS } from "@/lib/data";
 import { fmtCount } from "@/lib/data";
 
 export const runtime = "edge";
-export const alt = "Claudinho publisher";
+export const alt = "Claudinho creator";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -49,7 +49,7 @@ export default async function Image({
           </span>
         </div>
 
-        {/* Publisher name */}
+        {/* Creator name */}
         <div
           style={{
             fontSize: name.length > 24 ? 52 : name.length > 16 ? 64 : 72,

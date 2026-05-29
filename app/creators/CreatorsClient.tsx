@@ -53,7 +53,7 @@ function sortRows(
 
 // ─── page ──────────────────────────────────────────────────────────────────
 
-export function PublishersClient({ rawRows }: { rawRows: DBPublisherRow[] }) {
+export function CreatorsClient({ rawRows }: { rawRows: DBPublisherRow[] }) {
   const router = useRouter();
 
   // Enrich with catalog data on the client (PUBLISHERS is a static bundle import).
@@ -110,7 +110,7 @@ export function PublishersClient({ rawRows }: { rawRows: DBPublisherRow[] }) {
 
       <div className="pl-page">
         <header className="bp-head">
-          <h1>Publishers</h1>
+          <h1>Creators</h1>
         </header>
 
         {/* Toolbar: shelf filter chips */}
@@ -155,12 +155,12 @@ export function PublishersClient({ rawRows }: { rawRows: DBPublisherRow[] }) {
             <p className="pl-count">
               <span className="n">{rows.length}</span>
               {rows.length === allRows.length ? (
-                " publishers"
+                " creators"
               ) : (
                 <>
                   {" of "}
                   <span className="n">{allRows.length}</span>
-                  {" publishers"}
+                  {" creators"}
                 </>
               )}
             </p>
@@ -170,8 +170,8 @@ export function PublishersClient({ rawRows }: { rawRows: DBPublisherRow[] }) {
         {/* Table */}
         {rows.length === 0 ? (
           <div className="bp-empty">
-            <h3>No publishers match this filter.</h3>
-            <p>Try removing a shelf, or view all publishers.</p>
+            <h3>No creators match this filter.</h3>
+            <p>Try removing a shelf, or view all creators.</p>
             <div className="actions">
               <button
                 className="lp-btn"
@@ -185,7 +185,7 @@ export function PublishersClient({ rawRows }: { rawRows: DBPublisherRow[] }) {
           <table className="pl-table">
             <thead>
               <tr>
-                <th>Publisher</th>
+                <th>Creator</th>
                 {TABLE_COLUMNS.map((c) => (
                   <th
                     key={c.key}
@@ -209,7 +209,7 @@ export function PublishersClient({ rawRows }: { rawRows: DBPublisherRow[] }) {
               {rows.map((r) => (
                 <tr
                   key={r.handle}
-                  onClick={() => router.push(`/publishers/${r.handle}`)}
+                  onClick={() => router.push(`/creators/${r.handle}`)}
                 >
                   <td>
                     <div className="pl-pub">

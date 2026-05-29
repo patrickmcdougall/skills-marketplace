@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import {
   PUBLISHERS,
   REAL_STATS,
@@ -10,13 +11,13 @@ import {
 import {
   getSkillsByOwner,
   ownerFromUrl,
-  repoPathFromUrl,
-  skillLeaf,
   type SkillRow,
 } from "@/lib/db";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { SkillCard } from "@/components/SkillCard";
+
+export const revalidate = 3600;
 
 // Map a DB SkillRow to the Skill shape SkillCard expects.
 function rowToSkill(row: SkillRow): Skill {
@@ -88,7 +89,7 @@ export async function generateMetadata({ params }: { params: Promise<{ handle: s
   const desc = p
     ? `${p.role}. ${skillCount} verified skill${skillCount !== 1 ? "s" : ""}.`
     : `${skillCount} skill${skillCount !== 1 ? "s" : ""} published on Claudinho.`;
-  const url = `https://claudinho.xyz/publishers/${handle}`;
+  const url = `https://claudinho.xyz/creators/${handle}`;
 
   return {
     title: name,
@@ -98,7 +99,11 @@ export async function generateMetadata({ params }: { params: Promise<{ handle: s
   };
 }
 
-export default async function PublisherPage({
+export async function generateStaticParams() {
+  return Object.keys(PUBLISHERS).map((handle) => ({ handle }));
+}
+
+export default async function CreatorPage({
   params,
 }: {
   params: Promise<{ handle: string }>;
@@ -221,7 +226,7 @@ export default async function PublisherPage({
                 {shelves.map((sh, i) => (
                   <span key={sh}>
                     {i > 0 && <span className="sep">·</span>}
-                    <a className="v" href="/browse">
+                    <a className="v" href="/skills">
                       {sh}
                     </a>
                   </span>
@@ -246,9 +251,4 @@ export default async function PublisherPage({
       <Footer stats={stats} />
     </div>
   );
-}
-
-// Generate static params for all known publishers
-export async function generateStaticParams() {
-  return Object.keys(PUBLISHERS).map((handle) => ({ handle }));
 }

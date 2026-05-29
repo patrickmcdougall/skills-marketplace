@@ -54,10 +54,10 @@ export default function SkillNotFound() {
           </p>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 4 }}>
-            <Link href="/browse" className="lp-btn accent">
+            <Link href="/skills" className="lp-btn accent">
               Browse all skills
             </Link>
-            <Link href="/publishers" className="lp-btn">
+            <Link href="/creators" className="lp-btn">
               See the table
             </Link>
           </div>

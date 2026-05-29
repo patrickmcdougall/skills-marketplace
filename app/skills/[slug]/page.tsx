@@ -8,6 +8,9 @@ import {
   skillLeaf,
   installCommand,
 } from "@/lib/db";
+
+// Pages render on first request and are ISR-cached for one hour.
+export const revalidate = 3600;
 import { PUBLISHERS, REAL_STATS, fmtCount } from "@/lib/data";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
@@ -96,7 +99,7 @@ export default async function SkillDetailPage({
       {/* Title block */}
       <section className="dp-title-block dp-page">
         <nav className="dp-breadcrumb">
-          <Link href={`/publishers/${owner}`}>{owner}</Link>
+          <Link href={`/creators/${owner}`}>{owner}</Link>
           <span className="sep">/</span>
           <span>{repoName}</span>
           <span className="sep">/</span>
@@ -197,7 +200,7 @@ export default async function SkillDetailPage({
               </div>
             </dl>
             <div className="actions">
-              <Link href={`/publishers/${owner}`}>
+              <Link href={`/creators/${owner}`}>
                 view full profile →
               </Link>
             </div>
@@ -208,7 +211,7 @@ export default async function SkillDetailPage({
             <aside className="dp-other-skills">
               <div className="head">
                 <h3>More from {pub.name.split(" ")[0]}</h3>
-                <Link className="see-all" href={`/publishers/${owner}`}>
+                <Link className="see-all" href={`/creators/${owner}`}>
                   all →
                 </Link>
               </div>

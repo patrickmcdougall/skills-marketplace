@@ -66,7 +66,7 @@ function PubCard({ handle }: { handle: string }) {
         ))}
       </div>
       <div className="pub-foot">
-        <Link className="lp-btn sm" href={`/publishers/${handle}`}>
+        <Link className="lp-btn sm" href={`/creators/${handle}`}>
           View profile →
         </Link>
         <a className="lp-btn ghost sm" href="#">
@@ -86,7 +86,7 @@ function PublishersBand() {
       <div className="lp-page">
         <div className="lp-section-eyebrow">
           <span className="left">Publishers · {allHandles.length} sourced</span>
-          <span className="right">view all →</span>
+          <Link className="right" href="/creators">view all →</Link>
         </div>
         <div className="head">
           <div>
@@ -140,7 +140,7 @@ function ShelfRow({ shelf }: { shelf: (typeof SHELVES)[number] }) {
           <span>
             <span className="count lp-num">{shelf.skills.length}</span> skills
           </span>
-          <Link className="see-all" href={`/browse?shelf=${shelf.id}`}>
+          <Link className="see-all" href={`/skills?shelf=${shelf.id}`}>
             see all →
           </Link>
         </div>

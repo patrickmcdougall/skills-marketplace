@@ -16,7 +16,7 @@ export function Nav({ stats }: NavProps) {
           <Link className="logo" href="/" style={{ fontSize: "18px" }}>
             Claudinho
           </Link>
-          <span className="brand-tag">pick your skills</span>
+          <span className="brand-tag">pick your lineup of skills</span>
         </div>
         <span className="status" title="Last full re-verification run">
           <span>{stats.skills} verified · last run today</span>
@@ -24,8 +24,8 @@ export function Nav({ stats }: NavProps) {
       </div>
       <div className="right">
         <div className="links">
-          <Link href="/browse">Browse</Link>
-          <Link href="/publishers">Publishers</Link>
+          <Link href="/skills">Browse</Link>
+          <Link href="/creators">Creators</Link>
           <a href="/#how">About</a>
         </div>
       </div>
