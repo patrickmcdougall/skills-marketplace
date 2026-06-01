@@ -2201,14 +2201,40 @@ body.page-pp {
     min-height: 44px;            /* tap target */
   }
 
-  /* forms: 16px floor stops iOS Safari zoom-on-focus */
-  .bp-search input,
-  .bp-search input::placeholder { font-size: 16px; }
-
   /* footer collapses to a single stacked column (design system); the wide
      nowrap status chip no longer has to fit a half-width grid track. */
   .lp-footer .inner { padding: 0 24px; grid-template-columns: 1fr; gap: 28px; }
   .lp-footer .legal { padding: 16px 24px 0; }
   .pp-grid { grid-template-columns: 1fr; }
   .pp-name { font-size: 26px; }
+}
+
+/* touch ergonomics: phone + tablet (≤768px) */
+@media (max-width: 768px) {
+  /* 16px input floor stops iOS/iPadOS Safari zoom-on-focus; 44px-tall field
+     so the focusable element itself (not just its padding) is the tap target */
+  .bp-search { padding: 0 12px; }
+  .bp-search input { min-height: 44px; }
+  .bp-search input,
+  .bp-search input::placeholder { font-size: 16px; }
+
+  /* tap targets ≥44px — buttons, rows, chips, list items, footer/section links */
+  .lp-btn,
+  .bp-pubrow,
+  .bp-check, .bp-radio,
+  .bp-sort-btn,
+  .bp-loadmore,
+  .pl-filter-chip,
+  .dp-install .alt,
+  .dp-other-skills .row { min-height: 44px; }
+  .bp-loadmore { display: inline-flex; align-items: center; justify-content: center; }
+  .lp-footer .col a,
+  .lp-footer .brand .logo,
+  .see-all {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  /* widen short text nav links ("About") into a ≥44px hit zone */
+  .lp-nav .links a { padding-inline: 3px; }
 }
