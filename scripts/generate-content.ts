@@ -35,7 +35,7 @@ loadEnv({ path: ".env.local" });
 const MODEL = "claude-haiku-4-5-20251001"; // swap here; few-shot carries quality
 const MAX_TOKENS = 700;
 const BATCH = 50;
-const CONCURRENCY = 5;
+const CONCURRENCY = 3;
 const CHECKPOINT_FILE = ".content-gen-checkpoint.json";
 
 // ---------- env ----------
@@ -123,7 +123,7 @@ const TOOL: Anthropic.Tool = {
       bestFor: { type: "string", maxLength: 95 },
       shelf: { enum: Object.keys(SHELVES) },
       subShelf: { type: "string" },
-      tags: { type: "array", minItems: 2, maxItems: 5, items: { type: "string" } },
+      tags: { type: "array", minItems: 2, maxItems: 5, items: { type: "string", enum: [...ALL_TAGS] } },
       confidence: { type: "number", minimum: 0, maximum: 1 },
     },
   },
@@ -195,8 +195,19 @@ function fewshotMessages(): Anthropic.MessageParam[] {
 }
 const FEWSHOT_MSGS = fewshotMessages();
 
+// The verbatim system prompt references "the allowed enum" but never lists it,
+// so the model invents out-of-bounds sub-shelves/tags. Append the closed
+// taxonomy so it can only choose valid values (still validated in code).
+const TAXONOMY = [
+  "ALLOWED VALUES — choose shelf + subShelf from exactly this map (force the closest fit, never invent a new one):",
+  ...Object.entries(SHELVES).map(([s, subs]) => `  ${s}: ${subs.join(", ")}`),
+  "",
+  "tags — choose 2–5 from exactly these families (include an Audience tag and a Setup tag when inferable):",
+  ...Object.entries(TAG_FAMILIES).map(([f, t]) => `  ${f}: ${t.join(", ")}`),
+].join("\n");
+
 const SYSTEM_BLOCKS: Anthropic.TextBlockParam[] = [
-  { type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } },
+  { type: "text", text: `${SYSTEM}\n\n${TAXONOMY}`, cache_control: { type: "ephemeral" } },
 ];
 
 // ---------- model call ----------
@@ -223,33 +234,28 @@ async function callModel(name: string, desc: string): Promise<CardContent | null
 
 // ---------- validation ----------
 
-type Verdict = { status: "ok" | "review" | "pending"; issues: string[] };
-
-function validate(c: CardContent): Verdict {
+// Returns the list of soft issues + whether the shelf itself is invalid (the
+// only thing worth a retry). Char budgets carry a little slack so good copy
+// lands as `ok` rather than `review` — `review`/`pending` rows fall back to raw.
+function validate(c: CardContent): { issues: string[]; shelfInvalid: boolean } {
   const issues: string[] = [];
-  let soft = false;
-
-  if (!c.display_title || c.display_title.length > 50) issues.push(`title len ${c.display_title?.length}`);
+  if (!c.display_title || c.display_title.length > 52) issues.push(`title ${c.display_title?.length}`);
   const dlen = c.display_description?.length ?? 0;
-  if (dlen < 90 || dlen > 200) { issues.push(`desc len ${dlen}`); soft = true; }
-  if (!c.bestFor || c.bestFor.length > 95) { issues.push(`bestFor len ${c.bestFor?.length}`); soft = true; }
+  if (dlen < 90 || dlen > 205) issues.push(`desc ${dlen}`);
+  if (!c.bestFor || c.bestFor.length > 105) issues.push(`bestFor ${c.bestFor?.length}`);
 
+  let shelfInvalid = false;
   const shelfList = SHELVES[c.shelf];
-  if (!shelfList) issues.push(`bad shelf ${c.shelf}`);
-  else if (!shelfList.includes(c.subShelf)) issues.push(`subShelf ${c.subShelf} not in ${c.shelf}`);
+  if (!shelfList) { issues.push(`bad shelf ${c.shelf}`); shelfInvalid = true; }
+  else if (!shelfList.includes(c.subShelf)) issues.push(`subShelf ${c.subShelf}`);
 
-  if (!Array.isArray(c.tags) || c.tags.length < 2 || c.tags.length > 5) { issues.push("tags count"); soft = true; }
+  if (!Array.isArray(c.tags) || c.tags.length < 2 || c.tags.length > 5) issues.push("tags count");
   else {
     const bad = c.tags.filter((t) => !ALL_TAGS.has(t));
-    if (bad.length) { issues.push(`bad tags ${bad.join(",")}`); soft = true; }
+    if (bad.length) issues.push(`bad tags ${bad.join(",")}`);
   }
-  if (typeof c.confidence !== "number" || c.confidence < 0 || c.confidence > 1) issues.push("confidence range");
-
-  // hard structural failures (taxonomy/title) => caller retries / pending
-  const hard = issues.some((i) => i.startsWith("title") || i.startsWith("bad shelf") || i.startsWith("subShelf") || i.startsWith("confidence"));
-  if (hard) return { status: "pending", issues };
-  if (c.confidence < 0.6 || soft) return { status: "review", issues };
-  return { status: "ok", issues };
+  if (typeof c.confidence !== "number" || c.confidence < 0 || c.confidence > 1) issues.push("confidence");
+  return { issues, shelfInvalid };
 }
 
 // ---------- per-skill pipeline ----------
@@ -276,12 +282,12 @@ async function processRow(row: Row): Promise<Result> {
       continue;
     }
     const triggers = TRIGGER_RE.test(c.display_description);
-    const verdict = validate(c);
-    // trigger-language => retry once; hard pending => retry once
-    if ((triggers || verdict.status === "pending") && attempt === 0) continue;
-    const issues = triggers ? [...verdict.issues, "trigger-language"] : verdict.issues;
-    const status = triggers && verdict.status === "ok" ? "review" : verdict.status;
-    return { row, content: c, status, issues };
+    const { issues, shelfInvalid } = validate(c);
+    // worst misses (leaked trigger language, nonsense shelf) earn one retry
+    if (attempt === 0 && (triggers || shelfInvalid)) continue;
+    const allIssues = triggers ? [...issues, "trigger-language"] : issues;
+    const clean = allIssues.length === 0 && c.confidence >= 0.6;
+    return { row, content: c, status: clean ? "ok" : "review", issues: allIssues };
   }
   return { row, content: null, status: "pending", issues: ["exhausted"] };
 }
@@ -311,13 +317,17 @@ async function loadRows(): Promise<Row[]> {
   const out: Row[] = [];
   const PAGE = 1000;
   let from = 0;
+  // A read-only dry run must work before the migration adds the generated
+  // columns, so only select them when we intend to write.
+  const cols = DRY_RUN
+    ? "id, slug, skill_name, description_excerpt"
+    : "id, slug, skill_name, description_excerpt, content_input_hash, content_status";
   for (;;) {
-    let q = db
+    const { data, error } = await db
       .from("skill_listing")
-      .select("id, slug, skill_name, description_excerpt, content_input_hash, content_status")
+      .select(cols)
       .eq("status", "indexed")
       .range(from, from + PAGE - 1);
-    const { data, error } = await q;
     if (error) throw new Error(`skill_listing read: ${error.message}`);
     if (!data?.length) break;
     for (const r of data as any[]) {
@@ -325,7 +335,7 @@ async function loadRows(): Promise<Row[]> {
       const desc = r.description_excerpt ?? "";
       const hash = hashInput(name, desc);
       // incremental: skip rows already generated for this exact input
-      const fresh = r.content_input_hash === hash && r.content_status === "ok";
+      const fresh = !DRY_RUN && r.content_input_hash === hash && r.content_status === "ok";
       if (!fresh) out.push({ id: r.id, slug: r.slug, name, desc, hash });
     }
     if (data.length < PAGE) break;
