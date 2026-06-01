@@ -2180,11 +2180,34 @@ body.page-pp {
 }
 @media (max-width: 640px) {
   .bp-grid { grid-template-columns: 1fr; }
+  /* shelf skill-cards stack 1-col below 640px (never 2-col — cards overflow) */
+  .lp-shelf-grid { grid-template-columns: 1fr; }
   .lp-page, .bp-page, .dp-page, .pp-page {
     padding: 0 24px;
   }
-  .lp-nav { padding: 16px 24px; }
-  .lp-footer .inner { padding: 0 24px; grid-template-columns: 1fr 1fr; }
+
+  /* nav: one tidy row of brand + links. The tagline and status chip — both
+     duplicated in the footer — drop out so the row never spills off-screen
+     (root cause of the page-wide horizontal scroll). */
+  .lp-nav { padding: 14px 24px; gap: 12px; }
+  .lp-nav .brand-tag,
+  .lp-nav .status { display: none; }
+  .lp-nav .right { gap: 0; }
+  .lp-nav .links { gap: 20px; font-size: 14px; }
+  .lp-nav .links a,
+  .lp-nav .logo {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;            /* tap target */
+  }
+
+  /* forms: 16px floor stops iOS Safari zoom-on-focus */
+  .bp-search input,
+  .bp-search input::placeholder { font-size: 16px; }
+
+  /* footer collapses to a single stacked column (design system); the wide
+     nowrap status chip no longer has to fit a half-width grid track. */
+  .lp-footer .inner { padding: 0 24px; grid-template-columns: 1fr; gap: 28px; }
   .lp-footer .legal { padding: 16px 24px 0; }
   .pp-grid { grid-template-columns: 1fr; }
   .pp-name { font-size: 26px; }
