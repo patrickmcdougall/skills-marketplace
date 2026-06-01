@@ -9,35 +9,31 @@ interface SkillCardProps {
 }
 
 export function SkillCard({ skill, context = "shelf" }: SkillCardProps) {
-  const showFullPath = context === "wall" || context === "browse";
-  const showSubOnly = context === "shelf";
-  const showTags = context === "browse" || context === "detail";
   const oneLine = context === "shelf";
+  const date = fmtVerifiedDate(skill.verifiedDate);
 
   const publisher = PUBLISHERS[skill.publisher];
   const publisherName = publisher?.name ?? skill.publisher;
+  const tags = (skill.tags ?? []).slice(0, 2);
+  const hasChips = Boolean(skill.shelfTitle) || tags.length > 0;
 
   return (
     <Link className={`skill-card ctx-${context}`} href={`/skills/${skill.id}`}>
       <div className="top-row">
-        <span className="lp-verified">
-          verified · {fmtVerifiedDate(skill.verifiedDate)}
-        </span>
-        {showFullPath && (
-          <span className="shelf-path">
-            {skill.shelfTitle}
-            {skill.subShelf ? ` / ${skill.subShelf}` : ""}
-          </span>
-        )}
-        {showSubOnly && skill.subShelf && (
-          <span className="shelf-path">{skill.subShelf}</span>
-        )}
+        {/* neutral recency label — green is reserved for true verification (nav/footer) */}
+        <span className="lp-checked">{date ? `checked ${date}` : "checked"}</span>
       </div>
       <div className="title">{skill.title}</div>
       <div className={`desc${oneLine ? " one-line" : ""}`}>{skill.desc}</div>
-      {showTags && skill.tags && skill.tags.length > 0 && (
+      {hasChips && (
         <div className="tags">
-          {skill.tags.map((t) => (
+          {skill.shelfTitle && (
+            <span className="tag tag-shelf">
+              {skill.shelfTitle}
+              {skill.subShelf ? ` / ${skill.subShelf}` : ""}
+            </span>
+          )}
+          {tags.map((t) => (
             <span className="tag" key={t}>
               {t}
             </span>

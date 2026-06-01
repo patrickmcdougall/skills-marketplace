@@ -57,6 +57,18 @@ export interface Publisher {
 
 // ─── helpers ──────────────────────────────────────────────────────────────
 
+// The generated-content shelf enum (engineering, customer-success, operations)
+// differs from the catalog's shelf ids (eng, cs, ops) the browse sidebar uses.
+export const GEN_SHELF_TO_ID: Record<string, string> = {
+  engineering: "eng",
+  "customer-success": "cs",
+  operations: "ops",
+};
+export function genShelfId(shelf: string | null | undefined): string {
+  if (!shelf) return "";
+  return GEN_SHELF_TO_ID[shelf] ?? shelf;
+}
+
 function _verifiedDate(id: string): string {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;

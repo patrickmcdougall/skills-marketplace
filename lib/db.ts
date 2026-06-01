@@ -36,6 +36,14 @@ export type SkillRow = {
   created_at: string;
   status: string;
   skill_signal: SkillSignal | null;
+  // AI-generated card content (via "*" select; present once generated)
+  display_title: string | null;
+  display_description: string | null;
+  best_for: string | null;
+  shelf: string | null;
+  sub_shelf: string | null;
+  tags: string[] | null;
+  content_status: string | null;
 };
 
 // ─── helpers ──────────────────────────────────────────────────────────────
@@ -74,14 +82,22 @@ export function installCommand(repoPath: string, skillName: string): string {
 // Serialisable shape passed from server → client for browse & publisher pages.
 export type BrowseSkill = {
   slug: string;
-  title: string;
-  desc: string;
+  title: string;       // raw skill_name
+  desc: string;        // raw description_excerpt
   ownerHandle: string;
   installs: number;
   stars: number;
   verifiedDate: string;  // ISO date string
   category: string | null;
   topics: string[];
+  // AI-generated (present once content_status !== 'pending')
+  displayTitle: string | null;
+  displayDescription: string | null;
+  bestFor: string | null;
+  genShelf: string | null;
+  subShelf: string | null;
+  genTags: string[] | null;
+  contentStatus: string | null;  // 'pending' | 'ok' | 'review'
 };
 
 // Raw publisher aggregate from DB (no catalog enrichment).
@@ -134,7 +150,7 @@ export async function getBrowseSkills(): Promise<BrowseSkill[]> {
     const { data, error } = await serverDb()
       .from("skill_listing")
       .select(
-        "slug, skill_name, description_excerpt, source_url, topics, category, last_indexed_at, skill_signal(install_count_estimate, stars)"
+        "slug, skill_name, description_excerpt, source_url, topics, category, last_indexed_at, display_title, display_description, best_for, shelf, sub_shelf, tags, content_status, skill_signal(install_count_estimate, stars)"
       )
       .eq("status", "indexed")
       .range(from, from + PAGE - 1);
@@ -147,6 +163,13 @@ export async function getBrowseSkills(): Promise<BrowseSkill[]> {
       topics: string[];
       category: string | null;
       last_indexed_at: string | null;
+      display_title: string | null;
+      display_description: string | null;
+      best_for: string | null;
+      shelf: string | null;
+      sub_shelf: string | null;
+      tags: string[] | null;
+      content_status: string | null;
       skill_signal: { install_count_estimate: number; stars: number } | null;
     };
     for (const row of data as unknown as BrowseRow[]) {
@@ -160,6 +183,13 @@ export async function getBrowseSkills(): Promise<BrowseSkill[]> {
         verifiedDate: row.last_indexed_at ?? "",
         category: row.category,
         topics: row.topics ?? [],
+        displayTitle: row.display_title,
+        displayDescription: row.display_description,
+        bestFor: row.best_for,
+        genShelf: row.shelf,
+        subShelf: row.sub_shelf,
+        genTags: row.tags,
+        contentStatus: row.content_status,
       });
     }
     if (data.length < PAGE) break;

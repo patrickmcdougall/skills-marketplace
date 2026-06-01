@@ -11,7 +11,7 @@ import {
 
 // Pages render on first request and are ISR-cached for one hour.
 export const revalidate = 3600;
-import { PUBLISHERS, REAL_STATS, fmtCount } from "@/lib/data";
+import { PUBLISHERS, REAL_STATS, fmtCount, genShelfId, shelfLabel } from "@/lib/data";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { InstallCard } from "./InstallCard";
@@ -105,10 +105,25 @@ export default async function SkillDetailPage({
           <span className="sep">/</span>
           <span className="here">{leaf}</span>
         </nav>
-        <h1>{row.skill_name}</h1>
-        <p className="dp-desc">{row.description_excerpt}</p>
-        {row.category && (
-          <div className="dp-cat">{row.category}</div>
+        <h1>{row.content_status === "ok" && row.display_title ? row.display_title : row.skill_name}</h1>
+        <p className="dp-desc">
+          {row.content_status === "ok" && row.display_description
+            ? row.display_description
+            : row.description_excerpt}
+        </p>
+        {row.best_for && <p className="dp-bestfor">Best for: {row.best_for}</p>}
+        {(row.shelf || (row.tags && row.tags.length > 0)) && (
+          <div className="dp-chips">
+            {row.shelf && (
+              <span className="tag tag-shelf">
+                {shelfLabel(genShelfId(row.shelf))}
+                {row.sub_shelf ? ` / ${row.sub_shelf}` : ""}
+              </span>
+            )}
+            {(row.tags ?? []).slice(0, 4).map((t) => (
+              <span className="tag" key={t}>{t}</span>
+            ))}
+          </div>
         )}
       </section>
 

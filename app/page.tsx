@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { unstable_cache } from "next/cache";
-import { fmtCount, type Skill } from "@/lib/data";
+import { fmtCount, genShelfId, shelfLabel, type Skill } from "@/lib/data";
 import {
   getBrowseSkills,
   type BrowseSkill,
@@ -37,7 +37,7 @@ const getLandingData = unstable_cache(
 
     return { skills, pubs, topics };
   },
-  ["landing-data-v1"],
+  ["landing-data-v2"],
   { revalidate: 600 }
 );
 import { Footer } from "@/components/Footer";
@@ -46,19 +46,23 @@ import { DriftWall } from "@/components/DriftWall";
 
 // Map a DB BrowseSkill to the Skill shape the cards expect (mirrors BrowseClient).
 function toSkill(s: BrowseSkill): Skill {
+  // Prefer generated copy only when content_status is 'ok'; use generated
+  // shelf/tags for classification whenever present.
+  const ok = s.contentStatus === "ok";
+  const sid = genShelfId(s.genShelf);
   return {
     id: s.slug,
-    title: s.title,
-    desc: s.desc,
+    title: ok && s.displayTitle ? s.displayTitle : s.title,
+    desc: ok && s.displayDescription ? s.displayDescription : s.desc,
     publisher: s.ownerHandle,
     installs: s.installs,
     stars: s.stars,
     verifiedDate: s.verifiedDate,
     version: "",
-    shelfTitle: s.category ?? "",
-    shelfId: s.category?.toLowerCase().replace(/\s+/g, "-") ?? "",
-    subShelf: undefined,
-    tags: s.topics,
+    shelfTitle: s.genShelf ? shelfLabel(sid) : (s.category ?? ""),
+    shelfId: s.genShelf ? sid : (s.category?.toLowerCase().replace(/\s+/g, "-") ?? ""),
+    subShelf: s.subShelf ?? undefined,
+    tags: s.genTags && s.genTags.length ? s.genTags : s.topics,
   };
 }
 

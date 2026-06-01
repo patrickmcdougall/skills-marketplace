@@ -11,6 +11,7 @@ import {
   applyFilters,
   publisherListForCurrent,
   shelfLabel,
+  genShelfId,
   fmtCount,
   type BrowseFilters,
   type Skill,
@@ -343,19 +344,23 @@ function BrowseEmpty({ onClear }: { onClear: () => void }) {
 
 // Map a BrowseSkill to the Skill shape that existing filter/sort/card logic expects.
 function toSkill(s: BrowseSkill): Skill {
+  // Prefer generated COPY only when content_status is 'ok'; use the generated
+  // shelf/tags for classification whenever present (ok or review).
+  const ok = s.contentStatus === "ok";
+  const sid = genShelfId(s.genShelf);
   return {
     id: s.slug,
-    title: s.title,
-    desc: s.desc,
+    title: ok && s.displayTitle ? s.displayTitle : s.title,
+    desc: ok && s.displayDescription ? s.displayDescription : s.desc,
     publisher: s.ownerHandle,
     installs: s.installs,
     stars: s.stars,
     verifiedDate: s.verifiedDate,
     version: "",
-    shelfTitle: s.category ?? "",
-    shelfId: s.category?.toLowerCase().replace(/\s+/g, "-") ?? "",
-    subShelf: undefined,
-    tags: s.topics,
+    shelfTitle: s.genShelf ? shelfLabel(sid) : (s.category ?? ""),
+    shelfId: s.genShelf ? sid : (s.category?.toLowerCase().replace(/\s+/g, "-") ?? ""),
+    subShelf: s.subShelf ?? undefined,
+    tags: s.genTags && s.genTags.length ? s.genTags : s.topics,
   };
 }
 

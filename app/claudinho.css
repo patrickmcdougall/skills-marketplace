@@ -248,6 +248,43 @@ body.page-pp {
   flex-shrink: 0;
 }
 
+/* neutral card recency label — no green dot (green = true verification only) */
+.lp-checked {
+  font-family: var(--font-jetbrains-mono), var(--font-geist-mono), monospace;
+  font-size: 10.5px;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+/* shelf/sub-shelf chip stands out from the plain tag chips */
+.skill-card .tag.tag-shelf {
+  color: var(--accent-2);
+  background: var(--accent-soft);
+}
+
+/* detail page: best-for line + shelf/tag chip row */
+.dp-bestfor {
+  font-size: 13.5px;
+  color: var(--ink-2);
+  margin-top: 10px;
+}
+.dp-chips {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-top: 14px;
+}
+.dp-chips .tag {
+  font-family: var(--font-jetbrains-mono), var(--font-geist-mono), monospace;
+  font-size: 11px;
+  color: var(--ink-2);
+  background: var(--paper-2);
+  padding: 3px 9px;
+  border-radius: var(--r-chip);
+}
+.dp-chips .tag.tag-shelf {
+  color: var(--accent-2);
+  background: var(--accent-soft);
+}
+
 /* ─── avatar ─────────────────────────────────────────────────────────────── */
 .lp-avatar {
   display: inline-flex;

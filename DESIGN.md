@@ -100,7 +100,10 @@ Full `<Link>` wrapping the card. Four contexts: `wall`, `shelf`, `browse`, `deta
 **Decision (D4)**: Hero CTA "Browse the registry" → `.lp-btn.accent`. "How we verify" → small text link (`font-size: 13px; color: var(--ink-2); text-decoration: underline`) below the button, not a button itself.
 
 ### Verification signal (`.lp-verified`)
-Green dot (`--verified`) + monospace text. Used on: skill cards, nav status chip, footer status. Never use a generic checkmark — always the green dot.
+Green dot (`--verified`) + monospace text. Used on **nav status chip and footer status only** — true system-verification signal. NOT on individual skill cards.
+
+### Card freshness label (`.lp-checked`)
+Skill cards use a **neutral** `checked {relative date}` label (muted mono, no dot, no green). Green is reserved for the system-verification signal above; a per-card green "verified" overstated what we actually check, so cards show recency neutrally instead.
 
 ### Section eyebrow (`.lp-section-eyebrow`)
 Black top border + mono uppercase text. Left = section identifier. Right = meta count or date. Always use this pattern for section headers on the landing page.
