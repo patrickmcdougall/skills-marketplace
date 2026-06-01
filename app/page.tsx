@@ -33,6 +33,22 @@ function initialsOf(handle: string): string {
   return handle.replace(/[^a-zA-Z0-9]/g, "").slice(0, 2).toUpperCase() || "??";
 }
 
+// Spread skills across publishers (one each, recent-first) so a single indexing
+// batch doesn't dominate, then backfill with the rest.
+function spreadByPublisher(skills: BrowseSkill[], limit: number): BrowseSkill[] {
+  const firstPer: BrowseSkill[] = [];
+  const leftover: BrowseSkill[] = [];
+  const seen = new Set<string>();
+  for (const s of skills) {
+    if (seen.has(s.ownerHandle)) leftover.push(s);
+    else {
+      seen.add(s.ownerHandle);
+      firstPer.push(s);
+    }
+  }
+  return [...firstPer, ...leftover].slice(0, limit);
+}
+
 // ─── publisher card (real DB publisher) ───────────────────────────────────
 
 function PubCard({
@@ -185,8 +201,9 @@ export default async function LandingPage() {
     }
   }
 
-  const wallSkills = recent.slice(0, 16).map(toSkill);
-  const featured = recent.slice(0, 8).map(toSkill);
+  const spread = spreadByPublisher(recent, 16); // diverse, recent-first
+  const wallSkills = spread.map(toSkill);
+  const featured = spread.slice(0, 8).map(toSkill);
   const topPubs = dbPubs.slice(0, 8); // already sorted by installs then skillCount
 
   return (

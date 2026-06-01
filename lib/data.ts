@@ -78,9 +78,9 @@ export function fmtVerifiedDate(iso: string): string {
   // Accept both 'YYYY-MM-DD' (catalog) and full ISO timestamps (DB rows).
   const d = new Date(iso.length <= 10 ? iso + 'T00:00:00Z' : iso);
   if (isNaN(d.getTime())) return '';   // never surface "invalid date" to users
-  const today = new Date('2026-05-28T00:00:00Z');
+  const today = new Date();            // real current date (was a hardcoded 2026-05-28)
   const diff = Math.round((today.getTime() - d.getTime()) / 86400000);
-  if (diff === 0) return 'today';
+  if (diff <= 0) return 'today';       // clamp future/just-now to "today" (no "-2d ago")
   if (diff === 1) return 'yesterday';
   if (diff < 7) return diff + 'd ago';
   if (diff < 30) return Math.round(diff / 7) + 'w ago';
