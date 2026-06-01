@@ -42,3 +42,6 @@ next-env.d.ts
 
 # audit artifacts (mobile pass / design review scratch)
 /tmp/
+
+# content generation checkpoint (resumable run state)
+.content-gen-checkpoint.json
