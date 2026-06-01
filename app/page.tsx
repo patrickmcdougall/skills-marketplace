@@ -1,64 +1,75 @@
 import Link from "next/link";
+import { fmtCount, type Skill } from "@/lib/data";
 import {
-  SHELVES,
-  PUBLISHERS,
-  REAL_STATS,
-  publisherStats,
-  topSkills,
-  fmtCount,
-  fmtVerifiedDate,
-} from "@/lib/data";
+  getBrowseSkills,
+  getDBPublisherRows,
+  type BrowseSkill,
+  type DBPublisherRow,
+} from "@/lib/db";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { SkillCard } from "@/components/SkillCard";
 import { DriftWall } from "@/components/DriftWall";
-import { ShelfGlyph } from "@/components/ShelfGlyph";
 
-// ─── publisher card (server component) ────────────────────────────────────
+// Map a DB BrowseSkill to the Skill shape the cards expect (mirrors BrowseClient).
+function toSkill(s: BrowseSkill): Skill {
+  return {
+    id: s.slug,
+    title: s.title,
+    desc: s.desc,
+    publisher: s.ownerHandle,
+    installs: s.installs,
+    stars: s.stars,
+    verifiedDate: s.verifiedDate,
+    version: "",
+    shelfTitle: s.category ?? "",
+    shelfId: s.category?.toLowerCase().replace(/\s+/g, "-") ?? "",
+    subShelf: undefined,
+    tags: s.topics,
+  };
+}
 
-function PubCard({ handle }: { handle: string }) {
-  const p = PUBLISHERS[handle];
-  if (!p) return null;
-  const stats = publisherStats(handle);
-  const top = topSkills(handle, 2);
+function initialsOf(handle: string): string {
+  return handle.replace(/[^a-zA-Z0-9]/g, "").slice(0, 2).toUpperCase() || "??";
+}
+
+// ─── publisher card (real DB publisher) ───────────────────────────────────
+
+function PubCard({
+  pub,
+  topSkills,
+}: {
+  pub: DBPublisherRow;
+  topSkills: Skill[];
+}) {
   return (
     <div className="lp-pub-card">
       <div className="pub-header">
         <span
           className="lp-avatar"
-          style={{
-            width: 48,
-            height: 48,
-            fontSize: Math.round(48 * 0.42),
-          }}
+          style={{ width: 48, height: 48, fontSize: Math.round(48 * 0.42) }}
         >
-          {p.initials}
+          {initialsOf(pub.handle)}
         </span>
         <div className="who">
-          <div className="pub-name">{p.name}</div>
-          <div className="pub-handle">
-            @{p.handle} · {p.loc}
-          </div>
-          <div className="pub-role">{p.role}</div>
+          <div className="pub-name">{pub.handle}</div>
+          <div className="pub-handle">@{pub.handle}</div>
+          <div className="pub-role">GitHub publisher</div>
         </div>
       </div>
       <div className="pub-stats">
         <div className="s">
-          <span className="v lp-num">{stats.count}</span>
+          <span className="v lp-num">{pub.skillCount}</span>
           <span className="k">skills</span>
         </div>
         <div className="s">
-          <span className="v lp-num">{fmtCount(stats.installs)}</span>
-          <span className="k">installs</span>
-        </div>
-        <div className="s">
-          <span className="v lp-num">{fmtCount(p.fol)}</span>
-          <span className="k">followers</span>
+          <span className="v lp-num">{fmtCount(pub.ghStars)}</span>
+          <span className="k">gh stars</span>
         </div>
       </div>
       <div className="pub-top-skills">
         <div className="label">Top skills</div>
-        {top.map((s) => (
+        {topSkills.map((s) => (
           <div className="row" key={s.id}>
             <span className="t">{s.title}</span>
             <span className="n">↓ {fmtCount(s.installs)}</span>
@@ -66,95 +77,18 @@ function PubCard({ handle }: { handle: string }) {
         ))}
       </div>
       <div className="pub-foot">
-        <Link className="lp-btn sm" href={`/creators/${handle}`}>
+        <Link className="lp-btn sm" href={`/creators/${pub.handle}`}>
           View profile →
         </Link>
-        <a className="lp-btn ghost sm" href="#">
-          All {stats.count} skills
-        </a>
+        <Link className="lp-btn ghost sm" href={`/creators/${pub.handle}`}>
+          All {pub.skillCount} skills
+        </Link>
       </div>
     </div>
   );
 }
 
-// ─── publishers band ───────────────────────────────────────────────────────
-
-function PublishersBand() {
-  const allHandles = Object.keys(PUBLISHERS);
-  return (
-    <section className="lp-pubs" id="publishers">
-      <div className="lp-page">
-        <div className="lp-section-eyebrow">
-          <span className="left">Publishers · {allHandles.length} sourced</span>
-          <Link className="right" href="/creators">view all →</Link>
-        </div>
-        <div className="head">
-          <div>
-            <h2>Sourced from operators who already ship&nbsp;these.</h2>
-          </div>
-          <p className="lede">
-            Each publisher&apos;s external footprint — GitHub stars, follower count, role — is part
-            of the source signal. Skills don&apos;t ship without it.
-          </p>
-        </div>
-      </div>
-      <div className="lp-pub-scroll">
-        <div className="lp-pub-grid">
-          {allHandles.map((h) => (
-            <PubCard key={h} handle={h} />
-          ))}
-          <Link className="lp-pub-end" href="/creators">
-            <span className="t">
-              Browse all <span className="lp-num">{allHandles.length}</span> publishers
-            </span>
-            <span className="a">→</span>
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── shelf row ─────────────────────────────────────────────────────────────
-
-function ShelfRow({ shelf }: { shelf: (typeof SHELVES)[number] }) {
-  const accent = `var(--c-${shelf.id})`;
-  return (
-    <section
-      className="lp-shelf"
-      id={`shelf-${shelf.id}`}
-      style={{ ["--shelf-accent" as string]: accent }}
-    >
-      <div className="lp-shelf-head">
-        <div>
-          <div className="lp-shelf-eyebrow">
-            <span className="glyph">
-              <ShelfGlyph id={shelf.id} size={12} />
-            </span>
-            <span>{shelf.num}</span>
-          </div>
-          <h2 className="lp-shelf-title">{shelf.title}</h2>
-          <p className="lp-shelf-blurb">{shelf.blurb}</p>
-        </div>
-        <div className="lp-shelf-right">
-          <span>
-            <span className="count lp-num">{shelf.skills.length}</span> skills
-          </span>
-          <Link className="see-all" href={`/skills?shelf=${shelf.id}`}>
-            see all →
-          </Link>
-        </div>
-      </div>
-      <div className="lp-shelf-grid">
-        {shelf.skills.slice(0, 4).map((s) => (
-          <SkillCard key={s.id} skill={s} context="shelf" />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// ─── how it works ──────────────────────────────────────────────────────────
+// ─── how it works (static) ─────────────────────────────────────────────────
 
 function HowItWorks() {
   return (
@@ -218,10 +152,42 @@ function HowItWorks() {
 
 // ─── page ──────────────────────────────────────────────────────────────────
 
-export default function LandingPage() {
-  const stats = REAL_STATS;
-  // Wall uses first 16 skills
-  const wallSkills = SHELVES.flatMap((sh) => sh.skills).slice(0, 16);
+export default async function LandingPage() {
+  // Real data from Supabase.
+  const [dbSkills, dbPubs] = await Promise.all([
+    getBrowseSkills(),
+    getDBPublisherRows(),
+  ]);
+
+  // Most-recently-verified first (last_indexed_at desc).
+  const recent = [...dbSkills].sort((a, b) =>
+    (b.verifiedDate || "").localeCompare(a.verifiedDate || "")
+  );
+
+  const distinctTopics = new Set(dbSkills.flatMap((s) => s.topics)).size;
+  const totalInstalls = dbSkills.reduce((a, s) => a + s.installs, 0);
+
+  // Stats for Nav / Footer (they read .skills).
+  const stats = {
+    skills: dbSkills.length,
+    publishers: dbPubs.length,
+    installs: fmtCount(totalInstalls),
+  };
+
+  // Top skills per publisher handle (for the publisher cards), recent-first.
+  const byOwner = new Map<string, Skill[]>();
+  for (const s of recent) {
+    const arr = byOwner.get(s.ownerHandle);
+    if (arr) {
+      if (arr.length < 2) arr.push(toSkill(s));
+    } else {
+      byOwner.set(s.ownerHandle, [toSkill(s)]);
+    }
+  }
+
+  const wallSkills = recent.slice(0, 16).map(toSkill);
+  const featured = recent.slice(0, 8).map(toSkill);
+  const topPubs = dbPubs.slice(0, 8); // already sorted by installs then skillCount
 
   return (
     <div className="lp accent-orange bg-cream">
@@ -247,7 +213,7 @@ export default function LandingPage() {
         </div>
         <div className="stat-strip">
           <div className="stat">
-            <span className="v lp-num">{stats.skills}</span>
+            <span className="v lp-num">{fmtCount(stats.skills)}</span>
             <span className="k">skills · verified</span>
           </div>
           <div className="stat">
@@ -255,27 +221,80 @@ export default function LandingPage() {
             <span className="k">publishers · sourced</span>
           </div>
           <div className="stat">
-            <span className="v lp-num">{stats.installs}</span>
-            <span className="k">installs · all-time</span>
+            <span className="v lp-num">{distinctTopics}</span>
+            <span className="k">topics · tracked</span>
           </div>
         </div>
       </header>
 
-      {/* Drifting wall (client component for animation) */}
+      {/* Drifting wall of recently-verified skills (real data) */}
       <DriftWall skills={wallSkills} />
 
-      {/* Publishers band */}
-      <PublishersBand />
+      {/* Publishers band (real publishers, top by reach) */}
+      <section className="lp-pubs" id="publishers">
+        <div className="lp-page">
+          <div className="lp-section-eyebrow">
+            <span className="left">Publishers · {stats.publishers} sourced</span>
+            <Link className="right" href="/creators">view all →</Link>
+          </div>
+          <div className="head">
+            <div>
+              <h2>Sourced from operators who already ship&nbsp;these.</h2>
+            </div>
+            <p className="lede">
+              Each publisher&apos;s external footprint — GitHub stars, follower count, role — is part
+              of the source signal. Skills don&apos;t ship without it.
+            </p>
+          </div>
+        </div>
+        <div className="lp-pub-scroll">
+          <div className="lp-pub-grid">
+            {topPubs.map((pub) => (
+              <PubCard
+                key={pub.handle}
+                pub={pub}
+                topSkills={byOwner.get(pub.handle) ?? []}
+              />
+            ))}
+            <Link className="lp-pub-end" href="/creators">
+              <span className="t">
+                Browse all <span className="lp-num">{stats.publishers}</span> publishers
+              </span>
+              <span className="a">→</span>
+            </Link>
+          </div>
+        </div>
+      </section>
 
-      {/* Shelves */}
+      {/* Recently verified (real data — replaces the un-categorized mock shelves) */}
       <main className="lp-shelves lp-page" id="shelves">
         <div className="lp-section-eyebrow">
-          <span className="left">Topics · 8 business functions</span>
-          <span className="right">{stats.skills} skills</span>
+          <span className="left">Recently verified</span>
+          <span className="right">{fmtCount(stats.skills)} skills</span>
         </div>
-        {SHELVES.map((sh) => (
-          <ShelfRow key={sh.id} shelf={sh} />
-        ))}
+        <section className="lp-shelf">
+          <div className="lp-shelf-head">
+            <div>
+              <h2 className="lp-shelf-title">Fresh in the registry</h2>
+              <p className="lp-shelf-blurb">
+                The latest skills to pass verification, newest first.
+              </p>
+            </div>
+            <div className="lp-shelf-right">
+              <span>
+                <span className="count lp-num">{fmtCount(stats.skills)}</span> skills
+              </span>
+              <Link className="see-all" href="/skills">
+                browse all →
+              </Link>
+            </div>
+          </div>
+          <div className="lp-shelf-grid">
+            {featured.map((s) => (
+              <SkillCard key={s.id} skill={s} context="shelf" />
+            ))}
+          </div>
+        </section>
       </main>
 
       {/* How it works */}
