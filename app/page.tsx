@@ -103,12 +103,12 @@ function PublishersBand() {
           {allHandles.map((h) => (
             <PubCard key={h} handle={h} />
           ))}
-          <a className="lp-pub-end" href="#">
+          <Link className="lp-pub-end" href="/creators">
             <span className="t">
               Browse all <span className="lp-num">{allHandles.length}</span> publishers
             </span>
             <span className="a">→</span>
-          </a>
+          </Link>
         </div>
       </div>
     </section>

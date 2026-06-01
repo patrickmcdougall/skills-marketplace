@@ -140,7 +140,9 @@ function FilterPublisher({
       {list.length > 6 && (
         <div className="bp-search">
           <span className="icon">/</span>
+          <label htmlFor="bp-creator-q" className="sr-only">Search creators</label>
           <input
+            id="bp-creator-q"
             placeholder="search creators"
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -491,7 +493,9 @@ function BrowsePageInner({ initialSkills }: { initialSkills: BrowseSkill[] }) {
         <h1>Browse</h1>
         <div className="bp-search" style={{ marginTop: 16, maxWidth: 480 }}>
           <span className="icon">⌕</span>
+          <label htmlFor="bp-search-q" className="sr-only">Search skills</label>
           <input
+            id="bp-search-q"
             placeholder="Search skills, creators, topics…"
             value={query}
             onChange={(e) => { setQuery(e.target.value); setVisible(PAGE_SIZE); }}
