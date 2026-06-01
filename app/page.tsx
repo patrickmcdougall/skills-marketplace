@@ -1,12 +1,45 @@
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { fmtCount, type Skill } from "@/lib/data";
 import {
   getBrowseSkills,
-  getDBPublisherRows,
   type BrowseSkill,
   type DBPublisherRow,
 } from "@/lib/db";
 import { Nav } from "@/components/Nav";
+
+// The landing reads aggregate registry data that doesn't need to be realtime.
+// One cached full scan (revalidated every 10 min) feeds the stat strip, the
+// publishers band, and the recent-skills wall/grid — instead of two scans per
+// request, which made the page take minutes to render.
+export const revalidate = 600;
+
+const getLandingData = unstable_cache(
+  async () => {
+    const skills = await getBrowseSkills();
+
+    // Aggregate publishers in-memory (avoids a second full-table scan).
+    const pubMap = new Map<string, DBPublisherRow>();
+    for (const s of skills) {
+      if (!s.ownerHandle) continue;
+      const e =
+        pubMap.get(s.ownerHandle) ??
+        { handle: s.ownerHandle, skillCount: 0, installs: 0, ghStars: 0 };
+      e.skillCount++;
+      e.installs += s.installs;
+      e.ghStars += s.stars;
+      pubMap.set(s.ownerHandle, e);
+    }
+    const pubs = [...pubMap.values()].sort(
+      (a, b) => b.installs - a.installs || b.skillCount - a.skillCount
+    );
+    const topics = new Set(skills.flatMap((s) => s.topics)).size;
+
+    return { skills, pubs, topics };
+  },
+  ["landing-data-v1"],
+  { revalidate: 600 }
+);
 import { Footer } from "@/components/Footer";
 import { SkillCard } from "@/components/SkillCard";
 import { DriftWall } from "@/components/DriftWall";
@@ -169,18 +202,15 @@ function HowItWorks() {
 // ─── page ──────────────────────────────────────────────────────────────────
 
 export default async function LandingPage() {
-  // Real data from Supabase.
-  const [dbSkills, dbPubs] = await Promise.all([
-    getBrowseSkills(),
-    getDBPublisherRows(),
-  ]);
+  // Real data from Supabase (single cached scan).
+  const { skills: dbSkills, pubs: dbPubs, topics: distinctTopics } =
+    await getLandingData();
 
   // Most-recently-verified first (last_indexed_at desc).
   const recent = [...dbSkills].sort((a, b) =>
     (b.verifiedDate || "").localeCompare(a.verifiedDate || "")
   );
 
-  const distinctTopics = new Set(dbSkills.flatMap((s) => s.topics)).size;
   const totalInstalls = dbSkills.reduce((a, s) => a + s.installs, 0);
 
   // Stats for Nav / Footer (they read .skills).
