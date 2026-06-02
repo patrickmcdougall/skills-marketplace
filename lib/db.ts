@@ -117,6 +117,18 @@ export type DBPublisherRow = {
   ghStars: number;
 };
 
+// GitHub profile data from publisher_profile table.
+export type PublisherProfile = {
+  handle: string;
+  displayName: string | null;
+  bio: string | null;
+  company: string | null;
+  blog: string | null;
+  twitterUsername: string | null;
+  avatarUrl: string | null;
+  ghFollowers: number | null;
+};
+
 // ─── queries ──────────────────────────────────────────────────────────────
 
 export async function getSkillBySlug(slug: string): Promise<SkillRow | null> {
@@ -265,6 +277,39 @@ export async function getSkillsByOwner(
       (b.skill_signal?.install_count_estimate ?? 0) -
       (a.skill_signal?.install_count_estimate ?? 0)
   );
+}
+
+export async function getPublisherProfiles(
+  handles: string[]
+): Promise<Map<string, PublisherProfile>> {
+  if (handles.length === 0) return new Map();
+  const { data } = await serverDb()
+    .from("publisher_profile")
+    .select("handle, display_name, bio, company, blog, twitter_username, avatar_url, gh_followers")
+    .in("handle", handles);
+  const out = new Map<string, PublisherProfile>();
+  for (const row of (data ?? []) as {
+    handle: string;
+    display_name: string | null;
+    bio: string | null;
+    company: string | null;
+    blog: string | null;
+    twitter_username: string | null;
+    avatar_url: string | null;
+    gh_followers: number | null;
+  }[]) {
+    out.set(row.handle, {
+      handle: row.handle,
+      displayName: row.display_name,
+      bio: row.bio,
+      company: row.company,
+      blog: row.blog,
+      twitterUsername: row.twitter_username,
+      avatarUrl: row.avatar_url,
+      ghFollowers: row.gh_followers,
+    });
+  }
+  return out;
 }
 
 export async function getAllSkillSlugs(): Promise<string[]> {

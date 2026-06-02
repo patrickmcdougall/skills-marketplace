@@ -3,8 +3,10 @@ import { unstable_cache } from "next/cache";
 import { fmtCount, genShelfId, shelfLabel, type Skill } from "@/lib/data";
 import {
   getBrowseSkills,
+  getPublisherProfiles,
   type BrowseSkill,
   type DBPublisherRow,
+  type PublisherProfile,
 } from "@/lib/db";
 import { Nav } from "@/components/Nav";
 
@@ -83,6 +85,8 @@ const getLandingData = unstable_cache(
       ? wallCurated
       : spreadByPublisher(recent, 16);
 
+    const pubProfiles = await getPublisherProfiles(topPubs.map(p => p.handle));
+
     return {
       totalSkills: skills.length,
       totalPublishers: pubs.length,
@@ -92,9 +96,10 @@ const getLandingData = unstable_cache(
       wall,
       spread: spreadByPublisher(recent, 16),
       topSkillsByPub,
+      pubProfiles: Object.fromEntries(pubProfiles),
     };
   },
-  ["landing-data-v6"],
+  ["landing-data-v8"],
   { revalidate: 600 }
 );
 import { Footer } from "@/components/Footer";
@@ -167,21 +172,30 @@ function interleaveByPublisher(
   return out;
 }
 
-// Known display names / roles for select publishers.
-const PUBLISHER_META: Record<string, { name: string; role: string }> = {
-  garrytan: { name: "Garry Tan", role: "President & CEO, Y Combinator" },
-};
-
 // ─── publisher card (real DB publisher) ───────────────────────────────────
+
+function pubRole(profile: PublisherProfile | undefined): string {
+  if (!profile) return "GitHub publisher";
+  const parts: string[] = [];
+  if (profile.company) parts.push(profile.company);
+  if (!parts.length && profile.bio) {
+    // Use first sentence of bio as fallback role line.
+    const sentence = profile.bio.split(/[.!?\n]/)[0].trim();
+    if (sentence.length <= 60) parts.push(sentence);
+  }
+  return parts.join(" · ") || "GitHub publisher";
+}
 
 function PubCard({
   pub,
   topSkills,
+  profile,
 }: {
   pub: DBPublisherRow;
   topSkills: Skill[];
+  profile?: PublisherProfile;
 }) {
-  const meta = PUBLISHER_META[pub.handle];
+  const displayName = profile?.displayName ?? pub.handle;
   return (
     <div className="lp-pub-card">
       <div className="pub-header">
@@ -192,11 +206,14 @@ function PubCard({
           {initialsOf(pub.handle)}
         </span>
         <div className="who">
-          <div className="pub-name">{meta?.name ?? pub.handle}</div>
+          <div className="pub-name">{displayName}</div>
           <div className="pub-handle">@{pub.handle}</div>
-          <div className="pub-role">{meta?.role ?? "GitHub publisher"}</div>
+          <div className="pub-role">{pubRole(profile)}</div>
         </div>
       </div>
+      {profile?.bio && (
+        <p className="pub-bio">{profile.bio}</p>
+      )}
       <div className="pub-stats">
         <div className="s">
           <span className="v lp-num">{pub.skillCount}</span>
@@ -303,6 +320,7 @@ export default async function LandingPage() {
     wall,
     spread,
     topSkillsByPub,
+    pubProfiles,
   } = await getLandingData();
 
   // Stats for Nav / Footer (they read .skills).
@@ -386,6 +404,7 @@ export default async function LandingPage() {
                 key={pub.handle}
                 pub={pub}
                 topSkills={byOwner.get(pub.handle) ?? []}
+                profile={pubProfiles[pub.handle]}
               />
             ))}
             <Link className="lp-pub-end" href="/creators">
