@@ -18,6 +18,7 @@ export type SkillSignal = {
   stars: number;
   forks: number;
   install_count_estimate: number;
+  install_count: number;
   fetched_at: string;
 };
 
@@ -44,6 +45,13 @@ export type SkillRow = {
   sub_shelf: string | null;
   tags: string[] | null;
   content_status: string | null;
+  // Install bundle
+  distribution_mode: string | null;
+  bundle_url: string | null;
+  bundle_status: string | null;
+  bundle_source_ref: string | null;
+  bundle_packaged_at: string | null;
+  skill_path: string | null;
 };
 
 // ─── helpers ──────────────────────────────────────────────────────────────
