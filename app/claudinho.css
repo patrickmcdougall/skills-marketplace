@@ -671,6 +671,7 @@ body.page-pp {
 }
 .lp-pub-grid {
   display: flex;
+  align-items: stretch;
   gap: 16px;
   overflow-x: auto;
   overflow-y: visible;
@@ -688,6 +689,7 @@ body.page-pp {
 .lp-pub-grid > .lp-pub-card {
   flex: 0 0 360px;
   scroll-snap-align: start;
+  height: auto; /* stretch to row height */
 }
 .lp-pub-end {
   flex: 0 0 280px;
@@ -799,6 +801,7 @@ body.page-pp {
 }
 .lp-pub-card .pub-top-skills {
   display: flex; flex-direction: column; gap: 8px;
+  flex: 1; /* grow to fill card so footer always pins to bottom */
 }
 .lp-pub-card .pub-top-skills .label {
   font-family: var(--font-jetbrains-mono), var(--font-geist-mono), monospace;
@@ -2175,6 +2178,9 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.pl-pub .pl-location {
+  color: var(--ink-4);
 }
 
 /* shelves cell */

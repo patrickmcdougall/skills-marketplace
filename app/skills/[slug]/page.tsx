@@ -185,7 +185,7 @@ export default async function SkillDetailPage({
           <section className="dp-block dp-readme">
             <h2 className="dp-h2">Source</h2>
             <p className="dp-h2-sub">
-              Publisher&apos;s repository · {repoPath}
+              Creator&apos;s repository · {repoPath}
             </p>
             <div style={{ marginTop: 12 }}>
               <a

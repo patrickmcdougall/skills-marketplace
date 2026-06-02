@@ -12,7 +12,7 @@ function loadFont(): ArrayBuffer {
 
 const STATS = [
   { n: "2k+", k: "skills" },
-  { n: "89", k: "publishers" },
+  { n: "89", k: "creators" },
   { n: "181", k: "topics" },
 ];
 

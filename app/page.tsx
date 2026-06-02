@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { unstable_cache } from "next/cache";
-import { fmtCount, genShelfId, shelfLabel, type Skill } from "@/lib/data";
+import { fmtCount, genShelfId, shelfLabel, skillsByPublisher, type Skill } from "@/lib/data";
 import {
   getBrowseSkills,
   getPublisherProfiles,
@@ -23,8 +23,10 @@ const WALL_CURATORS = new Set([
   "obra", "mattpocock", "anthropic", "coreyhaines31", "addyosmani", "garrytan",
 ]);
 
-// Handles that are always shown in the publishers band, regardless of install rank.
-const PINNED_PUBLISHERS = new Set(["garrytan"]);
+// Handles always shown in the creators band regardless of install rank.
+const PINNED_PUBLISHERS = new Set(["garrytan", "addyosmani"]);
+// Handles excluded from the band even if they rank highly by installs.
+const SUPPRESSED_PUBLISHERS = new Set(["doany-ai"]);
 
 const getLandingData = unstable_cache(
   async () => {
@@ -33,6 +35,7 @@ const getLandingData = unstable_cache(
     // Publisher aggregates (avoids a second full-table scan).
     const pubMap = new Map<string, DBPublisherRow>();
     let totalInstalls = 0;
+    const seenRepos = new Set<string>();
     for (const s of skills) {
       totalInstalls += s.installs;
       if (!s.ownerHandle) continue;
@@ -41,7 +44,12 @@ const getLandingData = unstable_cache(
         { handle: s.ownerHandle, skillCount: 0, installs: 0, ghStars: 0 };
       e.skillCount++;
       e.installs += s.installs;
-      e.ghStars += s.stars;
+      // Count repo stars once per repo, not once per skill.
+      const repoKey = `${s.ownerHandle}/${s.repoName}`;
+      if (!seenRepos.has(repoKey)) {
+        e.ghStars += s.stars;
+        seenRepos.add(repoKey);
+      }
       pubMap.set(s.ownerHandle, e);
     }
     const pubs = [...pubMap.values()].sort(
@@ -49,7 +57,7 @@ const getLandingData = unstable_cache(
     );
     // Always include pinned publishers; fill remaining slots from the ranked list.
     const pinned = pubs.filter(p => PINNED_PUBLISHERS.has(p.handle));
-    const ranked = pubs.filter(p => !PINNED_PUBLISHERS.has(p.handle));
+    const ranked = pubs.filter(p => !PINNED_PUBLISHERS.has(p.handle) && !SUPPRESSED_PUBLISHERS.has(p.handle));
     const topPubs = [...pinned, ...ranked].slice(0, 8);
 
     const recent = [...skills].sort((a, b) =>
@@ -99,7 +107,7 @@ const getLandingData = unstable_cache(
       pubProfiles: Object.fromEntries(pubProfiles),
     };
   },
-  ["landing-data-v8"],
+  ["landing-data-v11"],
   { revalidate: 600 }
 );
 import { Footer } from "@/components/Footer";
@@ -175,7 +183,7 @@ function interleaveByPublisher(
 // ─── publisher card (real DB publisher) ───────────────────────────────────
 
 function pubRole(profile: PublisherProfile | undefined): string {
-  if (!profile) return "GitHub publisher";
+  if (!profile) return "GitHub creator";
   const parts: string[] = [];
   if (profile.company) parts.push(profile.company);
   if (!parts.length && profile.bio) {
@@ -183,7 +191,7 @@ function pubRole(profile: PublisherProfile | undefined): string {
     const sentence = profile.bio.split(/[.!?\n]/)[0].trim();
     if (sentence.length <= 60) parts.push(sentence);
   }
-  return parts.join(" · ") || "GitHub publisher";
+  return parts.join(" · ") || "GitHub creator";
 }
 
 function PubCard({
@@ -196,24 +204,28 @@ function PubCard({
   profile?: PublisherProfile;
 }) {
   const displayName = profile?.displayName ?? pub.handle;
+  // Only show @handle if it adds information (i.e. there's a real name different from the handle).
+  const showHandle = displayName.toLowerCase() !== pub.handle.toLowerCase();
   return (
     <div className="lp-pub-card">
       <div className="pub-header">
         <span
           className="lp-avatar"
-          style={{ width: 48, height: 48, fontSize: Math.round(48 * 0.42) }}
+          style={{ width: 48, height: 48, fontSize: Math.round(48 * 0.42), overflow: "hidden", padding: 0 }}
         >
-          {initialsOf(pub.handle)}
+          {profile?.avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={profile.avatarUrl} alt={displayName} width={48} height={48} style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : (
+            initialsOf(pub.handle)
+          )}
         </span>
         <div className="who">
           <div className="pub-name">{displayName}</div>
-          <div className="pub-handle">@{pub.handle}</div>
+          {showHandle && <div className="pub-handle">@{pub.handle}</div>}
           <div className="pub-role">{pubRole(profile)}</div>
         </div>
       </div>
-      {profile?.bio && (
-        <p className="pub-bio">{profile.bio}</p>
-      )}
       <div className="pub-stats">
         <div className="s">
           <span className="v lp-num">{pub.skillCount}</span>
@@ -330,10 +342,11 @@ export default async function LandingPage() {
     installs: fmtCount(totalInstalls),
   };
 
-  // Top skills per publisher handle (for the publisher cards).
+  // Skills shown on each publisher card: catalog picks take priority over DB top-by-installs.
   const byOwner = new Map<string, Skill[]>();
   for (const [handle, list] of Object.entries(topSkillsByPub)) {
-    byOwner.set(handle, list.map(toSkill));
+    const picks = skillsByPublisher(handle).filter((s) => s.pick).slice(0, 2);
+    byOwner.set(handle, picks.length > 0 ? picks : list.map(toSkill));
   }
 
   const wallSkills = wall.map(toSkill);
@@ -380,11 +393,11 @@ export default async function LandingPage() {
       {/* Drifting wall of recently-verified skills (real data) */}
       <DriftWall skills={wallSkills} />
 
-      {/* Publishers band (real publishers, top by reach) */}
-      <section className="lp-pubs" id="publishers">
+      {/* Creators band */}
+      <section className="lp-pubs" id="creators">
         <div className="lp-page">
           <div className="lp-section-eyebrow">
-            <span className="left">Publishers · {stats.publishers} creators</span>
+            <span className="left">Creators · {stats.publishers}</span>
             <Link className="right" href="/creators">view all →</Link>
           </div>
           <div className="head">
@@ -404,12 +417,12 @@ export default async function LandingPage() {
                 key={pub.handle}
                 pub={pub}
                 topSkills={byOwner.get(pub.handle) ?? []}
-                profile={pubProfiles[pub.handle]}
+                profile={pubProfiles[pub.handle.toLowerCase()]}
               />
             ))}
             <Link className="lp-pub-end" href="/creators">
               <span className="t">
-                Browse all <span className="lp-num">{stats.publishers}</span> publishers
+                Browse all <span className="lp-num">{stats.publishers}</span> creators
               </span>
               <span className="a">→</span>
             </Link>

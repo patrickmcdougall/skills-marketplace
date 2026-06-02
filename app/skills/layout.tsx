@@ -5,16 +5,16 @@ const count = ALL_SKILLS.length;
 
 export const metadata: Metadata = {
   title: "Browse skills",
-  description: `Browse and filter ${count} verified Claude skills by role, stage, setup, and publisher. Every skill is installed and re-verified weekly.`,
+  description: `Browse and filter ${count} verified Claude skills by role, stage, setup, and creator. Every skill is installed and re-verified weekly.`,
   openGraph: {
     title: "Browse skills — Claudinho",
-    description: `Browse and filter ${count} verified Claude skills by role, stage, setup, and publisher.`,
+    description: `Browse and filter ${count} verified Claude skills by role, stage, setup, and creator.`,
     url: "https://claudinho.xyz/skills",
   },
   twitter: {
     card: "summary_large_image",
     title: "Browse skills — Claudinho",
-    description: `Browse and filter ${count} verified Claude skills by role, stage, setup, and publisher.`,
+    description: `Browse and filter ${count} verified Claude skills by role, stage, setup, and creator.`,
   },
 };
 

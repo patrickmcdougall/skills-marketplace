@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { PUBLISHERS, fmtCount } from "@/lib/data";
-import type { DBPublisherRow } from "@/lib/db";
+import type { DBPublisherRow, PublisherProfile } from "@/lib/db";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 
@@ -13,6 +13,11 @@ type EnrichedRow = DBPublisherRow & {
   name: string;
   initials: string;
   role: string;
+  avatarUrl: string | null;
+  location: string | null;
+  bio: string | null;
+  twitterHandle: string | null;
+  blog: string | null;
 };
 
 const SORT_OPTIONS = [
@@ -25,9 +30,9 @@ const SORT_OPTIONS = [
 type SortKey = "installs" | "skillCount" | "ghStars" | "az";
 
 const TABLE_COLUMNS: { key: SortKey; label: string }[] = [
+  { key: "ghStars", label: "GH ★" },
   { key: "skillCount", label: "Skills" },
   { key: "installs", label: "Installs" },
-  { key: "ghStars", label: "GH ★" },
 ];
 
 function sortRows(rows: EnrichedRow[], sortKey: SortKey, sortDir: "asc" | "desc"): EnrichedRow[] {
@@ -42,6 +47,22 @@ function sortRows(rows: EnrichedRow[], sortKey: SortKey, sortDir: "asc" | "desc"
   });
 }
 
+function cleanLocation(loc: string | null): string | null {
+  if (!loc) return null;
+  // Strip US zip codes (e.g. "Berkeley, CA 94703" → "Berkeley, CA")
+  return loc.replace(/,?\s*\d{5}(-\d{4})?(?=\s*$)/, "").trim() || null;
+}
+
+function creatorRole(cat: ReturnType<typeof Object.values<(typeof PUBLISHERS)[string]>>[number] | undefined, profile: PublisherProfile | undefined): string {
+  if (cat?.role) return cat.role;
+  if (profile?.company) return profile.company;
+  if (profile?.bio) {
+    const sentence = profile.bio.split(/[.!?\n]/)[0].trim();
+    if (sentence.length <= 70) return sentence;
+  }
+  return "GitHub creator";
+}
+
 // ─── sidebar ────────────────────────────────────────────────────────────────
 
 function FilterSearch({ value, onChange }: { value: string; onChange: (v: string) => void }) {
@@ -53,7 +74,7 @@ function FilterSearch({ value, onChange }: { value: string; onChange: (v: string
         <label htmlFor="pl-creator-q" className="sr-only">Search creators</label>
         <input
           id="pl-creator-q"
-          placeholder="name or handle"
+          placeholder="name, handle, or company"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           autoComplete="off"
@@ -119,20 +140,32 @@ function CreatorsTopBar({ count, total }: { count: number; total: number }) {
 
 // ─── page ────────────────────────────────────────────────────────────────────
 
-export function CreatorsClient({ rawRows }: { rawRows: DBPublisherRow[] }) {
+export function CreatorsClient({
+  rawRows,
+  profiles,
+}: {
+  rawRows: DBPublisherRow[];
+  profiles: Record<string, PublisherProfile>;
+}) {
   const router = useRouter();
 
   const allRows = useMemo<EnrichedRow[]>(() =>
     rawRows.map((r) => {
       const cat = PUBLISHERS[r.handle];
+      const profile = profiles[r.handle.toLowerCase()];
       return {
         ...r,
-        name: cat?.name ?? r.handle,
-        initials: cat?.initials ?? r.handle.slice(0, 2).toUpperCase(),
-        role: cat?.role ?? "",
+        name: cat?.name ?? profile?.displayName ?? r.handle,
+        initials: cat?.initials ?? (profile?.displayName ?? r.handle).slice(0, 2).toUpperCase(),
+        role: creatorRole(cat, profile),
+        avatarUrl: profile?.avatarUrl ?? null,
+        location: cleanLocation(profile?.location ?? null),
+        bio: profile?.bio ?? null,
+        twitterHandle: profile?.twitterUsername ?? null,
+        blog: profile?.blog ?? null,
       };
     }),
-    [rawRows]
+    [rawRows, profiles]
   );
 
   const stats = useMemo(() => ({
@@ -143,7 +176,7 @@ export function CreatorsClient({ rawRows }: { rawRows: DBPublisherRow[] }) {
   }), [rawRows]);
 
   const [query, setQuery] = useState("");
-  const [sortKey, setSortKey] = useState<SortKey>("installs");
+  const [sortKey, setSortKey] = useState<SortKey>("ghStars");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   const rows = useMemo(() => {
@@ -152,7 +185,7 @@ export function CreatorsClient({ rawRows }: { rawRows: DBPublisherRow[] }) {
       const lower = query.toLowerCase().replace(/-/g, " ");
       const lowerCompact = query.toLowerCase().replace(/[\s-]/g, "");
       r = r.filter((row) => {
-        const parts = [row.name, row.handle, row.role];
+        const parts = [row.name, row.handle, row.role, row.location ?? "", row.bio ?? ""];
         const hay = parts.join(" ").toLowerCase().replace(/-/g, " ");
         const hayCompact = parts.join("").toLowerCase().replace(/[\s-]/g, "");
         return hay.includes(lower) || hayCompact.includes(lowerCompact);
@@ -223,19 +256,29 @@ export function CreatorsClient({ rawRows }: { rawRows: DBPublisherRow[] }) {
                       <div className="pl-pub">
                         <span
                           className="lp-avatar"
-                          style={{ width: 36, height: 36, fontSize: Math.round(36 * 0.42) }}
+                          style={{ width: 36, height: 36, fontSize: Math.round(36 * 0.42), overflow: "hidden", padding: 0, flexShrink: 0 }}
                         >
-                          {r.initials}
+                          {r.avatarUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={r.avatarUrl} alt={r.name} width={36} height={36} style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }} />
+                          ) : (
+                            r.initials
+                          )}
                         </span>
                         <div className="who">
                           <span className="name">{r.name}</span>
-                          <span className="role">{r.role}</span>
+                          <span className="role">
+                            {r.role}
+                            {r.location && (
+                              <span className="pl-location"> · {r.location}</span>
+                            )}
+                          </span>
                         </div>
                       </div>
                     </td>
+                    <td className="num dim" data-label="GH ★">{fmtCount(r.ghStars)}</td>
                     <td className="num" data-label="Skills">{r.skillCount}</td>
                     <td className="num" data-label="Installs">{r.installs > 0 ? fmtCount(r.installs) : "—"}</td>
-                    <td className="num dim" data-label="GH ★">{fmtCount(r.ghStars)}</td>
                     <td className="pl-arrow-cell">→</td>
                   </tr>
                 ))}

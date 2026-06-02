@@ -127,6 +127,7 @@ export type PublisherProfile = {
   twitterUsername: string | null;
   avatarUrl: string | null;
   ghFollowers: number | null;
+  location: string | null;
 };
 
 // ─── queries ──────────────────────────────────────────────────────────────
@@ -240,13 +241,25 @@ export async function getDBPublisherRows(): Promise<DBPublisherRow[]> {
     from += PAGE;
   }
 
+  // Deduplicate stars by repo URL so a 58-skill repo isn't counted 58×.
+  const repoStars = new Map<string, number>(); // source_url → stars
+  for (const row of out) {
+    if (!repoStars.has(row.source_url)) {
+      repoStars.set(row.source_url, row.skill_signal?.stars ?? 0);
+    }
+  }
+
   const map = new Map<string, { installs: number; ghStars: number; count: number }>();
+  const seenRepos = new Set<string>();
   for (const row of out) {
     const handle = ownerFromUrl(row.source_url);
     if (!handle) continue;
     const entry = map.get(handle) ?? { installs: 0, ghStars: 0, count: 0 };
     entry.installs += row.skill_signal?.install_count_estimate ?? 0;
-    entry.ghStars += row.skill_signal?.stars ?? 0;
+    if (!seenRepos.has(row.source_url)) {
+      entry.ghStars += repoStars.get(row.source_url) ?? 0;
+      seenRepos.add(row.source_url);
+    }
     entry.count++;
     map.set(handle, entry);
   }
@@ -283,10 +296,12 @@ export async function getPublisherProfiles(
   handles: string[]
 ): Promise<Map<string, PublisherProfile>> {
   if (handles.length === 0) return new Map();
+  // Profiles are stored with lowercase handles; normalize before querying.
+  const lower = handles.map((h) => h.toLowerCase());
   const { data } = await serverDb()
     .from("publisher_profile")
-    .select("handle, display_name, bio, company, blog, twitter_username, avatar_url, gh_followers")
-    .in("handle", handles);
+    .select("handle, display_name, bio, company, blog, twitter_username, avatar_url, gh_followers, location")
+    .in("handle", lower);
   const out = new Map<string, PublisherProfile>();
   for (const row of (data ?? []) as {
     handle: string;
@@ -297,6 +312,7 @@ export async function getPublisherProfiles(
     twitter_username: string | null;
     avatar_url: string | null;
     gh_followers: number | null;
+    location: string | null;
   }[]) {
     out.set(row.handle, {
       handle: row.handle,
@@ -307,6 +323,7 @@ export async function getPublisherProfiles(
       twitterUsername: row.twitter_username,
       avatarUrl: row.avatar_url,
       ghFollowers: row.gh_followers,
+      location: row.location,
     });
   }
   return out;

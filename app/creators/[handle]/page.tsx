@@ -10,8 +10,10 @@ import {
 } from "@/lib/data";
 import {
   getSkillsByOwner,
+  getPublisherProfiles,
   ownerFromUrl,
   type SkillRow,
+  type PublisherProfile,
 } from "@/lib/db";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
@@ -113,27 +115,42 @@ export default async function CreatorPage({
 
   // Try curated catalog first (enriched bio/social data), fall back to DB.
   const catalogPub = getPublisher(handle);
-  const dbSkillRows = await getSkillsByOwner(handle);
+  const [dbSkillRows, profileMap] = await Promise.all([
+    getSkillsByOwner(handle),
+    getPublisherProfiles([handle]),
+  ]);
+  const profile: PublisherProfile | undefined = profileMap.get(handle.toLowerCase());
 
   if (!catalogPub && dbSkillRows.length === 0) notFound();
 
   // Build a unified publisher object.
-  const pub = catalogPub ?? {
+  // Catalog data wins for name/role/social (it's curated), but GitHub profile
+  // fills in avatar, location, blog, and everything else for non-catalog publishers.
+  const basePub = catalogPub ?? {
     handle,
-    name: handle,
-    role: "GitHub publisher",
-    initials: handle.slice(0, 2).toUpperCase(),
+    name: profile?.displayName ?? handle,
+    role: profile?.company ?? "GitHub creator",
+    initials: (profile?.displayName ?? handle).slice(0, 2).toUpperCase(),
     skills: dbSkillRows.length,
-    loc: null,
+    loc: profile?.location ?? null,
     gh: null,
-    fol: null,
-    bio: null,
-    intro: null,
-    github: null,
-    twitter: null,
+    fol: profile?.ghFollowers ?? null,
+    bio: profile?.bio ?? null,
+    intro: profile?.bio ?? null,
+    github: profile ? { handle, followers: profile.ghFollowers ?? 0 } : null,
+    twitter: profile?.twitterUsername ? { handle: profile.twitterUsername, followers: null } : null,
     position: null,
-    company: null,
-    location: null,
+    company: profile?.company ?? null,
+    location: profile?.location ?? null,
+  };
+
+  // Always layer profile fields that catalog data doesn't carry.
+  const pub = {
+    ...basePub,
+    avatarUrl: profile?.avatarUrl ?? null,
+    blog: (basePub as { blog?: string | null }).blog ?? profile?.blog ?? null,
+    location: basePub.location ?? profile?.location ?? null,
+    loc: basePub.loc ?? profile?.location ?? null,
   };
 
   // Skills: catalog first (richer SkillCard data), otherwise map DB rows.
@@ -151,25 +168,34 @@ export default async function CreatorPage({
       {/* Header */}
       <header className="pp-header pp-page">
         <div className="pp-avatar-lg" aria-label={`${pub.name} avatar`}>
-          {pub.initials}
+          {(pub as { avatarUrl?: string | null }).avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={(pub as { avatarUrl: string }).avatarUrl}
+              alt={pub.name}
+              width={80}
+              height={80}
+              style={{ borderRadius: 4, display: "block" }}
+            />
+          ) : (
+            pub.initials
+          )}
         </div>
         <div className="pp-head-text">
           <h1 className="pp-name">{pub.name}</h1>
           <div className="pp-handle">/{pub.handle}</div>
           <div className="pp-role">
-            {pub.position || pub.role}
-            {pub.company && (
-              <>
-                <span className="sep">·</span>
-                {pub.company}
-              </>
-            )}
-            {(pub.location || pub.loc) && (
-              <>
-                <span className="sep">·</span>
-                {pub.location || pub.loc}
-              </>
-            )}
+            {(() => {
+              const role = pub.position || pub.role;
+              const company = pub.company;
+              const loc = pub.location || pub.loc;
+              // Deduplicate: skip company if it's already expressed in the role string.
+              const showCompany = company && company.toLowerCase() !== role?.toLowerCase();
+              const parts = [role, showCompany ? company : null, loc].filter(Boolean);
+              return parts.map((p, i) => (
+                <span key={i}>{i > 0 && <span className="sep">·</span>}{p}</span>
+              ));
+            })()}
           </div>
           <div className="pp-socials">
             {pub.github && (
@@ -195,8 +221,23 @@ export default async function CreatorPage({
               >
                 <XIcon />
                 <span className="handle">@{pub.twitter.handle}</span>
-                <span className="sep">·</span>
-                <span className="count">{fmtCount(pub.twitter.followers)}</span>
+                {pub.twitter.followers != null && (
+                  <>
+                    <span className="sep">·</span>
+                    <span className="count">{fmtCount(pub.twitter.followers)}</span>
+                  </>
+                )}
+                <span className="ext">↗</span>
+              </a>
+            )}
+            {(pub as { blog?: string | null }).blog && (
+              <a
+                className="pp-social"
+                href={(pub as { blog: string }).blog}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span className="handle">{(pub as { blog: string }).blog.replace(/^https?:\/\//, "")}</span>
                 <span className="ext">↗</span>
               </a>
             )}

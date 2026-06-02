@@ -128,6 +128,7 @@ type Profile = {
   twitter_username: string | null;
   avatar_url: string | null;
   gh_followers: number | null;
+  location: string | null;
 };
 
 async function fetchGitHubUser(handle: string): Promise<Profile> {
@@ -141,6 +142,7 @@ async function fetchGitHubUser(handle: string): Promise<Profile> {
     twitter_username: data.twitter_username ?? null,
     avatar_url: data.avatar_url ?? null,
     gh_followers: data.followers ?? null,
+    location: data.location ?? null,
   };
 }
 
