@@ -17,9 +17,6 @@ export function Footer({ stats }: FooterProps) {
             </a>
             <span className="brand-tag">ready-made skills</span>
           </div>
-          <span className="status-foot">
-            {stats.skills} skills ready to install
-          </span>
         </div>
         <div className="col">
           <b>Browse</b>
