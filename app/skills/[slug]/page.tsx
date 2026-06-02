@@ -21,17 +21,29 @@ import { CopyForSlack } from "./CopyForSlack";
 
 async function fetchSkillFileContent(
   sourceUrl: string,
-  skillPath: string | null
+  skillPath: string | null,
+  skillLeafName: string
 ): Promise<string | null> {
   try {
     const parts = new URL(sourceUrl).pathname.split("/").filter(Boolean);
     if (parts.length < 2) return null;
     const [owner, repo] = parts;
-    const filePath = skillPath ? `${skillPath.replace(/\/$/, "")}/SKILL.md` : "SKILL.md";
-    const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/HEAD/${filePath}`;
-    const res = await fetch(rawUrl, { next: { revalidate: 3600 } });
-    if (!res.ok) return null;
-    return await res.text();
+    const base = `https://raw.githubusercontent.com/${owner}/${repo}/HEAD`;
+
+    const candidates = skillPath
+      ? [`${skillPath.replace(/\/$/, "")}/SKILL.md`]
+      : [
+          `skills/${skillLeafName}/SKILL.md`,
+          `.claude/skills/${skillLeafName}/SKILL.md`,
+          `${skillLeafName}/SKILL.md`,
+          "SKILL.md",
+        ];
+
+    for (const filePath of candidates) {
+      const res = await fetch(`${base}/${filePath}`, { next: { revalidate: 3600 } });
+      if (res.ok) return await res.text();
+    }
+    return null;
   } catch {
     return null;
   }
@@ -114,7 +126,7 @@ export default async function SkillDetailPage({
   const stats = REAL_STATS;
   const [others, skillFileContent] = await Promise.all([
     getOtherSkillsByOwner(owner, slug, 3),
-    fetchSkillFileContent(row.source_url, row.skill_path),
+    fetchSkillFileContent(row.source_url, row.skill_path, leaf),
   ]);
 
   return (
