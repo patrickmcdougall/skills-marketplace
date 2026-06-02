@@ -364,16 +364,18 @@ function toSkill(s: BrowseSkill): Skill {
   };
 }
 
+const compact = (s: string) => s.toLowerCase().replace(/[\s-]/g, "");
+
 function searchSkills(skills: Skill[], q: string): Skill[] {
   if (!q.trim()) return skills;
   const lower = q.toLowerCase().replace(/-/g, " ");
+  const lowerCompact = compact(q);
   return skills.filter((s) => {
     const pub = PUBLISHERS[s.publisher];
-    const hay = [s.title, s.desc, pub?.name ?? s.publisher, s.shelfTitle, s.subShelf ?? "", ...(s.tags ?? [])]
-      .join(" ")
-      .toLowerCase()
-      .replace(/-/g, " ");
-    return hay.includes(lower);
+    const parts = [s.title, s.desc, pub?.name ?? s.publisher, s.shelfTitle, s.subShelf ?? "", ...(s.tags ?? [])];
+    const hay = parts.join(" ").toLowerCase().replace(/-/g, " ");
+    const hayCompact = parts.join(" ").toLowerCase().replace(/[\s-]/g, "");
+    return hay.includes(lower) || hayCompact.includes(lowerCompact);
   });
 }
 
