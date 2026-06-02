@@ -65,10 +65,13 @@ export async function generateMetadata({
 
 export default async function SkillDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ install?: string }>;
 }) {
   const { slug } = await params;
+  const { install } = await searchParams;
   const row = await getSkillBySlug(slug);
   if (!row) notFound();
 
@@ -171,7 +174,14 @@ export default async function SkillDetailPage({
         {/* Right rail */}
         <aside className="dp-right">
           {/* Install card */}
-          <InstallCard installCommand={cmd} />
+          <InstallCard
+            slug={slug}
+            installCommand={cmd}
+            sourceUrl={row.source_url}
+            sourceOnly={row.distribution_mode === "source-only" || row.bundle_status === "source-only"}
+            installUnavailable={install === "unavailable"}
+            installCount={signal?.install_count ?? 0}
+          />
 
           {/* Source card */}
           <aside className="dp-source-card">
