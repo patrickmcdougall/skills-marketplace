@@ -369,7 +369,7 @@ function searchSkills(skills: Skill[], q: string): Skill[] {
   const lower = q.toLowerCase();
   return skills.filter((s) => {
     const pub = PUBLISHERS[s.publisher];
-    const hay = [s.title, s.desc, pub?.name ?? s.publisher, s.shelfTitle, s.subShelf ?? ""]
+    const hay = [s.title, s.desc, pub?.name ?? s.publisher, s.shelfTitle, s.subShelf ?? "", ...(s.tags ?? [])]
       .join(" ")
       .toLowerCase();
     return hay.includes(lower);
