@@ -14,13 +14,18 @@ import { Nav } from "@/components/Nav";
 // request, which made the page take minutes to render.
 export const revalidate = 600;
 
+// Derive everything the landing needs from one full scan, then cache ONLY the
+// small result — not the 2.2k-row array, which exceeds Next's 2MB data-cache
+// limit and silently fails to cache (forcing a slow re-scan every request).
 const getLandingData = unstable_cache(
   async () => {
     const skills = await getBrowseSkills();
 
-    // Aggregate publishers in-memory (avoids a second full-table scan).
+    // Publisher aggregates (avoids a second full-table scan).
     const pubMap = new Map<string, DBPublisherRow>();
+    let totalInstalls = 0;
     for (const s of skills) {
+      totalInstalls += s.installs;
       if (!s.ownerHandle) continue;
       const e =
         pubMap.get(s.ownerHandle) ??
@@ -33,11 +38,32 @@ const getLandingData = unstable_cache(
     const pubs = [...pubMap.values()].sort(
       (a, b) => b.installs - a.installs || b.skillCount - a.skillCount
     );
-    const topics = new Set(skills.flatMap((s) => s.topics)).size;
+    const topPubs = pubs.slice(0, 8);
 
-    return { skills, pubs, topics };
+    const recent = [...skills].sort((a, b) =>
+      (b.verifiedDate || "").localeCompare(a.verifiedDate || "")
+    );
+
+    // Top 2 recent skills per top-publisher (for the publisher cards).
+    const topHandles = new Set(topPubs.map((p) => p.handle));
+    const topSkillsByPub: Record<string, BrowseSkill[]> = {};
+    for (const s of recent) {
+      if (!topHandles.has(s.ownerHandle)) continue;
+      const arr = (topSkillsByPub[s.ownerHandle] ??= []);
+      if (arr.length < 2) arr.push(s);
+    }
+
+    return {
+      totalSkills: skills.length,
+      totalPublishers: pubs.length,
+      totalInstalls,
+      distinctTopics: new Set(skills.flatMap((s) => s.topics)).size,
+      topPubs,
+      spread: spreadByPublisher(recent, 16), // diverse, recent-first
+      topSkillsByPub,
+    };
   },
-  ["landing-data-v2"],
+  ["landing-data-v3"],
   { revalidate: 600 }
 );
 import { Footer } from "@/components/Footer";
@@ -206,39 +232,32 @@ function HowItWorks() {
 // ─── page ──────────────────────────────────────────────────────────────────
 
 export default async function LandingPage() {
-  // Real data from Supabase (single cached scan).
-  const { skills: dbSkills, pubs: dbPubs, topics: distinctTopics } =
-    await getLandingData();
-
-  // Most-recently-verified first (last_indexed_at desc).
-  const recent = [...dbSkills].sort((a, b) =>
-    (b.verifiedDate || "").localeCompare(a.verifiedDate || "")
-  );
-
-  const totalInstalls = dbSkills.reduce((a, s) => a + s.installs, 0);
+  // Real data from Supabase (single cached scan, small cached payload).
+  const {
+    totalSkills,
+    totalPublishers,
+    totalInstalls,
+    distinctTopics,
+    topPubs,
+    spread,
+    topSkillsByPub,
+  } = await getLandingData();
 
   // Stats for Nav / Footer (they read .skills).
   const stats = {
-    skills: dbSkills.length,
-    publishers: dbPubs.length,
+    skills: totalSkills,
+    publishers: totalPublishers,
     installs: fmtCount(totalInstalls),
   };
 
-  // Top skills per publisher handle (for the publisher cards), recent-first.
+  // Top skills per publisher handle (for the publisher cards).
   const byOwner = new Map<string, Skill[]>();
-  for (const s of recent) {
-    const arr = byOwner.get(s.ownerHandle);
-    if (arr) {
-      if (arr.length < 2) arr.push(toSkill(s));
-    } else {
-      byOwner.set(s.ownerHandle, [toSkill(s)]);
-    }
+  for (const [handle, list] of Object.entries(topSkillsByPub)) {
+    byOwner.set(handle, list.map(toSkill));
   }
 
-  const spread = spreadByPublisher(recent, 16); // diverse, recent-first
   const wallSkills = spread.map(toSkill);
   const featured = spread.slice(0, 8).map(toSkill);
-  const topPubs = dbPubs.slice(0, 8); // already sorted by installs then skillCount
 
   return (
     <div className="lp accent-orange bg-cream">
