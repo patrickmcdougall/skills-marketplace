@@ -144,8 +144,8 @@ export async function getOtherSkillsByOwner(
   return (data as SkillRow[])
     .sort(
       (a, b) =>
-        (b.skill_signal?.install_count_estimate ?? 0) -
-        (a.skill_signal?.install_count_estimate ?? 0)
+        ((b.skill_signal?.install_count_estimate ?? 0) + (b.skill_signal?.install_count ?? 0)) -
+        ((a.skill_signal?.install_count_estimate ?? 0) + (a.skill_signal?.install_count ?? 0))
     )
     .slice(0, limit);
 }
@@ -158,7 +158,7 @@ export async function getBrowseSkills(): Promise<BrowseSkill[]> {
     const { data, error } = await serverDb()
       .from("skill_listing")
       .select(
-        "slug, skill_name, description_excerpt, source_url, topics, category, last_indexed_at, display_title, display_description, best_for, shelf, sub_shelf, tags, content_status, skill_signal(install_count_estimate, stars)"
+        "slug, skill_name, description_excerpt, source_url, topics, category, last_indexed_at, display_title, display_description, best_for, shelf, sub_shelf, tags, content_status, skill_signal(install_count_estimate, install_count, stars)"
       )
       .eq("status", "indexed")
       .range(from, from + PAGE - 1);
@@ -178,7 +178,7 @@ export async function getBrowseSkills(): Promise<BrowseSkill[]> {
       sub_shelf: string | null;
       tags: string[] | null;
       content_status: string | null;
-      skill_signal: { install_count_estimate: number; stars: number } | null;
+      skill_signal: { install_count_estimate: number; install_count: number; stars: number } | null;
     };
     for (const row of data as unknown as BrowseRow[]) {
       out.push({
@@ -186,7 +186,7 @@ export async function getBrowseSkills(): Promise<BrowseSkill[]> {
         title: row.skill_name,
         desc: row.description_excerpt,
         ownerHandle: ownerFromUrl(row.source_url),
-        installs: row.skill_signal?.install_count_estimate ?? 0,
+        installs: (row.skill_signal?.install_count_estimate ?? 0) + (row.skill_signal?.install_count ?? 0),
         stars: row.skill_signal?.stars ?? 0,
         verifiedDate: row.last_indexed_at ?? "",
         category: row.category,
@@ -209,7 +209,7 @@ export async function getBrowseSkills(): Promise<BrowseSkill[]> {
 export async function getDBPublisherRows(): Promise<DBPublisherRow[]> {
   type PubRow = {
     source_url: string;
-    skill_signal: { install_count_estimate: number; stars: number } | null;
+    skill_signal: { install_count_estimate: number; install_count: number; stars: number } | null;
   };
   const out: PubRow[] = [];
   let from = 0;
@@ -217,7 +217,7 @@ export async function getDBPublisherRows(): Promise<DBPublisherRow[]> {
   for (;;) {
     const { data, error } = await serverDb()
       .from("skill_listing")
-      .select("source_url, skill_signal(install_count_estimate, stars)")
+      .select("source_url, skill_signal(install_count_estimate, install_count, stars)")
       .eq("status", "indexed")
       .range(from, from + PAGE - 1);
     if (error || !data?.length) break;
@@ -231,7 +231,7 @@ export async function getDBPublisherRows(): Promise<DBPublisherRow[]> {
     const handle = ownerFromUrl(row.source_url);
     if (!handle) continue;
     const entry = map.get(handle) ?? { installs: 0, ghStars: 0, count: 0 };
-    entry.installs += row.skill_signal?.install_count_estimate ?? 0;
+    entry.installs += (row.skill_signal?.install_count_estimate ?? 0) + (row.skill_signal?.install_count ?? 0);
     entry.ghStars += row.skill_signal?.stars ?? 0;
     entry.count++;
     map.set(handle, entry);

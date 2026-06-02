@@ -26,7 +26,7 @@ export default async function Image({
   const shelf = row?.shelf ?? null;
   const subShelf = row?.sub_shelf ?? null;
   const publisherHandle = row ? ownerFromUrl(row.source_url) : "";
-  const installs = row?.skill_signal?.install_count_estimate ?? 0;
+  const installs = (row?.skill_signal?.install_count_estimate ?? 0) + (row?.skill_signal?.install_count ?? 0);
   const stars = row?.skill_signal?.stars ?? 0;
 
   const shelfLabel = shelf

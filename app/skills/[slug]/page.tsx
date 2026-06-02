@@ -181,7 +181,7 @@ export default async function SkillDetailPage({
             sourceUrl={row.source_url}
             sourceOnly={row.distribution_mode === "source-only" || row.bundle_status === "source-only"}
             installUnavailable={install === "unavailable"}
-            installCount={signal?.install_count ?? 0}
+            installCount={(signal?.install_count_estimate ?? 0) + (signal?.install_count ?? 0)}
           />
           <CopyForSlack
             title={row.content_status === "ok" && row.display_title ? row.display_title : row.skill_name}
