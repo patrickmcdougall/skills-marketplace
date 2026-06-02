@@ -17,7 +17,6 @@ type ListingRow = {
   bundle_url: string | null;
   bundle_source_ref: string | null;
   distribution_mode: string | null;
-  skill_signal: { id?: string } | null;
 };
 
 // Coarse bot filter — don't count prefetch/crawler hits.
@@ -58,7 +57,7 @@ export async function GET(
 
   const { data, error } = await db
     .from("skill_listing")
-    .select("id, slug, source_url, skill_path, bundle_status, bundle_url, bundle_source_ref, distribution_mode, skill_signal(id)")
+    .select("id, slug, source_url, skill_path, bundle_status, bundle_url, bundle_source_ref, distribution_mode")
     .eq("slug", slug)
     .eq("status", "indexed")
     .maybeSingle();
