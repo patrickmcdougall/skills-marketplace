@@ -36,7 +36,7 @@ export function InstallCard({
     <div className="dp-install">
       {canDownload ? (
         <>
-          <a className="primary" href={`/i/${slug}`} download>
+          <a className="primary" href={`/i/${slug}`}>
             <span className="arrow">↓</span>
             Download .skill
           </a>

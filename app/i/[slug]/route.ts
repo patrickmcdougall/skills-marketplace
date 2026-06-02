@@ -83,7 +83,7 @@ export async function GET(
 
   // Bundle ready — check if still fresh (source ref matches latest)
   if (listing.bundle_status === "ready" && listing.bundle_url && listing.bundle_source_ref) {
-    return bundleResponse(listing.bundle_url, slug);
+    return await bundleResponse(listing.bundle_url, slug);
   }
 
   // Package on demand (first visitor pays the cost; everyone after hits the cache)
@@ -120,7 +120,7 @@ export async function GET(
       bundle_packaged_at: new Date().toISOString(),
     }).eq("id", listing.id);
 
-    return bundleResponse(result.bundleUrl, slug);
+    return await bundleResponse(result.bundleUrl, slug);
   } catch {
     const dest = new URL(`/skills/${slug}`, req.url);
     dest.searchParams.set("install", "unavailable");
@@ -128,6 +128,18 @@ export async function GET(
   }
 }
 
-function bundleResponse(bundleUrl: string, slug: string): Response {
-  return Response.redirect(bundleUrl, 302);
+async function bundleResponse(bundleUrl: string, slug: string): Promise<Response> {
+  // Proxy the file so the browser gets a same-origin response with the right
+  // Content-Disposition — cross-origin redirects don't trigger file downloads.
+  const upstream = await fetch(bundleUrl);
+  if (!upstream.ok) {
+    throw new Error(`Storage fetch failed: ${upstream.status}`);
+  }
+  return new Response(upstream.body, {
+    headers: {
+      "Content-Type": "application/zip",
+      "Content-Disposition": `attachment; filename="${slug}.skill"`,
+      "Cache-Control": "public, max-age=3600",
+    },
+  });
 }
