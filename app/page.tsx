@@ -17,6 +17,10 @@ export const revalidate = 600;
 // Derive everything the landing needs from one full scan, then cache ONLY the
 // small result — not the 2.2k-row array, which exceeds Next's 2MB data-cache
 // limit and silently fails to cache (forcing a slow re-scan every request).
+const WALL_CURATORS = new Set([
+  "obra", "mattpocock", "anthropic", "coreyhaines31", "addyosmani",
+]);
+
 const getLandingData = unstable_cache(
   async () => {
     const skills = await getBrowseSkills();
@@ -53,17 +57,37 @@ const getLandingData = unstable_cache(
       if (arr.length < 2) arr.push(s);
     }
 
+    // Wall: skills from curated handles, interleaved by publisher so the wall
+    // looks diverse. Sorted by installs within each publisher's bucket so the
+    // best skills surface first. Fall back to all-publisher spread if the
+    // curated set is too thin (< 8 cards).
+    const wallByPub = new Map<string, BrowseSkill[]>();
+    for (const s of skills) {
+      if (!WALL_CURATORS.has(s.ownerHandle)) continue;
+      if (!wallByPub.has(s.ownerHandle)) wallByPub.set(s.ownerHandle, []);
+      const bucket = wallByPub.get(s.ownerHandle)!;
+      bucket.push(s);
+    }
+    for (const bucket of wallByPub.values()) {
+      bucket.sort((a, b) => b.installs - a.installs);
+    }
+    const wallCurated = interleaveByPublisher(wallByPub, 24);
+    const wall = wallCurated.length >= 8
+      ? wallCurated
+      : spreadByPublisher(recent, 16);
+
     return {
       totalSkills: skills.length,
       totalPublishers: pubs.length,
       totalInstalls,
       distinctTopics: new Set(skills.flatMap((s) => s.topics)).size,
       topPubs,
-      spread: spreadByPublisher(recent, 16), // diverse, recent-first
+      wall,
+      spread: spreadByPublisher(recent, 16),
       topSkillsByPub,
     };
   },
-  ["landing-data-v3"],
+  ["landing-data-v4"],
   { revalidate: 600 }
 );
 import { Footer } from "@/components/Footer";
@@ -110,6 +134,30 @@ function spreadByPublisher(skills: BrowseSkill[], limit: number): BrowseSkill[] 
     }
   }
   return [...firstPer, ...leftover].slice(0, limit);
+}
+
+// Round-robin across per-publisher buckets so no single publisher dominates
+// the wall. Each bucket should already be sorted by desired order (e.g. installs).
+function interleaveByPublisher(
+  byPub: Map<string, BrowseSkill[]>,
+  limit: number
+): BrowseSkill[] {
+  const buckets = [...byPub.values()];
+  const out: BrowseSkill[] = [];
+  let i = 0;
+  while (out.length < limit) {
+    let added = false;
+    for (const bucket of buckets) {
+      if (i < bucket.length) {
+        out.push(bucket[i]);
+        added = true;
+        if (out.length >= limit) break;
+      }
+    }
+    if (!added) break;
+    i++;
+  }
+  return out;
 }
 
 // ─── publisher card (real DB publisher) ───────────────────────────────────
@@ -239,6 +287,7 @@ export default async function LandingPage() {
     totalInstalls,
     distinctTopics,
     topPubs,
+    wall,
     spread,
     topSkillsByPub,
   } = await getLandingData();
@@ -256,7 +305,7 @@ export default async function LandingPage() {
     byOwner.set(handle, list.map(toSkill));
   }
 
-  const wallSkills = spread.map(toSkill);
+  const wallSkills = wall.map(toSkill);
   const featured = spread.slice(0, 8).map(toSkill);
 
   return (
