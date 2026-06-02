@@ -16,6 +16,8 @@ export function SkillCard({ skill, context = "shelf" }: SkillCardProps) {
   const publisherName = publisher?.name ?? skill.publisher;
   const tags = (skill.tags ?? []).slice(0, 2);
   const hasChips = Boolean(skill.shelfTitle) || tags.length > 0;
+  const fol = publisher?.fol ?? 0;
+  const showStars = !fol && skill.stars > 0;
 
   return (
     <Link className={`skill-card ctx-${context}`} href={`/skills/${skill.id}`}>
@@ -45,32 +47,39 @@ export function SkillCard({ skill, context = "shelf" }: SkillCardProps) {
           <span className="lp-byline-by">by</span>
           <span className="lp-byline-name">{publisherName}</span>
           <span className="dot-sep">·</span>
-          <span className="fol" title="followers on X">
-            <svg
-              className="fol-icon"
-              viewBox="0 0 10 10"
-              width="10"
-              height="10"
-              aria-hidden="true"
-            >
-              <circle
-                cx="5"
-                cy="3.2"
-                r="1.7"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.1"
-              />
-              <path
-                d="M1.6 9c0-1.9 1.5-3.2 3.4-3.2S8.4 7.1 8.4 9"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.1"
-                strokeLinecap="round"
-              />
-            </svg>
-            <span className="num">{fmtCount(publisher?.fol)}</span>
-          </span>
+          {showStars ? (
+            <span className="fol" title="GitHub stars">
+              <span style={{ fontSize: 10, opacity: 0.7 }}>★</span>
+              <span className="num">{fmtCount(skill.stars)}</span>
+            </span>
+          ) : (
+            <span className="fol" title="followers on X">
+              <svg
+                className="fol-icon"
+                viewBox="0 0 10 10"
+                width="10"
+                height="10"
+                aria-hidden="true"
+              >
+                <circle
+                  cx="5"
+                  cy="3.2"
+                  r="1.7"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.1"
+                />
+                <path
+                  d="M1.6 9c0-1.9 1.5-3.2 3.4-3.2S8.4 7.1 8.4 9"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.1"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <span className="num">{fmtCount(fol)}</span>
+            </span>
+          )}
         </span>
         <span className="signals" title="installs">
           <span className="icon">↓</span>
