@@ -48,7 +48,7 @@ export default async function Image({
         {/* Brand row */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 48 }}>
           <div style={{ width: 14, height: 14, borderRadius: "50%", background: "#d8581c", flexShrink: 0 }} />
-          <span style={{ fontSize: 20, fontWeight: 400, color: "#1c1b18", letterSpacing: "-0.01em", fontFamily: "Geist" }}>
+          <span style={{ fontSize: 20, color: "#1c1b18", letterSpacing: "-0.01em" }}>
             Claudinho
           </span>
         </div>
@@ -56,24 +56,23 @@ export default async function Image({
         {/* Creator name */}
         <div
           style={{
+            display: "flex",
             fontSize: name.length > 24 ? 52 : name.length > 16 ? 64 : 72,
-            fontWeight: 400,
             color: "#1c1b18",
             lineHeight: 1.05,
             letterSpacing: "-0.03em",
             flex: 1,
-            fontFamily: "Geist",
           }}
         >
-          {name}
+          <span>{name}</span>
         </div>
 
         {/* Role */}
-        {role && (
-          <div style={{ fontSize: 20, color: "#45413b", marginBottom: 32, fontFamily: "Geist" }}>
-            {role}
+        {role ? (
+          <div style={{ display: "flex", marginBottom: 32 }}>
+            <span style={{ fontSize: 20, color: "#45413b" }}>{role}</span>
           </div>
-        )}
+        ) : null}
 
         {/* Bottom row */}
         <div
@@ -86,36 +85,36 @@ export default async function Image({
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-            {skillCount > 0 && (
+            {skillCount > 0 ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ fontSize: 12, color: "#7a7468", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "Geist" }}>
+                <span style={{ fontSize: 12, color: "#7a7468", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                   skills
                 </span>
-                <span style={{ fontSize: 20, color: "#1c1b18", fontFamily: "Geist" }}>
+                <span style={{ fontSize: 20, color: "#1c1b18" }}>
                   {skillCount}
                 </span>
               </div>
-            )}
-            {totalInstalls > 0 && (
+            ) : null}
+            {totalInstalls > 0 ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ fontSize: 12, color: "#7a7468", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "Geist" }}>
+                <span style={{ fontSize: 12, color: "#7a7468", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                   installs
                 </span>
-                <span style={{ fontSize: 20, color: "#1c1b18", fontFamily: "Geist" }}>
+                <span style={{ fontSize: 20, color: "#1c1b18" }}>
                   {fmtCount(totalInstalls)}
                 </span>
               </div>
-            )}
+            ) : null}
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#2e8a4f" }} />
-              <span style={{ fontSize: 13, color: "#45413b", letterSpacing: "0.02em", fontFamily: "Geist" }}>
+              <span style={{ fontSize: 13, color: "#45413b", letterSpacing: "0.02em" }}>
                 verified registry
               </span>
             </div>
-            <span style={{ fontSize: 14, color: "#7a7468", letterSpacing: "0.04em", fontFamily: "Geist" }}>
+            <span style={{ fontSize: 14, color: "#7a7468", letterSpacing: "0.04em" }}>
               claudinho.xyz
             </span>
           </div>

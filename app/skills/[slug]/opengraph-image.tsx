@@ -35,6 +35,8 @@ export default async function Image({
 
   const font = loadFont();
 
+  const fontSize = title.length > 70 ? 40 : title.length > 50 ? 48 : title.length > 35 ? 54 : 60;
+
   return new ImageResponse(
     (
       <div
@@ -49,9 +51,9 @@ export default async function Image({
         }}
       >
         {/* Brand row */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 36 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 32 }}>
           <div style={{ width: 14, height: 14, borderRadius: "50%", background: "#d8581c", flexShrink: 0 }} />
-          <span style={{ fontSize: 20, fontWeight: 400, color: "#1c1b18", letterSpacing: "-0.01em" }}>
+          <span style={{ fontSize: 20, color: "#1c1b18", letterSpacing: "-0.01em" }}>
             Claudinho
           </span>
         </div>
@@ -65,47 +67,36 @@ export default async function Image({
               background: "#e4e0d8",
               borderRadius: 999,
               padding: "4px 14px",
-              fontSize: 13,
-              color: "#45413b",
-              letterSpacing: "0.03em",
-              marginBottom: 20,
-              fontFamily: "Geist",
+              marginBottom: 18,
             }}
           >
-            {shelfLabel}
+            <span style={{ fontSize: 13, color: "#45413b", letterSpacing: "0.03em" }}>
+              {shelfLabel}
+            </span>
           </div>
         )}
 
         {/* Skill title */}
         <div
           style={{
-            fontSize: title.length > 70 ? 40 : title.length > 50 ? 48 : title.length > 35 ? 54 : 60,
-            fontWeight: 400,
+            display: "flex",
+            fontSize,
             color: "#1c1b18",
             lineHeight: 1.1,
             letterSpacing: "-0.025em",
             maxWidth: 1000,
             flex: 1,
-            fontFamily: "Geist",
           }}
         >
-          {title}
+          <span>{title}</span>
         </div>
 
         {/* Best-for line */}
         {bestFor && (
-          <div
-            style={{
-              fontSize: 18,
-              color: "#7a7468",
-              lineHeight: 1.4,
-              maxWidth: 800,
-              marginTop: 16,
-              marginBottom: 8,
-              fontFamily: "Geist",
-            }}
-          >
-            {bestFor.length > 120 ? bestFor.slice(0, 117) + "…" : bestFor}
+          <div style={{ display: "flex", marginTop: 16, marginBottom: 8 }}>
+            <span style={{ fontSize: 18, color: "#7a7468", lineHeight: 1.4, maxWidth: 800 }}>
+              {bestFor.length > 120 ? bestFor.slice(0, 117) + "…" : bestFor}
+            </span>
           </div>
         )}
 
@@ -115,52 +106,52 @@ export default async function Image({
             display: "flex",
             alignItems: "flex-end",
             justifyContent: "space-between",
-            marginTop: 28,
-            paddingTop: 24,
+            marginTop: 24,
+            paddingTop: 20,
             borderTop: "1px solid #ddd2b8",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
-            {publisherHandle && (
+            {publisherHandle ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ fontSize: 12, color: "#7a7468", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "Geist" }}>
+                <span style={{ fontSize: 12, color: "#7a7468", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                   publisher
                 </span>
-                <span style={{ fontSize: 18, color: "#1c1b18", fontFamily: "Geist" }}>
+                <span style={{ fontSize: 18, color: "#1c1b18" }}>
                   {publisherHandle}
                 </span>
               </div>
-            )}
-            {installs > 0 && (
+            ) : null}
+            {installs > 0 ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ fontSize: 12, color: "#7a7468", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "Geist" }}>
+                <span style={{ fontSize: 12, color: "#7a7468", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                   installs
                 </span>
-                <span style={{ fontSize: 18, color: "#1c1b18", fontFamily: "Geist" }}>
+                <span style={{ fontSize: 18, color: "#1c1b18" }}>
                   {fmtCount(installs)}
                 </span>
               </div>
-            )}
-            {stars > 0 && (
+            ) : null}
+            {stars > 0 ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ fontSize: 12, color: "#7a7468", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "Geist" }}>
+                <span style={{ fontSize: 12, color: "#7a7468", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                   gh ★
                 </span>
-                <span style={{ fontSize: 18, color: "#1c1b18", fontFamily: "Geist" }}>
+                <span style={{ fontSize: 18, color: "#1c1b18" }}>
                   {fmtCount(stars)}
                 </span>
               </div>
-            )}
+            ) : null}
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#2e8a4f" }} />
-              <span style={{ fontSize: 13, color: "#45413b", letterSpacing: "0.02em", fontFamily: "Geist" }}>
+              <span style={{ fontSize: 13, color: "#45413b", letterSpacing: "0.02em" }}>
                 verified
               </span>
             </div>
-            <span style={{ fontSize: 14, color: "#7a7468", letterSpacing: "0.04em", fontFamily: "Geist" }}>
+            <span style={{ fontSize: 14, color: "#7a7468", letterSpacing: "0.04em" }}>
               claudinho.xyz
             </span>
           </div>

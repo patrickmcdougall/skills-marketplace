@@ -10,6 +10,12 @@ function loadFont(): ArrayBuffer {
   return readFileSync(join(process.cwd(), "public/fonts/Geist-Regular.ttf")).buffer as ArrayBuffer;
 }
 
+const STATS = [
+  { n: "2k+", k: "skills" },
+  { n: "89", k: "publishers" },
+  { n: "181", k: "topics" },
+];
+
 export default function Image() {
   const font = loadFont();
 
@@ -29,7 +35,7 @@ export default function Image() {
         {/* Brand row */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 60 }}>
           <div style={{ width: 14, height: 14, borderRadius: "50%", background: "#d8581c", flexShrink: 0 }} />
-          <span style={{ fontSize: 20, color: "#1c1b18", letterSpacing: "-0.01em", fontFamily: "Geist" }}>
+          <span style={{ fontSize: 20, color: "#1c1b18", letterSpacing: "-0.01em" }}>
             Claudinho
           </span>
         </div>
@@ -37,32 +43,33 @@ export default function Image() {
         {/* Hero headline */}
         <div
           style={{
+            display: "flex",
             fontSize: 62,
             color: "#1c1b18",
             lineHeight: 1.08,
             letterSpacing: "-0.03em",
             maxWidth: 960,
             flex: 1,
-            fontFamily: "Geist",
+            flexWrap: "wrap",
           }}
         >
-          Someone already built the{" "}
+          <span>{"Someone already built the "}</span>
           <span style={{ color: "#d8581c" }}>thing</span>
-          {" "}you wanted Claude to do.
+          <span>{" you wanted Claude to do."}</span>
         </div>
 
         {/* Subhead */}
         <div
           style={{
+            display: "flex",
             fontSize: 22,
             color: "#7a7468",
             lineHeight: 1.45,
             maxWidth: 760,
             marginBottom: 40,
-            fontFamily: "Geist",
           }}
         >
-          Two thousand community skills, sorted by the job they do.
+          <span>Two thousand community skills, sorted by the job they do.</span>
         </div>
 
         {/* Bottom strip */}
@@ -76,18 +83,14 @@ export default function Image() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-            {[
-              ["2k+", "skills"],
-              ["89", "publishers"],
-              ["181", "topics"],
-            ].map(([n, k]) => (
+            {STATS.map(({ n, k }) => (
               <div key={k} style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                <span style={{ fontSize: 22, color: "#1c1b18", fontFamily: "Geist" }}>{n}</span>
-                <span style={{ fontSize: 13, color: "#7a7468", letterSpacing: "0.04em", textTransform: "uppercase", fontFamily: "Geist" }}>{k}</span>
+                <span style={{ fontSize: 22, color: "#1c1b18" }}>{n}</span>
+                <span style={{ fontSize: 13, color: "#7a7468", letterSpacing: "0.04em", textTransform: "uppercase" }}>{k}</span>
               </div>
             ))}
           </div>
-          <span style={{ fontSize: 14, color: "#7a7468", letterSpacing: "0.04em", fontFamily: "Geist" }}>
+          <span style={{ fontSize: 14, color: "#7a7468", letterSpacing: "0.04em" }}>
             claudinho.xyz
           </span>
         </div>
