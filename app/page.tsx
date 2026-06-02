@@ -174,53 +174,53 @@ function HowItWorks() {
     <section className="lp-how" id="how">
       <div className="lp-page">
         <div className="lp-section-eyebrow">
-          <span className="left">About · the registry</span>
-          <span className="right">v1.0 · re-verified weekly</span>
+          <span className="left">How it works</span>
+          <span className="right">no terminal required</span>
         </div>
         <div className="lp-how-head">
-          <h2>How verification and signal aggregation work.</h2>
+          <h2>From "I want Claude to do this" to actually done.</h2>
           <p className="lede">
-            Three stages. All run by us, all visible. No claims we can&apos;t show metadata for.
+            Three steps. No command line, no reading someone&apos;s GitHub repo, no guessing whether it works.
           </p>
         </div>
         <div className="lp-how-grid">
           <div className="step">
-            <span className="n">01 · Source</span>
-            <h3>Skills enter the registry by community signal.</h3>
+            <span className="n">01 · Find</span>
+            <h3>Browse by job, not by search term.</h3>
             <p>
-              GitHub stars on the publisher&apos;s repo, install counts across other registries,
-              Twitter mentions, and publisher reputation (role, follower count). Signal thresholds
-              are public and re-checked daily.
+              Skills are organised by what they do — Marketing, Engineering, Sales, Operations —
+              not by repo name or keyword. Each card tells you what the skill does and who it&apos;s best for
+              before you click anything.
             </p>
             <span className="out">
-              <span className="k">tracks: </span>
-              <span className="v">twitter followers · install counts · publisher footprint</span>
+              <span className="k">how: </span>
+              <span className="v">browse by shelf · filter by topic · sort by installs</span>
             </span>
           </div>
           <div className="step">
-            <span className="n">02 · Verify</span>
-            <h3>Every skill is installed and run by us.</h3>
+            <span className="n">02 · Install</span>
+            <h3>Download the file. Drag it in. Done.</h3>
             <p>
-              Each topic has a standard input — 30 anonymized interview transcripts, a real PR diff,
-              a messy expense CSV. The skill runs against it. The exact output is captured and shown
-              on the detail page.
+              Every skill is packaged as a <code>.skill</code> file. Download it and drag it into
+              Claude Desktop or Cowork — the same way you&apos;d open any file. No terminal,
+              no install command, no reading code.
             </p>
             <span className="out">
-              <span className="k">artifact: </span>
-              <span className="v">pinned version · captured output · timestamp</span>
+              <span className="k">works with: </span>
+              <span className="v">Claude Desktop · Cowork · CLI for power users</span>
             </span>
           </div>
           <div className="step">
-            <span className="n">03 · Re-verify</span>
-            <h3>Daily polling. Weekly re-runs.</h3>
+            <span className="n">03 · Share</span>
+            <h3>Send it to your team in one click.</h3>
             <p>
-              A cron polls each publisher&apos;s repo for new releases. Every skill is re-run against its
-              standard input weekly. Broken skills are hidden from browse, not retried in public.
-              Source-only skills are re-verified monthly.
+              Found something useful? Hit &ldquo;Copy for Slack&rdquo; on any skill page and paste it
+              directly into a message — title, what it&apos;s best for, and the install link, formatted
+              and ready to send.
             </p>
             <span className="out">
-              <span className="k">cadence: </span>
-              <span className="v">poll daily · run weekly · health-check quarterly</span>
+              <span className="k">also: </span>
+              <span className="v">every skill link previews with title + image in Slack</span>
             </span>
           </div>
         </div>
@@ -284,7 +284,7 @@ export default async function LandingPage() {
         <div className="stat-strip">
           <div className="stat">
             <span className="v lp-num">{fmtCount(stats.skills)}</span>
-            <span className="k">skills · indexed</span>
+            <span className="k">skills · ready to install</span>
           </div>
           <div className="stat">
             <span className="v lp-num">{stats.publishers}</span>
@@ -304,16 +304,16 @@ export default async function LandingPage() {
       <section className="lp-pubs" id="publishers">
         <div className="lp-page">
           <div className="lp-section-eyebrow">
-            <span className="left">Publishers · {stats.publishers} sourced</span>
+            <span className="left">Publishers · {stats.publishers} creators</span>
             <Link className="right" href="/creators">view all →</Link>
           </div>
           <div className="head">
             <div>
-              <h2>Sourced from operators who already ship&nbsp;these.</h2>
+              <h2>Built by people who use Claude for this every&nbsp;day.</h2>
             </div>
             <p className="lede">
-              Each publisher&apos;s external footprint — GitHub stars, follower count, role — is part
-              of the source signal. Skills don&apos;t ship without it.
+              When the person who built a skill uses it in their own work, it&apos;s a different kind
+              of thing than a weekend project.
             </p>
           </div>
         </div>
@@ -339,15 +339,15 @@ export default async function LandingPage() {
       {/* Recently verified (real data — replaces the un-categorized mock shelves) */}
       <main className="lp-shelves lp-page" id="shelves">
         <div className="lp-section-eyebrow">
-          <span className="left">Recently verified</span>
+          <span className="left">Ready to install</span>
           <span className="right">{fmtCount(stats.skills)} skills</span>
         </div>
         <section className="lp-shelf">
           <div className="lp-shelf-head">
             <div>
-              <h2 className="lp-shelf-title">Fresh in the registry</h2>
+              <h2 className="lp-shelf-title">New this week</h2>
               <p className="lp-shelf-blurb">
-                The latest skills to pass verification, newest first.
+                Skills added this week, ready to drag into Claude.
               </p>
             </div>
             <div className="lp-shelf-right">

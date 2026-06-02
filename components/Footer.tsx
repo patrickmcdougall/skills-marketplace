@@ -15,10 +15,10 @@ export function Footer({ stats }: FooterProps) {
             <a className="logo" href="/">
               Claudinho
             </a>
-            <span className="brand-tag">pick your lineup of skills</span>
+            <span className="brand-tag">ready-made skills</span>
           </div>
           <span className="status-foot">
-            All systems · {stats.skills} verified · last run today
+            {stats.skills} skills ready to install
           </span>
         </div>
         <div className="col">
@@ -30,7 +30,7 @@ export function Footer({ stats }: FooterProps) {
         </div>
         <div className="col">
           <b>About</b>
-          <a href="/#how">How we verify</a>
+          <a href="/#how">How install works</a>
           <a href="mailto:patrick.mcdougalls@gmail.com">Submit a skill</a>
         </div>
         <div className="col">
@@ -39,8 +39,8 @@ export function Footer({ stats }: FooterProps) {
         </div>
       </div>
       <div className="legal">
-        <span>© Skills Marketplace · 2026</span>
-        <span>v1.0.0 · status: all systems green</span>
+        <span>© Claudinho · 2026</span>
+        <span>v1.0.0</span>
       </div>
     </footer>
   );
