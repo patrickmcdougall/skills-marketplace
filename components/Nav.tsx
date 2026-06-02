@@ -6,10 +6,9 @@ interface NavProps {
     publishers: number;
     installs: string;
   };
-  hideStatus?: boolean;
 }
 
-export function Nav({ stats, hideStatus }: NavProps) {
+export function Nav({ stats: _ }: NavProps) {
   return (
     <nav className="lp-nav">
       <div className="logo-row">
@@ -17,13 +16,8 @@ export function Nav({ stats, hideStatus }: NavProps) {
           <Link className="logo" href="/" style={{ fontSize: "18px" }}>
             Claudinho
           </Link>
-          <span className="brand-tag">pick your lineup of skills</span>
+          <span className="brand-tag">ready-made skills</span>
         </div>
-        {!hideStatus && (
-          <span className="status" title="Last full re-verification run">
-            <span>{stats.skills} verified · last run today</span>
-          </span>
-        )}
       </div>
       <div className="right">
         <div className="links">

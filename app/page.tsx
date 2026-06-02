@@ -261,7 +261,7 @@ export default async function LandingPage() {
 
   return (
     <div className="lp accent-orange bg-cream">
-      <Nav stats={stats} hideStatus />
+      <Nav stats={stats} />
 
       {/* Hero */}
       <header className="lp-hero lp-page">
