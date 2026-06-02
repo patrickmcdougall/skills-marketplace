@@ -93,6 +93,7 @@ export type BrowseSkill = {
   title: string;       // raw skill_name
   desc: string;        // raw description_excerpt
   ownerHandle: string;
+  repoName: string;
   installs: number;
   stars: number;
   verifiedDate: string;  // ISO date string
@@ -186,6 +187,7 @@ export async function getBrowseSkills(): Promise<BrowseSkill[]> {
         title: row.skill_name,
         desc: row.description_excerpt,
         ownerHandle: ownerFromUrl(row.source_url),
+        repoName: repoPathFromUrl(row.source_url).split("/")[1] ?? "",
         installs: (row.skill_signal?.install_count_estimate ?? 0) + (row.skill_signal?.install_count ?? 0),
         stars: row.skill_signal?.stars ?? 0,
         verifiedDate: row.last_indexed_at ?? "",

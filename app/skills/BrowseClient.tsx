@@ -360,7 +360,7 @@ function toSkill(s: BrowseSkill): Skill {
     shelfTitle: s.genShelf ? shelfLabel(sid) : (s.category ?? ""),
     shelfId: s.genShelf ? sid : (s.category?.toLowerCase().replace(/\s+/g, "-") ?? ""),
     subShelf: s.subShelf ?? undefined,
-    tags: s.genTags && s.genTags.length ? s.genTags : s.topics,
+    tags: [...(s.genTags && s.genTags.length ? s.genTags : s.topics), s.repoName],
   };
 }
 
