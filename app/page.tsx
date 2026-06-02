@@ -18,8 +18,11 @@ export const revalidate = 600;
 // small result — not the 2.2k-row array, which exceeds Next's 2MB data-cache
 // limit and silently fails to cache (forcing a slow re-scan every request).
 const WALL_CURATORS = new Set([
-  "obra", "mattpocock", "anthropic", "coreyhaines31", "addyosmani",
+  "obra", "mattpocock", "anthropic", "coreyhaines31", "addyosmani", "garrytan",
 ]);
+
+// Handles that are always shown in the publishers band, regardless of install rank.
+const PINNED_PUBLISHERS = new Set(["garrytan"]);
 
 const getLandingData = unstable_cache(
   async () => {
@@ -42,7 +45,10 @@ const getLandingData = unstable_cache(
     const pubs = [...pubMap.values()].sort(
       (a, b) => b.installs - a.installs || b.skillCount - a.skillCount
     );
-    const topPubs = pubs.slice(0, 8);
+    // Always include pinned publishers; fill remaining slots from the ranked list.
+    const pinned = pubs.filter(p => PINNED_PUBLISHERS.has(p.handle));
+    const ranked = pubs.filter(p => !PINNED_PUBLISHERS.has(p.handle));
+    const topPubs = [...pinned, ...ranked].slice(0, 8);
 
     const recent = [...skills].sort((a, b) =>
       (b.verifiedDate || "").localeCompare(a.verifiedDate || "")
@@ -87,7 +93,7 @@ const getLandingData = unstable_cache(
       topSkillsByPub,
     };
   },
-  ["landing-data-v4"],
+  ["landing-data-v5"],
   { revalidate: 600 }
 );
 import { Footer } from "@/components/Footer";

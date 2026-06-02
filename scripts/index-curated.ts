@@ -70,6 +70,15 @@ function loadCuratedRepos(): string[] {
   return Array.from(new Set(out));
 }
 
+// ---------- flags ----------
+
+const _argv = process.argv.slice(2);
+const _onlyIdx = _argv.indexOf("--only");
+const ONLY_SLUGS: string[] | null = _onlyIdx >= 0
+  ? (_argv[_onlyIdx + 1] ?? "").split(",").map(s => s.trim()).filter(Boolean)
+  : null;
+const FORCE = _argv.includes("--force"); // bypass size cap (use with --only on known skill repos)
+
 // ---------- config ----------
 
 const USER_AGENT = "claudinho-indexer/0.1 (+claudinho.app)";
@@ -135,7 +144,9 @@ type RepoMeta = {
 // ---------- main ----------
 
 async function main() {
-  console.log(`[curated] start — ${CURATED_REPOS.length} repos in queue`);
+  const queue = ONLY_SLUGS ? CURATED_REPOS.filter(r => ONLY_SLUGS.includes(r)) : CURATED_REPOS;
+  if (ONLY_SLUGS) console.log(`[curated] --only filter: ${ONLY_SLUGS.join(", ")}`);
+  console.log(`[curated] start — ${queue.length} repos in queue`);
 
   let inserted = 0;
   let skipped = 0;
@@ -148,7 +159,7 @@ async function main() {
   const errored: string[] = [];    // tree/meta fetch failed
   const productive: { repo: string; skills: number }[] = []; // ≥1 inserted
 
-  for (const slug of CURATED_REPOS) {
+  for (const slug of queue) {
     const [owner, repo] = slug.split("/");
     if (!owner || !repo) {
       console.warn(`[curated] skipping malformed entry: "${slug}"`);
@@ -169,9 +180,9 @@ async function main() {
 
     // Screen 1 — repo size. Massive monorepos (react, pytorch) hit tree
     // truncation and rarely have SKILL.md anyway.
-    if (meta.sizeKb > MAX_REPO_SIZE_KB) {
+    if (meta.sizeKb > MAX_REPO_SIZE_KB && !FORCE) {
       oversized.push(`${slug}  (${(meta.sizeKb / 1000).toFixed(1)} MB — over ${MAX_REPO_SIZE_KB / 1000} MB cap)`);
-      console.log(`[curated] SKIP — repo too large (${(meta.sizeKb / 1000).toFixed(1)} MB)`);
+      console.log(`[curated] SKIP — repo too large (${(meta.sizeKb / 1000).toFixed(1)} MB) — use --force to override`);
       continue;
     }
 
