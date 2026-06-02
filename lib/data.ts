@@ -7,7 +7,8 @@ export interface Skill {
   id: string;
   title: string;
   desc: string;
-  publisher: string;
+  publisher: string;           // GitHub handle (e.g. "obra")
+  publisherDisplayName?: string; // Real name when different from handle (e.g. "Jesse Vincent")
   installs: number;
   stars: number;
   pick?: boolean;

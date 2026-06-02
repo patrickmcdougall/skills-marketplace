@@ -521,6 +521,13 @@ body.page-pp {
   text-overflow: ellipsis;
   min-width: 0;
 }
+.skill-card .foot .lp-byline-handle {
+  font-family: var(--font-jetbrains-mono), var(--font-geist-mono), monospace;
+  font-size: 10px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 .skill-card .foot .dot-sep {
   color: var(--ink-4);
   flex-shrink: 0;
@@ -2018,6 +2025,49 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 }
+/* ─── repo subsections ───────────────────────────────────────────────────── */
+.pp-repo {
+  margin-bottom: 56px;
+}
+.pp-repo-head {
+  margin-bottom: 20px;
+}
+.pp-repo-title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.pp-repo-name {
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 1px;
+}
+.pp-repo-name:hover { border-bottom-color: var(--ink-3); }
+.pp-repo-stars {
+  font-family: var(--font-jetbrains-mono), var(--font-geist-mono), monospace;
+  font-size: 12px;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.pp-repo-count {
+  font-family: var(--font-jetbrains-mono), var(--font-geist-mono), monospace;
+  font-size: 11px;
+  color: var(--ink-4);
+}
+.pp-repo-desc {
+  font-size: 13.5px;
+  color: var(--ink-2);
+  line-height: 1.55;
+  margin: 0 0 16px;
+}
+
 .pp-notfound {
   padding: 96px 0;
   text-align: center;

@@ -13,7 +13,10 @@ export function SkillCard({ skill, context = "shelf" }: SkillCardProps) {
   const date = fmtVerifiedDate(skill.verifiedDate);
 
   const publisher = PUBLISHERS[skill.publisher];
-  const publisherName = publisher?.name ?? skill.publisher;
+  // Display name: explicit override > catalog name > handle
+  const publisherName = skill.publisherDisplayName ?? publisher?.name ?? skill.publisher;
+  // Show @handle when it adds info (name differs from handle)
+  const showHandle = publisherName.toLowerCase() !== skill.publisher.toLowerCase();
   const tags = (skill.tags ?? []).slice(0, 2);
   const hasChips = Boolean(skill.shelfTitle) || tags.length > 0;
   const fol = publisher?.fol ?? 0;
@@ -46,6 +49,9 @@ export function SkillCard({ skill, context = "shelf" }: SkillCardProps) {
         <span className="foot-left">
           <span className="lp-byline-by">by</span>
           <span className="lp-byline-name">{publisherName}</span>
+          {showHandle && (
+            <span className="lp-byline-handle">@{skill.publisher}</span>
+          )}
           <span className="dot-sep">·</span>
           {showStars ? (
             <span className="fol" title="GitHub stars">

@@ -4,6 +4,7 @@ import { fmtCount, genShelfId, shelfLabel, skillsByPublisher, type Skill } from 
 import {
   getBrowseSkills,
   getPublisherProfiles,
+  getAllRepoInfos,
   type BrowseSkill,
   type DBPublisherRow,
   type PublisherProfile,
@@ -30,7 +31,7 @@ const SUPPRESSED_PUBLISHERS = new Set(["doany-ai"]);
 
 const getLandingData = unstable_cache(
   async () => {
-    const skills = await getBrowseSkills();
+    const [skills, repoInfos] = await Promise.all([getBrowseSkills(), getAllRepoInfos()]);
 
     // Publisher aggregates (avoids a second full-table scan).
     const pubMap = new Map<string, DBPublisherRow>();
@@ -44,10 +45,10 @@ const getLandingData = unstable_cache(
         { handle: s.ownerHandle, skillCount: 0, installs: 0, ghStars: 0 };
       e.skillCount++;
       e.installs += s.installs;
-      // Count repo stars once per repo, not once per skill.
+      // Count repo stars once per repo using repo_info (fresh) over skill_signal (stale).
       const repoKey = `${s.ownerHandle}/${s.repoName}`;
       if (!seenRepos.has(repoKey)) {
-        e.ghStars += s.stars;
+        e.ghStars += repoInfos.get(repoKey)?.stars ?? s.stars;
         seenRepos.add(repoKey);
       }
       pubMap.set(s.ownerHandle, e);
@@ -107,7 +108,7 @@ const getLandingData = unstable_cache(
       pubProfiles: Object.fromEntries(pubProfiles),
     };
   },
-  ["landing-data-v11"],
+  ["landing-data-v13"],
   { revalidate: 600 }
 );
 import { Footer } from "@/components/Footer";

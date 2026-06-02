@@ -130,6 +130,13 @@ export type PublisherProfile = {
   location: string | null;
 };
 
+export type RepoInfo = {
+  repoPath: string;
+  name: string | null;
+  description: string | null;
+  stars: number | null;
+};
+
 // ─── queries ──────────────────────────────────────────────────────────────
 
 export async function getSkillBySlug(slug: string): Promise<SkillRow | null> {
@@ -201,7 +208,7 @@ export async function getBrowseSkills(): Promise<BrowseSkill[]> {
         desc: row.description_excerpt,
         ownerHandle: ownerFromUrl(row.source_url),
         repoName: repoPathFromUrl(row.source_url).split("/")[1] ?? "",
-        installs: (row.skill_signal?.install_count_estimate ?? 0) + (row.skill_signal?.install_count ?? 0),
+        installs: row.skill_signal?.install_count ?? 0,
         stars: row.skill_signal?.stars ?? 0,
         verifiedDate: row.last_indexed_at ?? "",
         category: row.category,
@@ -241,13 +248,9 @@ export async function getDBPublisherRows(): Promise<DBPublisherRow[]> {
     from += PAGE;
   }
 
-  // Deduplicate stars by repo URL so a 58-skill repo isn't counted 58×.
-  const repoStars = new Map<string, number>(); // source_url → stars
-  for (const row of out) {
-    if (!repoStars.has(row.source_url)) {
-      repoStars.set(row.source_url, row.skill_signal?.stars ?? 0);
-    }
-  }
+  // Collect distinct repo paths, then fetch fresh star counts from repo_info.
+  const distinctRepoPaths = [...new Set(out.map(r => repoPathFromUrl(r.source_url)).filter(Boolean))];
+  const repoInfoMap = await getRepoInfos(distinctRepoPaths);
 
   const map = new Map<string, { installs: number; ghStars: number; count: number }>();
   const seenRepos = new Set<string>();
@@ -255,9 +258,11 @@ export async function getDBPublisherRows(): Promise<DBPublisherRow[]> {
     const handle = ownerFromUrl(row.source_url);
     if (!handle) continue;
     const entry = map.get(handle) ?? { installs: 0, ghStars: 0, count: 0 };
-    entry.installs += row.skill_signal?.install_count_estimate ?? 0;
+    entry.installs += row.skill_signal?.install_count ?? 0;
     if (!seenRepos.has(row.source_url)) {
-      entry.ghStars += repoStars.get(row.source_url) ?? 0;
+      // Prefer repo_info.stars (freshly synced) over skill_signal.stars (stale at index time).
+      const repoPath = repoPathFromUrl(row.source_url);
+      entry.ghStars += repoInfoMap.get(repoPath)?.stars ?? row.skill_signal?.stars ?? 0;
       seenRepos.add(row.source_url);
     }
     entry.count++;
@@ -325,6 +330,30 @@ export async function getPublisherProfiles(
       ghFollowers: row.gh_followers,
       location: row.location,
     });
+  }
+  return out;
+}
+
+export async function getAllRepoInfos(): Promise<Map<string, RepoInfo>> {
+  const { data } = await serverDb()
+    .from("repo_info")
+    .select("repo_path, name, description, stars");
+  const out = new Map<string, RepoInfo>();
+  for (const row of (data ?? []) as { repo_path: string; name: string | null; description: string | null; stars: number | null }[]) {
+    out.set(row.repo_path, { repoPath: row.repo_path, name: row.name, description: row.description, stars: row.stars });
+  }
+  return out;
+}
+
+export async function getRepoInfos(repoPaths: string[]): Promise<Map<string, RepoInfo>> {
+  if (repoPaths.length === 0) return new Map();
+  const { data } = await serverDb()
+    .from("repo_info")
+    .select("repo_path, name, description, stars")
+    .in("repo_path", repoPaths);
+  const out = new Map<string, RepoInfo>();
+  for (const row of (data ?? []) as { repo_path: string; name: string | null; description: string | null; stars: number | null }[]) {
+    out.set(row.repo_path, { repoPath: row.repo_path, name: row.name, description: row.description, stars: row.stars });
   }
   return out;
 }

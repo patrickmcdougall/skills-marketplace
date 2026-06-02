@@ -343,7 +343,7 @@ function BrowseEmpty({ onClear }: { onClear: () => void }) {
 // ─── main browse page ─────────────────────────────────────────────────────────
 
 // Map a BrowseSkill to the Skill shape that existing filter/sort/card logic expects.
-function toSkill(s: BrowseSkill): Skill {
+function toSkill(s: BrowseSkill, publisherNames: Record<string, string>): Skill {
   // Prefer generated COPY only when content_status is 'ok'; use the generated
   // shelf/tags for classification whenever present (ok or review).
   const ok = s.contentStatus === "ok";
@@ -353,6 +353,7 @@ function toSkill(s: BrowseSkill): Skill {
     title: ok && s.displayTitle ? s.displayTitle : s.title,
     desc: ok && s.displayDescription ? s.displayDescription : s.desc,
     publisher: s.ownerHandle,
+    publisherDisplayName: publisherNames[s.ownerHandle],
     installs: s.installs,
     stars: s.stars,
     verifiedDate: s.verifiedDate,
@@ -379,8 +380,8 @@ function searchSkills(skills: Skill[], q: string): Skill[] {
   });
 }
 
-function BrowsePageInner({ initialSkills }: { initialSkills: BrowseSkill[] }) {
-  const allSkills = useMemo(() => initialSkills.map(toSkill), [initialSkills]);
+function BrowsePageInner({ initialSkills, publisherNames }: { initialSkills: BrowseSkill[]; publisherNames: Record<string, string> }) {
+  const allSkills = useMemo(() => initialSkills.map(s => toSkill(s, publisherNames)), [initialSkills, publisherNames]);
   const stats = useMemo(() => ({
     skills: initialSkills.length,
     publishers: new Set(initialSkills.map((s) => s.ownerHandle)).size,
@@ -588,10 +589,10 @@ function BrowsePageInner({ initialSkills }: { initialSkills: BrowseSkill[] }) {
   );
 }
 
-export function BrowseClient({ initialSkills }: { initialSkills: BrowseSkill[] }) {
+export function BrowseClient({ initialSkills, publisherNames }: { initialSkills: BrowseSkill[]; publisherNames: Record<string, string> }) {
   return (
     <Suspense>
-      <BrowsePageInner initialSkills={initialSkills} />
+      <BrowsePageInner initialSkills={initialSkills} publisherNames={publisherNames} />
     </Suspense>
   );
 }

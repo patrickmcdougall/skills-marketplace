@@ -1,25 +1,22 @@
-import type { Metadata } from "next";
-import { getBrowseSkills } from "@/lib/db";
+import { getBrowseSkills, getPublisherProfiles } from "@/lib/db";
 import { BrowseClient } from "./BrowseClient";
 
-export const metadata: Metadata = {
-  title: "Browse skills",
-  description:
-    "Two thousand community skills, sorted by the job they do. Find the one for your work and install it in a click — no terminal.",
-  openGraph: {
-    title: "Browse skills — Claudinho",
-    description:
-      "Two thousand community skills, sorted by the job they do. Find the one for your work and install it in a click — no terminal.",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Browse skills — Claudinho",
-    description:
-      "Two thousand community skills, sorted by the job they do. Find the one for your work and install it in a click — no terminal.",
-  },
-};
+export const revalidate = 600;
 
 export default async function SkillsPage() {
   const skills = await getBrowseSkills();
-  return <BrowseClient initialSkills={skills} />;
+
+  // Collect unique handles, fetch display names from publisher_profile.
+  const handles = [...new Set(skills.map((s) => s.ownerHandle).filter(Boolean))];
+  const profileMap = await getPublisherProfiles(handles);
+
+  // Build handle → displayName map; omit entries where name === handle (no info added).
+  const publisherNames: Record<string, string> = {};
+  for (const [handle, profile] of profileMap) {
+    if (profile.displayName && profile.displayName.toLowerCase() !== handle.toLowerCase()) {
+      publisherNames[handle] = profile.displayName;
+    }
+  }
+
+  return <BrowseClient initialSkills={skills} publisherNames={publisherNames} />;
 }

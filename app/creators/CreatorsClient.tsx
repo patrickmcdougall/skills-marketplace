@@ -155,8 +155,8 @@ export function CreatorsClient({
       const profile = profiles[r.handle.toLowerCase()];
       return {
         ...r,
-        name: cat?.name ?? profile?.displayName ?? r.handle,
-        initials: cat?.initials ?? (profile?.displayName ?? r.handle).slice(0, 2).toUpperCase(),
+        name: profile?.displayName ?? cat?.name ?? r.handle,
+        initials: (profile?.displayName ?? cat?.initials ?? r.handle).slice(0, 2).toUpperCase(),
         role: creatorRole(cat, profile),
         avatarUrl: profile?.avatarUrl ?? null,
         location: cleanLocation(profile?.location ?? null),
