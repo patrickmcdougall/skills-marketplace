@@ -207,6 +207,7 @@ export default async function SkillDetailPage({
           {/* Skill file preview */}
           {skillFileContent && (
             <section className="dp-block">
+              <h2 className="dp-h2">Skill file</h2>
               <details className="dp-skill-preview">
                 <summary className="dp-skill-preview-toggle">
                   <span className="label">Preview skill file</span>
