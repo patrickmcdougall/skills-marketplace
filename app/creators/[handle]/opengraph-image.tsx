@@ -1,12 +1,16 @@
 import { ImageResponse } from "next/og";
+import { readFileSync } from "fs";
+import { join } from "path";
 import { getSkillsByOwner } from "@/lib/db";
-import { PUBLISHERS } from "@/lib/data";
-import { fmtCount } from "@/lib/data";
+import { PUBLISHERS, fmtCount } from "@/lib/data";
 
-export const runtime = "edge";
 export const alt = "Claudinho creator";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+
+function loadFont(): ArrayBuffer {
+  return readFileSync(join(process.cwd(), "public/fonts/Geist-Regular.ttf")).buffer as ArrayBuffer;
+}
 
 export default async function Image({
   params,
@@ -19,13 +23,14 @@ export default async function Image({
   const name = catalog?.name ?? handle;
   const role = catalog?.role ?? null;
 
-  // Get skill count from DB
   const skills = await getSkillsByOwner(handle, 100);
   const skillCount = skills.length;
   const totalInstalls = skills.reduce(
     (a, s) => a + (s.skill_signal?.install_count_estimate ?? 0),
     0
   );
+
+  const font = loadFont();
 
   return new ImageResponse(
     (
@@ -36,15 +41,14 @@ export default async function Image({
           background: "#efece4",
           display: "flex",
           flexDirection: "column",
-          padding: "64px 80px",
-          fontFamily: "system-ui, -apple-system, sans-serif",
-          position: "relative",
+          padding: "60px 80px",
+          fontFamily: "Geist",
         }}
       >
         {/* Brand row */}
-        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 48 }}>
-          <div style={{ width: 16, height: 16, borderRadius: "50%", background: "#d8581c", flexShrink: 0 }} />
-          <span style={{ fontSize: 22, fontWeight: 600, color: "#1c1b18", letterSpacing: "-0.02em" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 48 }}>
+          <div style={{ width: 14, height: 14, borderRadius: "50%", background: "#d8581c", flexShrink: 0 }} />
+          <span style={{ fontSize: 20, fontWeight: 400, color: "#1c1b18", letterSpacing: "-0.01em", fontFamily: "Geist" }}>
             Claudinho
           </span>
         </div>
@@ -53,11 +57,12 @@ export default async function Image({
         <div
           style={{
             fontSize: name.length > 24 ? 52 : name.length > 16 ? 64 : 72,
-            fontWeight: 700,
+            fontWeight: 400,
             color: "#1c1b18",
             lineHeight: 1.05,
-            letterSpacing: "-0.034em",
+            letterSpacing: "-0.03em",
             flex: 1,
+            fontFamily: "Geist",
           }}
         >
           {name}
@@ -65,7 +70,7 @@ export default async function Image({
 
         {/* Role */}
         {role && (
-          <div style={{ fontSize: 20, color: "#54524c", marginBottom: 32, display: "flex" }}>
+          <div style={{ fontSize: 20, color: "#45413b", marginBottom: 32, fontFamily: "Geist" }}>
             {role}
           </div>
         )}
@@ -76,47 +81,50 @@ export default async function Image({
             display: "flex",
             alignItems: "flex-end",
             justifyContent: "space-between",
-            paddingTop: 28,
-            borderTop: "1px solid #d9d6cc",
+            paddingTop: 24,
+            borderTop: "1px solid #ddd2b8",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
             {skillCount > 0 && (
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ fontSize: 13, fontFamily: "monospace", color: "#8e8b82", letterSpacing: "0.04em" }}>
+                <span style={{ fontSize: 12, color: "#7a7468", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "Geist" }}>
                   skills
                 </span>
-                <span style={{ fontSize: 20, fontWeight: 600, color: "#1c1b18", letterSpacing: "-0.015em" }}>
+                <span style={{ fontSize: 20, color: "#1c1b18", fontFamily: "Geist" }}>
                   {skillCount}
                 </span>
               </div>
             )}
             {totalInstalls > 0 && (
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ fontSize: 13, fontFamily: "monospace", color: "#8e8b82", letterSpacing: "0.04em" }}>
+                <span style={{ fontSize: 12, color: "#7a7468", letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "Geist" }}>
                   installs
                 </span>
-                <span style={{ fontSize: 20, fontWeight: 600, color: "#1c1b18", letterSpacing: "-0.015em" }}>
+                <span style={{ fontSize: 20, color: "#1c1b18", fontFamily: "Geist" }}>
                   {fmtCount(totalInstalls)}
                 </span>
               </div>
             )}
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#2e8a4f" }} />
-              <span style={{ fontSize: 14, fontFamily: "monospace", color: "#54524c", letterSpacing: "0.02em" }}>
+              <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#2e8a4f" }} />
+              <span style={{ fontSize: 13, color: "#45413b", letterSpacing: "0.02em", fontFamily: "Geist" }}>
                 verified registry
               </span>
             </div>
-            <span style={{ fontSize: 16, fontFamily: "monospace", color: "#8e8b82", letterSpacing: "0.04em" }}>
+            <span style={{ fontSize: 14, color: "#7a7468", letterSpacing: "0.04em", fontFamily: "Geist" }}>
               claudinho.xyz
             </span>
           </div>
         </div>
       </div>
     ),
-    { ...size }
+    {
+      ...size,
+      fonts: [{ name: "Geist", data: font, weight: 400, style: "normal" }],
+    }
   );
 }
