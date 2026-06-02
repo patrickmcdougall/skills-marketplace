@@ -15,6 +15,7 @@ import { PUBLISHERS, REAL_STATS, fmtCount, genShelfId, shelfLabel } from "@/lib/
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { InstallCard } from "./InstallCard";
+import { CopyForSlack } from "./CopyForSlack";
 
 // ─── helpers ──────────────────────────────────────────────────────────────
 
@@ -181,6 +182,11 @@ export default async function SkillDetailPage({
             sourceOnly={row.distribution_mode === "source-only" || row.bundle_status === "source-only"}
             installUnavailable={install === "unavailable"}
             installCount={signal?.install_count ?? 0}
+          />
+          <CopyForSlack
+            title={row.content_status === "ok" && row.display_title ? row.display_title : row.skill_name}
+            bestFor={row.content_status === "ok" ? (row.best_for ?? null) : null}
+            slug={slug}
           />
 
           {/* Source card */}
