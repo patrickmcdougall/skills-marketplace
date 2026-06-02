@@ -366,12 +366,13 @@ function toSkill(s: BrowseSkill): Skill {
 
 function searchSkills(skills: Skill[], q: string): Skill[] {
   if (!q.trim()) return skills;
-  const lower = q.toLowerCase();
+  const lower = q.toLowerCase().replace(/-/g, " ");
   return skills.filter((s) => {
     const pub = PUBLISHERS[s.publisher];
     const hay = [s.title, s.desc, pub?.name ?? s.publisher, s.shelfTitle, s.subShelf ?? "", ...(s.tags ?? [])]
       .join(" ")
-      .toLowerCase();
+      .toLowerCase()
+      .replace(/-/g, " ");
     return hay.includes(lower);
   });
 }
