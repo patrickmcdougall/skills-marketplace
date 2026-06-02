@@ -212,7 +212,7 @@ function PubCard({
         {topSkills.map((s) => (
           <div className="row" key={s.id}>
             <span className="t">{s.title}</span>
-            {s.installs > 0 && <span className="n">↓ {fmtCount(s.installs)}</span>}
+            {s.installs > 1000 && <span className="n">↓ {fmtCount(s.installs)}</span>}
           </div>
         ))}
       </div>
