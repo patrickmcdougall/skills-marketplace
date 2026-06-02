@@ -141,7 +141,7 @@ export default async function SkillDetailPage({
               <h2 className="dp-h2">Topics</h2>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
                 {row.topics.map((t) => (
-                  <span key={t} className="skill-card tag">{t}</span>
+                  <span key={t} className="tag">{t}</span>
                 ))}
               </div>
             </section>

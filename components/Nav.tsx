@@ -6,9 +6,10 @@ interface NavProps {
     publishers: number;
     installs: string;
   };
+  hideStatus?: boolean;
 }
 
-export function Nav({ stats }: NavProps) {
+export function Nav({ stats, hideStatus }: NavProps) {
   return (
     <nav className="lp-nav">
       <div className="logo-row">
@@ -18,9 +19,11 @@ export function Nav({ stats }: NavProps) {
           </Link>
           <span className="brand-tag">pick your lineup of skills</span>
         </div>
-        <span className="status" title="Last full re-verification run">
-          <span>{stats.skills} verified · last run today</span>
-        </span>
+        {!hideStatus && (
+          <span className="status" title="Last full re-verification run">
+            <span>{stats.skills} verified · last run today</span>
+          </span>
+        )}
       </div>
       <div className="right">
         <div className="links">

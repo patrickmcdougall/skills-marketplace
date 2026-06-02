@@ -261,7 +261,7 @@ export default async function LandingPage() {
 
   return (
     <div className="lp accent-orange bg-cream">
-      <Nav stats={stats} />
+      <Nav stats={stats} hideStatus />
 
       {/* Hero */}
       <header className="lp-hero lp-page">
@@ -270,21 +270,21 @@ export default async function LandingPage() {
           to&nbsp;do.
         </h1>
         <p className="sub">
-          Skills built and shared by the community. Every skill is installed, run on a real
-          input, and re-verified weekly — the output you see is the output you get.
+          Two thousand community skills, sorted by the job they do. Find the one for your
+          work and install it in a click — no terminal.
         </p>
         <div className="actions">
           <a href="#shelves" className="lp-btn solid">
-            Browse the registry ↓
+            Browse skills →
           </a>
           <a href="#how" className="lp-btn ghost">
-            How we verify
+            How install works
           </a>
         </div>
         <div className="stat-strip">
           <div className="stat">
             <span className="v lp-num">{fmtCount(stats.skills)}</span>
-            <span className="k">skills · verified</span>
+            <span className="k">skills · indexed</span>
           </div>
           <div className="stat">
             <span className="v lp-num">{stats.publishers}</span>

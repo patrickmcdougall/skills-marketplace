@@ -2,18 +2,13 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import {
-  SHELVES,
-  PUBLISHERS,
-  fmtCount,
-} from "@/lib/data";
+import { PUBLISHERS, fmtCount } from "@/lib/data";
 import type { DBPublisherRow } from "@/lib/db";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 
-// ─── helpers ──────────────────────────────────────────────────────────────
+// ─── types ──────────────────────────────────────────────────────────────────
 
-// Enriched row — raw DBPublisherRow plus catalog name/initials/role.
 type EnrichedRow = DBPublisherRow & {
   name: string;
   initials: string;
@@ -35,11 +30,7 @@ const TABLE_COLUMNS: { key: SortKey; label: string }[] = [
   { key: "ghStars", label: "GH ★" },
 ];
 
-function sortRows(
-  rows: EnrichedRow[],
-  sortKey: SortKey,
-  sortDir: "asc" | "desc"
-): EnrichedRow[] {
+function sortRows(rows: EnrichedRow[], sortKey: SortKey, sortDir: "asc" | "desc"): EnrichedRow[] {
   if (sortKey === "az") {
     const r = [...rows].sort((a, b) => a.name.localeCompare(b.name));
     return sortDir === "desc" ? r.reverse() : r;
@@ -51,12 +42,86 @@ function sortRows(
   });
 }
 
-// ─── page ──────────────────────────────────────────────────────────────────
+// ─── sidebar ────────────────────────────────────────────────────────────────
+
+function FilterSearch({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="bp-fsection">
+      <h3><span>Search</span></h3>
+      <div className="bp-search">
+        <span className="icon">/</span>
+        <label htmlFor="pl-creator-q" className="sr-only">Search creators</label>
+        <input
+          id="pl-creator-q"
+          placeholder="name or handle"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          autoComplete="off"
+        />
+      </div>
+    </div>
+  );
+}
+
+function FilterSort({
+  value,
+  sortDir,
+  onChange,
+  onDirToggle,
+}: {
+  value: SortKey;
+  sortDir: "asc" | "desc";
+  onChange: (k: SortKey) => void;
+  onDirToggle: () => void;
+}) {
+  return (
+    <div className="bp-fsection">
+      <h3><span>Sort</span></h3>
+      <ul className="bp-check-list">
+        {SORT_OPTIONS.map((opt) => (
+          <li key={opt.id}>
+            <button
+              className={`bp-check${value === opt.id ? " is-active" : ""}`}
+              onClick={() => onChange(opt.id as SortKey)}
+            >
+              <span>{opt.label}</span>
+              {value === opt.id && (
+                <span
+                  className="num"
+                  style={{ cursor: "pointer" }}
+                  onClick={(e) => { e.stopPropagation(); onDirToggle(); }}
+                >
+                  {sortDir === "desc" ? "▼" : "▲"}
+                </span>
+              )}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// ─── top bar ─────────────────────────────────────────────────────────────────
+
+function CreatorsTopBar({ count, total }: { count: number; total: number }) {
+  return (
+    <div className="bp-topbar">
+      <div className="count">
+        <span className="n">{count}</span>
+        {count === total ? " creators" : (
+          <> of <span className="n">{total}</span> creators</>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── page ────────────────────────────────────────────────────────────────────
 
 export function CreatorsClient({ rawRows }: { rawRows: DBPublisherRow[] }) {
   const router = useRouter();
 
-  // Enrich with catalog data on the client (PUBLISHERS is a static bundle import).
   const allRows = useMemo<EnrichedRow[]>(() =>
     rawRows.map((r) => {
       const cat = PUBLISHERS[r.handle];
@@ -77,174 +142,104 @@ export function CreatorsClient({ rawRows }: { rawRows: DBPublisherRow[] }) {
     installs: fmtCount(rawRows.reduce((a, r) => a + r.installs, 0)),
   }), [rawRows]);
 
-  const [activeShelves, setActiveShelves] = useState<string[]>([]);
+  const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("installs");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
-  // shelfCounts: DB rows don't have shelfIds yet (category=null), so all chips
-  // will show 0 counts and be disabled until category is populated.
-  const shelfCounts: Record<string, number> = {};
-
-  const rows = useMemo(() => sortRows(allRows, sortKey, sortDir),
-    [allRows, sortKey, sortDir]
-  );
-
-  const toggleShelf = (id: string) => {
-    setActiveShelves((s) =>
-      s.includes(id) ? s.filter((x) => x !== id) : [...s, id]
-    );
-  };
-
-  const headerSort = (key: SortKey) => {
-    if (key === sortKey) {
-      setSortDir((d) => (d === "desc" ? "asc" : "desc"));
-    } else {
-      setSortKey(key);
-      setSortDir("desc");
+  const rows = useMemo(() => {
+    let r = sortRows(allRows, sortKey, sortDir);
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      r = r.filter((row) => {
+        const hay = (row.name + " @" + row.handle + " " + row.role).toLowerCase();
+        return hay.includes(q);
+      });
     }
+    return r;
+  }, [allRows, sortKey, sortDir, query]);
+
+  const changeSort = (k: SortKey) => {
+    if (k === sortKey) setSortDir((d) => (d === "desc" ? "asc" : "desc"));
+    else { setSortKey(k); setSortDir("desc"); }
   };
 
   return (
-    <div className="lp bg-cream">
+    <div className="lp bp accent-orange bg-cream">
       <Nav stats={stats} />
 
-      <div className="pl-page">
-        <header className="bp-head">
-          <h1>Creators</h1>
-        </header>
+      <header className="bp-head bp-page">
+        <h1>Creators</h1>
+      </header>
 
-        {/* Toolbar: shelf filter chips */}
-        <div className="pl-toolbar">
-          <div className="pl-filter-row">
-            <button
-              className={`pl-filter-chip all-chip${
-                activeShelves.length === 0 ? " is-active" : ""
-              }`}
-              onClick={() => setActiveShelves([])}
-            >
-              All
-            </button>
-            {SHELVES.map((sh) => {
-              const c = shelfCounts[sh.id] || 0;
-              const active = activeShelves.includes(sh.id);
-              return (
-                <button
-                  key={sh.id}
-                  className={`pl-filter-chip${active ? " is-active" : ""}`}
-                  onClick={() => (c > 0 || active) && toggleShelf(sh.id)}
-                  disabled={c === 0 && !active}
-                >
-                  {sh.title}
-                  <span
-                    style={{
-                      fontFamily: "var(--font-jetbrains-mono), monospace",
-                      fontSize: "10px",
-                      opacity: 0.6,
-                      marginLeft: 2,
-                    }}
-                  >
-                    {c}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+      <div className="bp-shell bp-page">
+        <aside className="bp-aside">
+          <FilterSearch value={query} onChange={setQuery} />
+          <FilterSort
+            value={sortKey}
+            sortDir={sortDir}
+            onChange={changeSort}
+            onDirToggle={() => setSortDir((d) => (d === "desc" ? "asc" : "desc"))}
+          />
+        </aside>
 
-          {/* Count + sort */}
-          <div className="pl-count-row">
-            <p className="pl-count">
-              <span className="n">{rows.length}</span>
-              {rows.length === allRows.length ? (
-                " creators"
-              ) : (
-                <>
-                  {" of "}
-                  <span className="n">{allRows.length}</span>
-                  {" creators"}
-                </>
-              )}
-            </p>
-          </div>
-        </div>
+        <div className="bp-main">
+          <CreatorsTopBar count={rows.length} total={allRows.length} />
 
-        {/* Table */}
-        {rows.length === 0 ? (
-          <div className="bp-empty">
-            <h3>No creators match this filter.</h3>
-            <p>Try removing a shelf, or view all creators.</p>
-            <div className="actions">
-              <button
-                className="lp-btn"
-                onClick={() => setActiveShelves([])}
-              >
-                Clear filters
-              </button>
+          {rows.length === 0 ? (
+            <div className="bp-empty">
+              <h3>No creators match &ldquo;{query}&rdquo;.</h3>
+              <p>Try a different search term.</p>
+              <div className="actions">
+                <button className="lp-btn" onClick={() => setQuery("")}>Clear search</button>
+              </div>
             </div>
-          </div>
-        ) : (
-          <table className="pl-table">
-            <thead>
-              <tr>
-                <th>Creator</th>
-                {TABLE_COLUMNS.map((c) => (
-                  <th
-                    key={c.key}
-                    className={`num sortable${
-                      sortKey === c.key ? " is-sorted" : ""
-                    }`}
-                    onClick={() => headerSort(c.key)}
-                  >
-                    {c.label}
-                    {sortKey === c.key && (
-                      <span className="arrow">
-                        {sortDir === "desc" ? "▼" : "▲"}
-                      </span>
-                    )}
-                  </th>
-                ))}
-                <th className="pl-arrow-cell" aria-hidden="true"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr
-                  key={r.handle}
-                  onClick={() => router.push(`/creators/${r.handle}`)}
-                >
-                  <td>
-                    <div className="pl-pub">
-                      <span
-                        className="lp-avatar"
-                        style={{
-                          width: 36,
-                          height: 36,
-                          fontSize: Math.round(36 * 0.42),
-                        }}
-                      >
-                        {r.initials}
-                      </span>
-                      <div className="who">
-                        <span className="name">{r.name}</span>
-                        <span className="role">{r.role}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="num" data-label="Skills">
-                    {r.skillCount}
-                  </td>
-                  <td className="num" data-label="Installs">
-                    {fmtCount(r.installs)}
-                  </td>
-                  <td className="num dim" data-label="GH ★">
-                    {fmtCount(r.ghStars)}
-                  </td>
-                  <td>{/* shelves — available once category is populated */}</td>
-                  <td className="pl-arrow-cell">→</td>
+          ) : (
+            <table className="pl-table">
+              <thead>
+                <tr>
+                  <th>Creator</th>
+                  {TABLE_COLUMNS.map((c) => (
+                    <th
+                      key={c.key}
+                      className={`num sortable${sortKey === c.key ? " is-sorted" : ""}`}
+                      onClick={() => changeSort(c.key)}
+                    >
+                      {c.label}
+                      {sortKey === c.key && (
+                        <span className="arrow">{sortDir === "desc" ? "▼" : "▲"}</span>
+                      )}
+                    </th>
+                  ))}
+                  <th className="pl-arrow-cell" aria-hidden="true"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.handle} onClick={() => router.push(`/creators/${r.handle}`)}>
+                    <td>
+                      <div className="pl-pub">
+                        <span
+                          className="lp-avatar"
+                          style={{ width: 36, height: 36, fontSize: Math.round(36 * 0.42) }}
+                        >
+                          {r.initials}
+                        </span>
+                        <div className="who">
+                          <span className="name">{r.name}</span>
+                          <span className="role">{r.role}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="num" data-label="Skills">{r.skillCount}</td>
+                    <td className="num" data-label="Installs">{fmtCount(r.installs)}</td>
+                    <td className="num dim" data-label="GH ★">{fmtCount(r.ghStars)}</td>
+                    <td className="pl-arrow-cell">→</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
 
       <Footer stats={stats} />
