@@ -54,10 +54,11 @@ const getLandingData = unstable_cache(
       (b.verifiedDate || "").localeCompare(a.verifiedDate || "")
     );
 
-    // Top 2 recent skills per top-publisher (for the publisher cards).
+    // Top 2 skills per top-publisher by installs (for the publisher cards).
     const topHandles = new Set(topPubs.map((p) => p.handle));
     const topSkillsByPub: Record<string, BrowseSkill[]> = {};
-    for (const s of recent) {
+    const byInstalls = [...skills].sort((a, b) => b.installs - a.installs);
+    for (const s of byInstalls) {
       if (!topHandles.has(s.ownerHandle)) continue;
       const arr = (topSkillsByPub[s.ownerHandle] ??= []);
       if (arr.length < 2) arr.push(s);
@@ -93,7 +94,7 @@ const getLandingData = unstable_cache(
       topSkillsByPub,
     };
   },
-  ["landing-data-v5"],
+  ["landing-data-v6"],
   { revalidate: 600 }
 );
 import { Footer } from "@/components/Footer";
@@ -166,6 +167,11 @@ function interleaveByPublisher(
   return out;
 }
 
+// Known display names / roles for select publishers.
+const PUBLISHER_META: Record<string, { name: string; role: string }> = {
+  garrytan: { name: "Garry Tan", role: "President & CEO, Y Combinator" },
+};
+
 // ─── publisher card (real DB publisher) ───────────────────────────────────
 
 function PubCard({
@@ -175,6 +181,7 @@ function PubCard({
   pub: DBPublisherRow;
   topSkills: Skill[];
 }) {
+  const meta = PUBLISHER_META[pub.handle];
   return (
     <div className="lp-pub-card">
       <div className="pub-header">
@@ -185,9 +192,9 @@ function PubCard({
           {initialsOf(pub.handle)}
         </span>
         <div className="who">
-          <div className="pub-name">{pub.handle}</div>
+          <div className="pub-name">{meta?.name ?? pub.handle}</div>
           <div className="pub-handle">@{pub.handle}</div>
-          <div className="pub-role">GitHub publisher</div>
+          <div className="pub-role">{meta?.role ?? "GitHub publisher"}</div>
         </div>
       </div>
       <div className="pub-stats">
@@ -205,7 +212,7 @@ function PubCard({
         {topSkills.map((s) => (
           <div className="row" key={s.id}>
             <span className="t">{s.title}</span>
-            <span className="n">↓ {fmtCount(s.installs)}</span>
+            {s.installs > 0 && <span className="n">↓ {fmtCount(s.installs)}</span>}
           </div>
         ))}
       </div>
