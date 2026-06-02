@@ -233,7 +233,7 @@ export async function getDBPublisherRows(): Promise<DBPublisherRow[]> {
     const handle = ownerFromUrl(row.source_url);
     if (!handle) continue;
     const entry = map.get(handle) ?? { installs: 0, ghStars: 0, count: 0 };
-    entry.installs += (row.skill_signal?.install_count_estimate ?? 0) + (row.skill_signal?.install_count ?? 0);
+    entry.installs += row.skill_signal?.install_count_estimate ?? 0;
     entry.ghStars += row.skill_signal?.stars ?? 0;
     entry.count++;
     map.set(handle, entry);

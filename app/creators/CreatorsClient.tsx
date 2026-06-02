@@ -149,10 +149,13 @@ export function CreatorsClient({ rawRows }: { rawRows: DBPublisherRow[] }) {
   const rows = useMemo(() => {
     let r = sortRows(allRows, sortKey, sortDir);
     if (query.trim()) {
-      const q = query.toLowerCase();
+      const lower = query.toLowerCase().replace(/-/g, " ");
+      const lowerCompact = query.toLowerCase().replace(/[\s-]/g, "");
       r = r.filter((row) => {
-        const hay = (row.name + " @" + row.handle + " " + row.role).toLowerCase();
-        return hay.includes(q);
+        const parts = [row.name, row.handle, row.role];
+        const hay = parts.join(" ").toLowerCase().replace(/-/g, " ");
+        const hayCompact = parts.join("").toLowerCase().replace(/[\s-]/g, "");
+        return hay.includes(lower) || hayCompact.includes(lowerCompact);
       });
     }
     return r;
@@ -231,7 +234,7 @@ export function CreatorsClient({ rawRows }: { rawRows: DBPublisherRow[] }) {
                       </div>
                     </td>
                     <td className="num" data-label="Skills">{r.skillCount}</td>
-                    <td className="num" data-label="Installs">{fmtCount(r.installs)}</td>
+                    <td className="num" data-label="Installs">{r.installs > 0 ? fmtCount(r.installs) : "—"}</td>
                     <td className="num dim" data-label="GH ★">{fmtCount(r.ghStars)}</td>
                     <td className="pl-arrow-cell">→</td>
                   </tr>
