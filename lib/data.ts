@@ -463,21 +463,21 @@ export const ALL_SKILLS: Skill[] = (() => {
   return out;
 })();
 
-export const SHELF_SUB_SHELVES: Record<string, string[]> = (() => {
-  const map: Record<string, string[]> = {};
-  for (const sh of SHELVES) {
-    const counts: Record<string, number> = {};
-    for (const s of sh.skills) {
-      if (!s.subShelf) continue;
-      counts[s.subShelf] = (counts[s.subShelf] || 0) + 1;
-    }
-    map[sh.id] = Object.entries(counts)
-      .filter(([, n]) => n >= 1)
-      .sort((a, b) => b[1] - a[1])
-      .map(([name]) => name);
-  }
-  return map;
-})();
+// Sub-shelf options shown in the browse sidebar. These are the AI-generated
+// sub_shelf enum values (keyed by catalog shelf id), matching the raw values
+// stored on each skill — so counts/filters line up. (The old version derived
+// these from the mock SHELVES, whose sub-shelf names never matched the real
+// generated taxonomy, leaving every count at 0.)
+export const SHELF_SUB_SHELVES: Record<string, string[]> = {
+  product: ["discovery", "specification", "communication", "training-enablement"],
+  eng: ["planning-thinking", "code-review", "debugging-investigation", "pipelines-data", "workflow-sprint-structure", "skill-authoring"],
+  design: ["critique-review", "craft-polish", "accessibility", "systems-handoff"],
+  marketing: ["seo-content", "positioning-messaging", "landing-pages", "campaigns-launches", "swipe-inspiration"],
+  sales: ["outreach-prospecting", "discovery-qualification", "demo-followup", "pipeline-deal-management"],
+  cs: ["ticket-triage", "retention-churn-save", "onboarding", "health-insights"],
+  ops: ["vendor-procurement", "compliance-security", "process-automation", "people-team-ops"],
+  finance: ["runway-forecasting", "investor-relations", "bookkeeping-reconciliation", "reporting-dashboards"],
+};
 
 export const SORT_OPTIONS = [
   { id: 'installs', label: 'Most installed' },
