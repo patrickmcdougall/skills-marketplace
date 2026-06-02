@@ -19,6 +19,24 @@ import { CopyForSlack } from "./CopyForSlack";
 
 // ─── helpers ──────────────────────────────────────────────────────────────
 
+async function fetchSkillFileContent(
+  sourceUrl: string,
+  skillPath: string | null
+): Promise<string | null> {
+  try {
+    const parts = new URL(sourceUrl).pathname.split("/").filter(Boolean);
+    if (parts.length < 2) return null;
+    const [owner, repo] = parts;
+    const filePath = skillPath ? `${skillPath.replace(/\/$/, "")}/SKILL.md` : "SKILL.md";
+    const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/HEAD/${filePath}`;
+    const res = await fetch(rawUrl, { next: { revalidate: 3600 } });
+    if (!res.ok) return null;
+    return await res.text();
+  } catch {
+    return null;
+  }
+}
+
 function fmtDateShort(iso: string): string {
   if (!iso) return "";
   const d = new Date(iso);
@@ -94,7 +112,10 @@ export default async function SkillDetailPage({
   };
 
   const stats = REAL_STATS;
-  const others = await getOtherSkillsByOwner(owner, slug, 3);
+  const [others, skillFileContent] = await Promise.all([
+    getOtherSkillsByOwner(owner, slug, 3),
+    fetchSkillFileContent(row.source_url, row.skill_path),
+  ]);
 
   return (
     <div className="lp dp accent-orange bg-cream">
@@ -170,6 +191,20 @@ export default async function SkillDetailPage({
               </p>
             )}
           </section>
+
+          {/* Skill file preview */}
+          {skillFileContent && (
+            <section className="dp-block">
+              <details className="dp-skill-preview">
+                <summary className="dp-skill-preview-toggle">
+                  <span className="label">Preview skill file</span>
+                  <span className="arrow open-arrow">↓</span>
+                  <span className="arrow close-arrow">↑</span>
+                </summary>
+                <pre className="dp-skill-preview-content">{skillFileContent}</pre>
+              </details>
+            </section>
+          )}
         </div>
 
         {/* Right rail */}

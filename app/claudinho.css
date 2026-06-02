@@ -1664,6 +1664,51 @@ body.page-pp {
   letter-spacing: 0.04em;
 }
 .dp-install .cmd .copy:hover { color: var(--ink); }
+.dp-skill-preview {
+  border: 1px solid var(--line-2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.dp-skill-preview-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: var(--paper);
+  user-select: none;
+  transition: color 0.12s;
+}
+.dp-skill-preview-toggle:hover { color: var(--ink); }
+.dp-skill-preview-toggle::-webkit-details-marker { display: none; }
+.dp-skill-preview-toggle .label { flex: 1; }
+.dp-skill-preview-toggle .arrow {
+  font-size: 11px;
+  color: var(--ink-3);
+  transition: color 0.12s;
+}
+.dp-skill-preview-toggle .close-arrow { display: none; }
+details[open] .dp-skill-preview-toggle .open-arrow { display: none; }
+details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
+.dp-skill-preview-content {
+  margin: 0;
+  padding: 16px 18px;
+  background: var(--bg);
+  border-top: 1px solid var(--line-2);
+  font-family: var(--font-jetbrains-mono), var(--font-geist-mono), monospace;
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 480px;
+  overflow-y: auto;
+}
 .dp-source-card {
   background: var(--paper);
   border: 1px solid var(--line-2);
