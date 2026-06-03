@@ -315,6 +315,10 @@ async function processSkillFile(
 
   const slug = makeSlug(f, fm);
 
+  // Store the directory containing SKILL.md so detail pages can fetch the raw file.
+  // e.g. "skills/research/tracing-knowledge-lineages/SKILL.md" → "skills/research/tracing-knowledge-lineages"
+  const skillDir = f.path.includes("/") ? f.path.replace(/\/SKILL\.md$/i, "") : null;
+
   const listingRow = {
     slug,
     source_type: "github",
@@ -327,6 +331,7 @@ async function processSkillFile(
     last_indexed_at: new Date().toISOString(),
     last_modified_upstream_at: meta.lastModifiedUpstreamAt,
     status: "indexed",
+    skill_path: skillDir,
   };
 
   const { data: listing, error: listingErr } = await db
