@@ -249,13 +249,6 @@ body.page-pp {
 }
 
 /* neutral card recency label — no green dot (green = true verification only) */
-.lp-checked {
-  font-family: var(--font-jetbrains-mono), var(--font-geist-mono), monospace;
-  font-size: 10.5px;
-  color: var(--ink-3);
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
 /* shelf/sub-shelf chip stands out from the plain tag chips */
 .skill-card .tag.tag-shelf {
   color: var(--accent-2);
@@ -441,10 +434,6 @@ body.page-pp {
   border-color: var(--ink-3);
   box-shadow: 0 1px 0 0 var(--line-2), 0 8px 24px -12px rgba(28,27,24,0.10);
   transform: translateY(-1px);
-}
-.skill-card .top-row {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 12px;
 }
 .skill-card .top-row .shelf-path {
   font-family: var(--font-jetbrains-mono), var(--font-geist-mono), monospace;
@@ -1684,6 +1673,28 @@ body.page-pp {
   letter-spacing: 0.04em;
 }
 .dp-install .cmd .copy:hover { color: var(--ink); }
+.dp-share-social {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 0 2px;
+}
+.dp-share-social .alt-label {
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+.dp-share-icons {
+  display: flex; align-items: center; gap: 6px;
+}
+.dp-share-icon {
+  display: flex; align-items: center; justify-content: center;
+  background: none;
+  border: 1px solid var(--line-2);
+  border-radius: 2px;
+  color: var(--ink-3);
+  cursor: pointer;
+  padding: 5px 8px;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.dp-share-icon:hover { color: var(--ink); border-color: var(--line); }
 .dp-skill-preview {
   border: 1px solid var(--line-2);
   border-radius: 2px;

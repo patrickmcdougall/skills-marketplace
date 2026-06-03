@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { fmtCount, fmtVerifiedDate, PUBLISHERS, type Skill } from "@/lib/data";
+import { fmtCount, PUBLISHERS, type Skill } from "@/lib/data";
 
 interface SkillCardProps {
   skill: Skill;
@@ -10,7 +10,6 @@ interface SkillCardProps {
 
 export function SkillCard({ skill, context = "shelf" }: SkillCardProps) {
   const oneLine = context === "shelf";
-  const date = fmtVerifiedDate(skill.verifiedDate);
 
   const publisher = PUBLISHERS[skill.publisher];
   // Display name: explicit override > catalog name > handle
@@ -24,10 +23,6 @@ export function SkillCard({ skill, context = "shelf" }: SkillCardProps) {
 
   return (
     <Link className={`skill-card ctx-${context}`} href={`/skills/${skill.id}`}>
-      <div className="top-row">
-        {/* neutral recency label — green is reserved for true verification (nav/footer) */}
-        <span className="lp-checked">{date ? `checked ${date}` : "checked"}</span>
-      </div>
       <div className="title">{skill.title}</div>
       <div className={`desc${oneLine ? " one-line" : ""}`}>{skill.desc}</div>
       {hasChips && (

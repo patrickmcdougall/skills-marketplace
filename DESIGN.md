@@ -1,6 +1,6 @@
 # Claudinho — Design System
 
-Skills registry with a verified, community-sourced identity. The design trades on trust signals: warm cream palette, real type (not defaults), and a verification system built into every component.
+Creator-first skills discovery. Trust comes from knowing who built the skill and being able to judge their body of work — real names, real repos, real star counts — not a badge we applied. The aesthetic is warm and editorial: it should feel like a curated directory, not a product marketplace.
 
 ---
 
@@ -86,10 +86,12 @@ Page max-width: `1280px` with `56px` horizontal padding (→ `24px` at `≤640px
 
 ### Skill Card (`.skill-card`)
 Full `<Link>` wrapping the card. Four contexts: `wall`, `shelf`, `browse`, `detail`.
-- Verified status always top-left
-- Title 16px bold
+- Title 16px bold — leads the card
 - Description clamped to 2 lines (1 line in shelf context)
-- Footer: author byline + follower count (left) / install count (right)
+- Tags row: shelf category + up to 2 topic chips
+- Footer: creator byline (display name + `@handle` when name ≠ handle) + repo stars or follower count (left) / install count (right)
+
+Trust signal is the creator, not the platform. No "checked" or "verified" label on cards — that framing overstated what we actually check and distracted from the creator signal.
 
 ### Buttons (`.lp-btn`)
 - `.solid`: dark fill (`--ink` bg, `--bg` text) — default secondary
@@ -99,11 +101,8 @@ Full `<Link>` wrapping the card. Four contexts: `wall`, `shelf`, `browse`, `deta
 
 **Decision (D4)**: Hero CTA "Browse the registry" → `.lp-btn.accent`. "How we verify" → small text link (`font-size: 13px; color: var(--ink-2); text-decoration: underline`) below the button, not a button itself.
 
-### Verification signal (`.lp-verified`)
-Green dot (`--verified`) + monospace text. Used on **nav status chip and footer status only** — true system-verification signal. NOT on individual skill cards.
-
-### Card freshness label (`.lp-checked`)
-Skill cards use a **neutral** `checked {relative date}` label (muted mono, no dot, no green). Green is reserved for the system-verification signal above; a per-card green "verified" overstated what we actually check, so cards show recency neutrally instead.
+### Verification green (`.lp-verified`, `--verified`)
+`--verified` green is **UI feedback only**: copy confirmation ("copied"), install confirmation ("Opening Claude Code…"), nav/footer status chip. Never used as a quality or trust badge on content — that's the creator's job, not ours.
 
 ### Section eyebrow (`.lp-section-eyebrow`)
 Black top border + mono uppercase text. Left = section identifier. Right = meta count or date. Always use this pattern for section headers on the landing page.
@@ -143,10 +142,10 @@ Footer
 **Decision (D5)**: Right column starts with a 2–3 line outcome summary (from output data), then the install panel. Evidence before CTA.
 
 ### Creators Index (`/creators`)
-Sortable table with avatar, name/role, skills count, installs, followers, shelves.
+Sortable table: avatar (GitHub photo), display name + role/company + location, GH ★ (repo stars, deduplicated), skill count, installs. Default sort: GH ★. Real names from `publisher_profile` take priority over catalog handles.
 
 ### Creator Profile (`/creators/[handle]`)
-Avatar (80×80, border-radius 4px) + name + handle + role + socials → intro → skills grid.
+Avatar (80×80, border-radius 4px) + real display name + `/handle` + role/company/location + socials (GitHub with followers, Twitter, blog) → intro/bio → skills grouped by repo. Each repo section shows: repo name (linked to GitHub), star count, description, then skill cards. Single-repo creators show the repo header too.
 
 ---
 
@@ -234,5 +233,5 @@ Use `usePathname()` in Nav. Active link: `color: var(--ink)`, `font-weight: 500`
 2. **No inline styles** for design decisions. If you're writing `style={{ color: 'var(--ink-2)' }}`, add a CSS class instead.
 3. **Cards earn their existence.** Don't add new card grids as default layout.
 4. **One job per section.** Each section of the landing page has one purpose and one heading.
-5. **Verified green for success only.** `--verified` is reserved for trust signals (verification status, copy feedback, install confirmation). Don't use it decoratively.
+5. **Verified green for UI feedback only.** `--verified` is for copy/install confirmation states and the nav status chip — not for content trust signals. Creator credibility (stars, followers, identity) is the trust layer, not platform badges.
 6. **Orange accent for primary actions.** `--accent` on the one primary CTA per page. Not on decorative elements.
