@@ -100,7 +100,6 @@ const getLandingData = unstable_cache(
       totalSkills: skills.length,
       totalPublishers: pubs.length,
       totalInstalls,
-      distinctTopics: new Set(skills.flatMap((s) => s.topics)).size,
       topPubs,
       wall,
       spread: spreadByPublisher(recent, 16),
@@ -258,6 +257,30 @@ function PubCard({
   );
 }
 
+// ─── trust / about ─────────────────────────────────────────────────────────
+
+function TrustAbout() {
+  return (
+    <section className="lp-trust-about lp-page" id="about">
+      <div className="lp-section-eyebrow">
+        <span className="left">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 6 }}>
+            <circle cx="5.5" cy="5.5" r="5" fill="var(--verified-soft)" stroke="var(--verified)" strokeWidth="1"/>
+            <path d="M3 5.5l1.6 1.6 3.4-3.4" stroke="var(--verified)" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Built-in security
+        </span>
+        <span className="right">3 independent checks · every skill</span>
+      </div>
+      <p className="lp-trust-about-body">
+        Every skill on Claudinho is automatically checked by three independent security
+        firms — Gen Agent Trust Hub, Socket, and Snyk — before it reaches you. You can
+        browse and install without worrying about what you&apos;re running.
+      </p>
+    </section>
+  );
+}
+
 // ─── how it works (static) ─────────────────────────────────────────────────
 
 function HowItWorks() {
@@ -328,7 +351,6 @@ export default async function LandingPage() {
     totalSkills,
     totalPublishers,
     totalInstalls,
-    distinctTopics,
     topPubs,
     wall,
     spread,
@@ -339,7 +361,7 @@ export default async function LandingPage() {
   // Stats for Nav / Footer (they read .skills).
   const stats = {
     skills: totalSkills,
-    publishers: totalPublishers,
+    creators: totalPublishers,
     installs: fmtCount(totalInstalls),
   };
 
@@ -377,16 +399,24 @@ export default async function LandingPage() {
         </div>
         <div className="stat-strip">
           <div className="stat">
-            <span className="v lp-num">{fmtCount(stats.skills)}</span>
-            <span className="k">skills · ready to install</span>
+            <div className="stat-v-row">
+              <span className="v lp-num">{fmtCount(stats.skills)}</span>
+              <span className="lp-trust-badge-sm" title="Every skill is automatically checked by three independent security firms">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <circle cx="6" cy="6" r="5.5" fill="var(--verified-soft)" stroke="var(--verified)" strokeWidth="1"/>
+                  <path d="M3.5 6l1.8 1.8 3.2-3.6" stroke="var(--verified)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+            </div>
+            <span className="k">skills · every one security-checked</span>
           </div>
           <div className="stat">
-            <span className="v lp-num">{stats.publishers}</span>
-            <span className="k">publishers · sourced</span>
+            <span className="v lp-num">{stats.creators}</span>
+            <span className="k">creators · indexed</span>
           </div>
           <div className="stat">
-            <span className="v lp-num">{distinctTopics}</span>
-            <span className="k">topics · tracked</span>
+            <span className="v lp-num">{fmtCount(totalInstalls)}</span>
+            <span className="k">installs · all time</span>
           </div>
         </div>
       </header>
@@ -398,7 +428,7 @@ export default async function LandingPage() {
       <section className="lp-pubs" id="creators">
         <div className="lp-page">
           <div className="lp-section-eyebrow">
-            <span className="left">Creators · {stats.publishers}</span>
+            <span className="left">Creators · {stats.creators}</span>
             <Link className="right" href="/creators">view all →</Link>
           </div>
           <div className="head">
@@ -423,7 +453,7 @@ export default async function LandingPage() {
             ))}
             <Link className="lp-pub-end" href="/creators">
               <span className="t">
-                Browse all <span className="lp-num">{stats.publishers}</span> creators
+                Browse all <span className="lp-num">{stats.creators}</span> creators
               </span>
               <span className="a">→</span>
             </Link>
@@ -464,6 +494,9 @@ export default async function LandingPage() {
 
       {/* How it works */}
       <HowItWorks />
+
+      {/* Trust / about */}
+      <TrustAbout />
 
       {/* Footer */}
       <Footer stats={stats} />

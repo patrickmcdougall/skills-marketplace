@@ -20,6 +20,24 @@ export type SkillSignal = {
   install_count_estimate: number;
   install_count: number;
   fetched_at: string;
+  // skills.sh trending signals
+  installs_yesterday: number | null;
+  trending_velocity: number | null;
+  trending_rank: number | null;
+  hot_rank: number | null;
+};
+
+export type SkillAuditRow = {
+  id: string;
+  skill_id: string;
+  provider: string;
+  provider_slug: string;
+  status: string;           // 'pass' | 'warn' | 'fail'
+  summary: string | null;
+  risk_level: string | null; // 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
+  categories: string[] | null;
+  audited_at: string | null;
+  fetched_at: string;
 };
 
 export type SkillRow = {
@@ -52,6 +70,11 @@ export type SkillRow = {
   bundle_source_ref: string | null;
   bundle_packaged_at: string | null;
   skill_path: string | null;
+  // skills.sh identity
+  skillssh_id: string | null;
+  skillssh_url: string | null;
+  skillssh_hash: string | null;
+  is_first_party: boolean;
 };
 
 // ─── helpers ──────────────────────────────────────────────────────────────
@@ -208,7 +231,7 @@ export async function getBrowseSkills(): Promise<BrowseSkill[]> {
         desc: row.description_excerpt,
         ownerHandle: ownerFromUrl(row.source_url),
         repoName: repoPathFromUrl(row.source_url).split("/")[1] ?? "",
-        installs: row.skill_signal?.install_count ?? 0,
+        installs: (row.skill_signal?.install_count_estimate ?? 0) + (row.skill_signal?.install_count ?? 0),
         stars: row.skill_signal?.stars ?? 0,
         verifiedDate: row.last_indexed_at ?? "",
         category: row.category,
@@ -374,4 +397,37 @@ export async function getAllSkillSlugs(): Promise<string[]> {
     from += PAGE;
   }
   return slugs;
+}
+
+// ─── audit queries ────────────────────────────────────────────────────────
+
+/** Fetch all audit rows for a single skill by its UUID. */
+export async function getSkillAudits(skillId: string): Promise<SkillAuditRow[]> {
+  const { data } = await serverDb()
+    .from("skill_audit")
+    .select("*")
+    .eq("skill_id", skillId);
+  return (data ?? []) as SkillAuditRow[];
+}
+
+/**
+ * Fetch audit rows for a set of skills identified by slug.
+ * Returns a map of slug → audit rows (only slugs with at least one audit are present).
+ *
+ * Uses an embedded select via the skill_listing FK so one query suffices.
+ */
+export async function getAuditsBySlug(
+  slugs: string[]
+): Promise<Record<string, SkillAuditRow[]>> {
+  if (slugs.length === 0) return {};
+  type Row = { slug: string; skill_audit: SkillAuditRow[] };
+  const { data } = await serverDb()
+    .from("skill_listing")
+    .select("slug, skill_audit(*)")
+    .in("slug", slugs);
+  const out: Record<string, SkillAuditRow[]> = {};
+  for (const row of (data ?? []) as Row[]) {
+    if (row.skill_audit?.length) out[row.slug] = row.skill_audit;
+  }
+  return out;
 }

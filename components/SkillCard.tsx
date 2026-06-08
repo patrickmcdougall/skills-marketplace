@@ -2,13 +2,48 @@
 
 import Link from "next/link";
 import { fmtCount, PUBLISHERS, type Skill } from "@/lib/data";
+import type { SkillTrustStatus } from "@/lib/trust";
 
 interface SkillCardProps {
   skill: Skill;
   context?: "wall" | "shelf" | "browse" | "detail";
+  trust?: SkillTrustStatus;
 }
 
-export function SkillCard({ skill, context = "shelf" }: SkillCardProps) {
+function TrustIcon({ status }: { status: SkillTrustStatus }) {
+  if (status === "verified") {
+    return (
+      <span
+        className="card-trust verified"
+        title="Verified — passed all security checks"
+        aria-label="Verified"
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <circle cx="7" cy="7" r="6.5" fill="var(--verified-soft)" stroke="var(--verified)" strokeWidth="1"/>
+          <path d="M4.5 7l1.8 1.8 3.2-3.6" stroke="var(--verified)" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </span>
+    );
+  }
+  if (status === "flagged") {
+    return (
+      <span
+        className="card-trust flagged"
+        title="Flagged — review before installing"
+        aria-label="Flagged"
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M7 1.5L12.5 11.5H1.5L7 1.5Z" fill="var(--accent-soft)" stroke="var(--accent)" strokeWidth="1" strokeLinejoin="round"/>
+          <line x1="7" y1="5.5" x2="7" y2="8" stroke="var(--accent)" strokeWidth="1.3" strokeLinecap="round"/>
+          <circle cx="7" cy="9.5" r="0.6" fill="var(--accent)"/>
+        </svg>
+      </span>
+    );
+  }
+  return null;
+}
+
+export function SkillCard({ skill, context = "shelf", trust }: SkillCardProps) {
   const oneLine = context === "shelf";
 
   const publisher = PUBLISHERS[skill.publisher];
@@ -23,7 +58,10 @@ export function SkillCard({ skill, context = "shelf" }: SkillCardProps) {
 
   return (
     <Link className={`skill-card ctx-${context}`} href={`/skills/${skill.id}`}>
-      <div className="title">{skill.title}</div>
+      <div className="card-title-row">
+        <div className="title">{skill.title}</div>
+        {trust && trust !== "pending" && <TrustIcon status={trust} />}
+      </div>
       <div className={`desc${oneLine ? " one-line" : ""}`}>{skill.desc}</div>
       {hasChips && (
         <div className="tags">

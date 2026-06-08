@@ -2,12 +2,15 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
   getSkillBySlug,
+  getSkillAudits,
   getOtherSkillsByOwner,
   ownerFromUrl,
   repoPathFromUrl,
   skillLeaf,
   installCommand,
 } from "@/lib/db";
+import { auditRowsToInput, getSkillTrust } from "@/lib/trust";
+import { SecuritySection } from "./SecuritySection";
 
 // Pages render on first request and are ISR-cached for one hour.
 export const revalidate = 3600;
@@ -124,10 +127,12 @@ export default async function SkillDetailPage({
   };
 
   const stats = REAL_STATS;
-  const [others, skillFileContent] = await Promise.all([
+  const [others, skillFileContent, auditRows] = await Promise.all([
     getOtherSkillsByOwner(owner, slug, 3),
     fetchSkillFileContent(row.source_url, row.skill_path, leaf),
+    getSkillAudits(row.id),
   ]);
+  const trust = getSkillTrust(auditRowsToInput(auditRows));
 
   return (
     <div className="lp dp accent-orange bg-cream">
@@ -169,7 +174,7 @@ export default async function SkillDetailPage({
         {/* Left column */}
         <div className="dp-left">
 
-          {/* Topics */}
+          {/* Topics — what the skill covers */}
           {row.topics.length > 0 && (
             <section className="dp-block">
               <h2 className="dp-h2">Topics</h2>
@@ -181,7 +186,22 @@ export default async function SkillDetailPage({
             </section>
           )}
 
-          {/* Source — links back to the GitHub repo */}
+          {/* Skill file preview — what it actually contains */}
+          {skillFileContent && (
+            <section className="dp-block">
+              <h2 className="dp-h2">Skill file</h2>
+              <details className="dp-skill-preview">
+                <summary className="dp-skill-preview-toggle">
+                  <span className="label">Preview skill file</span>
+                  <span className="arrow open-arrow">↓</span>
+                  <span className="arrow close-arrow">↑</span>
+                </summary>
+                <pre className="dp-skill-preview-content">{skillFileContent}</pre>
+              </details>
+            </section>
+          )}
+
+          {/* Source — credibility: links back to the GitHub repo */}
           <section className="dp-block dp-readme">
             <h2 className="dp-h2">Source</h2>
             <p className="dp-h2-sub">
@@ -204,20 +224,9 @@ export default async function SkillDetailPage({
             )}
           </section>
 
-          {/* Skill file preview */}
-          {skillFileContent && (
-            <section className="dp-block">
-              <h2 className="dp-h2">Skill file</h2>
-              <details className="dp-skill-preview">
-                <summary className="dp-skill-preview-toggle">
-                  <span className="label">Preview skill file</span>
-                  <span className="arrow open-arrow">↓</span>
-                  <span className="arrow close-arrow">↑</span>
-                </summary>
-                <pre className="dp-skill-preview-content">{skillFileContent}</pre>
-              </details>
-            </section>
-          )}
+          {/* Security — is it safe, last so it doesn't front-load fear */}
+          <SecuritySection trust={trust} />
+
         </div>
 
         {/* Right rail */}
