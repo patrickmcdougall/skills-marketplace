@@ -1,11 +1,14 @@
 /**
- * Cron: fetch security audit results from skills.sh for all matched skills.
+ * Cron: fetch security audit results for all indexed skills.
  *
- * Called weekly by Vercel Cron. Protected by CRON_SECRET.
- * Processes skills in stale-first order (oldest fetched_at first), with a
- * per-run cap so the route stays within function timeout limits.
+ * Called daily by Vercel Cron. Protected by CRON_SECRET.
+ * Processes skills in stale-first order (never-fetched first) using parallel
+ * batches. At CONCURRENCY=5 and ~200ms per API call, a single 300s run
+ * handles ~5 000 skills — enough to cover the full catalog in one pass.
  *
- * Mirrors scripts/sync-audit-data.ts — that script is for manual runs.
+ * Env vars (optional):
+ *   AUDIT_CONCURRENCY   parallel slots per batch  (default 5)
+ *   AUDIT_PER_RUN_LIMIT max skills per run        (default 5000)
  */
 
 import { NextRequest } from "next/server";
@@ -39,10 +42,10 @@ type AuditResponse = { audits: AuditEntry[] };
 // ---------- config ----------
 
 const API_BASE = "https://skills.sh/api/v1";
-// AUDIT_PER_RUN_LIMIT: set to 1500 in Vercel env for initial bootstrap
-// (fills the full 300s window at ~200ms/skill). Default 250 for weekly maintenance.
-const PER_RUN_LIMIT = parseInt(process.env.AUDIT_PER_RUN_LIMIT ?? "250", 10);
-const GAP_MS = 200;
+const CONCURRENCY = parseInt(process.env.AUDIT_CONCURRENCY ?? "5", 10);
+const PER_RUN_LIMIT = parseInt(process.env.AUDIT_PER_RUN_LIMIT ?? "5000", 10);
+// Small pause between batches so we don't burst the audit API.
+const BATCH_GAP_MS = 50;
 const UA = "claudinho-cron/1.0 (+claudinho.xyz)";
 
 // ---------- route ----------
@@ -60,24 +63,33 @@ export async function GET(req: NextRequest) {
   );
   const headers = buildHeaders(token);
 
-  // Pick the stalest skills first (null fetched_at = never fetched, highest priority).
   const skills = await loadStalestSkills(db, PER_RUN_LIMIT);
-  console.log(`[cron/sync-audit] processing ${skills.length} skills`);
+  console.log(`[cron/sync-audit] processing ${skills.length} skills (concurrency=${CONCURRENCY})`);
 
   let fetched = 0, notAudited = 0, failed = 0, totalEntries = 0;
 
-  for (const skill of skills) {
-    try {
-      const result = await fetchAudit(headers, skill.skillssh_id);
-      if (result === null) { notAudited++; continue; }
-      await upsertAudits(db, skill.id, result.audits);
-      totalEntries += result.audits.length;
-      fetched++;
-    } catch (err) {
-      failed++;
-      console.warn(`[cron/sync-audit] failed ${skill.skillssh_id}: ${(err as Error).message}`);
+  for (let i = 0; i < skills.length; i += CONCURRENCY) {
+    const batch = skills.slice(i, i + CONCURRENCY);
+    const results = await Promise.allSettled(
+      batch.map(async (skill) => {
+        const result = await fetchAudit(headers, skill.skillssh_id);
+        if (result === null) return { notAudited: true as const };
+        await upsertAudits(db, skill.id, result.audits);
+        return { entries: result.audits.length };
+      })
+    );
+    for (const r of results) {
+      if (r.status === "rejected") {
+        failed++;
+        console.warn(`[cron/sync-audit] error: ${r.reason}`);
+      } else if ("notAudited" in r.value) {
+        notAudited++;
+      } else {
+        fetched++;
+        totalEntries += r.value.entries;
+      }
     }
-    await sleep(GAP_MS);
+    if (i + CONCURRENCY < skills.length) await sleep(BATCH_GAP_MS);
   }
 
   return Response.json({ ok: true, processed: skills.length, fetched, notAudited, failed, totalEntries });
@@ -105,18 +117,15 @@ function buildHeaders(token: string): Record<string, string> {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function loadStalestSkills(db: any, limit: number): Promise<SkillWithId[]> {
-  // Join skill_listing with the most recent audit fetch time per skill.
-  // Skills with no audit rows sort first (null fetched_at).
+  // Oversample so the client-side stale-first sort has enough candidates,
+  // but cap at 10 000 to keep the query fast regardless of limit size.
+  const fetchLimit = Math.min(limit * 2, 10_000);
   const { data, error } = await db
     .from("skill_listing")
-    .select(`
-      id,
-      skillssh_id,
-      skill_audit ( fetched_at )
-    `)
+    .select(`id, skillssh_id, skill_audit ( fetched_at )`)
     .not("skillssh_id", "is", null)
     .eq("status", "indexed")
-    .limit(limit * 4);  // oversample — we'll re-sort client-side
+    .limit(fetchLimit);
 
   if (error) throw new Error(`skill_listing: ${error.message}`);
 
@@ -124,10 +133,7 @@ async function loadStalestSkills(db: any, limit: number): Promise<SkillWithId[]>
 
   return (data as unknown as Row[])
     .map((row) => {
-      const latest = row.skill_audit
-        .map((a) => a.fetched_at)
-        .sort()
-        .pop() ?? null;
+      const latest = row.skill_audit.map((a) => a.fetched_at).sort().pop() ?? null;
       return { id: row.id, skillssh_id: row.skillssh_id, latestFetch: latest };
     })
     .sort((a, b) => {
