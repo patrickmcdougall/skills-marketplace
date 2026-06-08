@@ -104,9 +104,9 @@ export function skillLeaf(skillName: string): string {
   return skillName.split("/").pop() ?? skillName;
 }
 
-// "obra/superpowers" + "brainstorming" → "npx skills add obra/superpowers --skill brainstorming"
-export function installCommand(repoPath: string, skillName: string): string {
-  return `npx skills add ${repoPath} --skill ${skillName}`;
+export function installCommand(sourceUrl: string, _skillName: string, skillPath?: string | null): string {
+  if (skillPath) return `npx skills add ${sourceUrl}/tree/main/${skillPath}`;
+  return `npx skills add ${sourceUrl}`;
 }
 
 // ─── browse / publisher types ─────────────────────────────────────────────

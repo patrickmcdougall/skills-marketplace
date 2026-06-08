@@ -39,7 +39,7 @@ export function CopyForSlack({ title, bestFor, slug }: CopyForSlackProps) {
             bottom: "calc(100% + 6px)",
             left: "50%",
             transform: "translateX(-50%)",
-            background: "#1c1b18",
+            background: "#1A1A18",
             color: "#efece4",
             fontSize: 12,
             padding: "5px 12px",

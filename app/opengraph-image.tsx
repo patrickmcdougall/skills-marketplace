@@ -34,9 +34,10 @@ export default function Image() {
       >
         {/* Brand row */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 60 }}>
-          <div style={{ width: 14, height: 14, borderRadius: "50%", background: "#d8581c", flexShrink: 0 }} />
-          <span style={{ fontSize: 20, color: "#1c1b18", letterSpacing: "-0.01em" }}>
-            Claudinho
+          <div style={{ width: 14, height: 14, borderRadius: "50%", background: "#F25C1F", flexShrink: 0 }} />
+          <span style={{ fontSize: 20, color: "#1A1A18", letterSpacing: "-0.01em" }}>
+            <span style={{ color: "#1A1A18" }}>claud</span>
+            <span style={{ color: "#F25C1F" }}>inho</span>
           </span>
         </div>
 
@@ -45,7 +46,7 @@ export default function Image() {
           style={{
             display: "flex",
             fontSize: 62,
-            color: "#1c1b18",
+            color: "#1A1A18",
             lineHeight: 1.08,
             letterSpacing: "-0.03em",
             maxWidth: 960,
@@ -54,7 +55,7 @@ export default function Image() {
           }}
         >
           <span>{"Someone already built the "}</span>
-          <span style={{ color: "#d8581c" }}>thing</span>
+          <span style={{ color: "#F25C1F" }}>thing</span>
           <span>{" you wanted Claude to do."}</span>
         </div>
 
@@ -85,7 +86,7 @@ export default function Image() {
           <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
             {STATS.map(({ n, k }) => (
               <div key={k} style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                <span style={{ fontSize: 22, color: "#1c1b18" }}>{n}</span>
+                <span style={{ fontSize: 22, color: "#1A1A18" }}>{n}</span>
                 <span style={{ fontSize: 13, color: "#7a7468", letterSpacing: "0.04em", textTransform: "uppercase" }}>{k}</span>
               </div>
             ))}

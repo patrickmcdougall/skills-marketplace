@@ -21,7 +21,7 @@ import {
 } from "@/lib/db";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
-import { SkillCard } from "@/components/SkillCard";
+import { CreatorSkillsClient } from "./CreatorSkillsClient";
 
 export const revalidate = 3600;
 
@@ -47,8 +47,12 @@ function rowToSkill(row: SkillRow): Skill {
 function fmtCount(n: number | null | undefined): string {
   if (n == null) return "0";
   if (n < 1000) return String(n);
-  const k = n / 1000;
-  return (k >= 10 ? k.toFixed(0) : k.toFixed(1).replace(/\.0$/, "")) + "k";
+  if (n < 1_000_000) {
+    const k = n / 1000;
+    return (k >= 10 ? k.toFixed(0) : k.toFixed(1).replace(/\.0$/, "")) + "k";
+  }
+  const m = n / 1_000_000;
+  return (m >= 10 ? m.toFixed(0) : m.toFixed(1).replace(/\.0$/, "")) + "M";
 }
 
 function GhIcon({ size = 13 }: { size?: number }) {
@@ -237,7 +241,7 @@ export default async function CreatorPage({
         </section>
       )}
 
-      {/* Skills — grouped by repo */}
+      {/* Skills — search/filter/sort via client component */}
       <main className="pp-skills pp-page">
         <div className="pp-skills-head">
           <span className="lhs">
@@ -261,67 +265,8 @@ export default async function CreatorPage({
 
         {totalSkills === 0 ? (
           <p style={{ fontSize: 14, color: "var(--ink-3)" }}>No skills published yet.</p>
-        ) : repoSections.length === 1 ? (
-          // Single repo — show repo name + stars + description, then skills flat.
-          <>
-            {(() => {
-              const { repoPath, info } = repoSections[0];
-              const repoName = info?.name ?? repoPath.split("/")[1];
-              return (
-                <div className="pp-repo-head" style={{ marginBottom: 24 }}>
-                  <div className="pp-repo-title">
-                    <a href={`https://github.com/${repoPath}`} target="_blank" rel="noopener noreferrer" className="pp-repo-name">
-                      {repoName}
-                    </a>
-                    {info?.stars != null && (
-                      <span className="pp-repo-stars">{fmtCount(info.stars)} ★</span>
-                    )}
-                  </div>
-                  {info?.description && (
-                    <p className="pp-repo-desc">{info.description}</p>
-                  )}
-                </div>
-              );
-            })()}
-            <div className="pp-grid">
-              {repoSections[0].skills.map((s) => (
-                <SkillCard key={s.id} skill={s} context="browse" />
-              ))}
-            </div>
-          </>
         ) : (
-          // Multiple repos — show a subsection per repo.
-          repoSections.map(({ repoPath, info, skills }) => {
-            const repoName = info?.name ?? repoPath.split("/")[1];
-            return (
-              <section key={repoPath} className="pp-repo">
-                <div className="pp-repo-head">
-                  <div className="pp-repo-title">
-                    <a
-                      href={`https://github.com/${repoPath}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="pp-repo-name"
-                    >
-                      {repoName}
-                    </a>
-                    {info?.stars != null && (
-                      <span className="pp-repo-stars">{fmtCount(info.stars)} ★</span>
-                    )}
-                    <span className="pp-repo-count">{skills.length} {skills.length === 1 ? "skill" : "skills"}</span>
-                  </div>
-                  {info?.description && (
-                    <p className="pp-repo-desc">{info.description}</p>
-                  )}
-                </div>
-                <div className="pp-grid">
-                  {skills.map((s) => (
-                    <SkillCard key={s.id} skill={s} context="browse" />
-                  ))}
-                </div>
-              </section>
-            );
-          })
+          <CreatorSkillsClient repoSections={repoSections} totalSkills={totalSkills} />
         )}
       </main>
 

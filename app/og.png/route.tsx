@@ -26,10 +26,10 @@ export async function GET() {
               width: 20,
               height: 20,
               borderRadius: "50%",
-              background: "#d8581c",
+              background: "#F25C1F",
             }}
           />
-          <span style={{ fontSize: 28, fontWeight: 600, color: "#1c1b18", letterSpacing: "-0.02em" }}>
+          <span style={{ fontSize: 28, fontWeight: 600, color: "#1A1A18", letterSpacing: "-0.02em" }}>
             Claudinho
           </span>
         </div>
@@ -39,14 +39,14 @@ export async function GET() {
           style={{
             fontSize: 72,
             fontWeight: 700,
-            color: "#1c1b18",
+            color: "#1A1A18",
             lineHeight: 1.05,
             letterSpacing: "-0.035em",
             maxWidth: 900,
           }}
         >
           Skills, built by the{" "}
-          <span style={{ color: "#d8581c" }}>community.</span>
+          <span style={{ color: "#F25C1F" }}>community.</span>
         </div>
 
         {/* sub */}

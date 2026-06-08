@@ -52,8 +52,8 @@ export default async function Image({
       >
         {/* Brand row */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 32 }}>
-          <div style={{ width: 14, height: 14, borderRadius: "50%", background: "#d8581c", flexShrink: 0 }} />
-          <span style={{ fontSize: 20, color: "#1c1b18", letterSpacing: "-0.01em" }}>
+          <div style={{ width: 14, height: 14, borderRadius: "50%", background: "#F25C1F", flexShrink: 0 }} />
+          <span style={{ fontSize: 20, color: "#1A1A18", letterSpacing: "-0.01em" }}>
             Claudinho
           </span>
         </div>
@@ -81,7 +81,7 @@ export default async function Image({
           style={{
             display: "flex",
             fontSize,
-            color: "#1c1b18",
+            color: "#1A1A18",
             lineHeight: 1.1,
             letterSpacing: "-0.025em",
             maxWidth: 1000,
@@ -117,7 +117,7 @@ export default async function Image({
                 <span style={{ fontSize: 12, color: "#7a7468", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                   creator
                 </span>
-                <span style={{ fontSize: 18, color: "#1c1b18" }}>
+                <span style={{ fontSize: 18, color: "#1A1A18" }}>
                   {publisherHandle}
                 </span>
               </div>
@@ -127,7 +127,7 @@ export default async function Image({
                 <span style={{ fontSize: 12, color: "#7a7468", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                   installs
                 </span>
-                <span style={{ fontSize: 18, color: "#1c1b18" }}>
+                <span style={{ fontSize: 18, color: "#1A1A18" }}>
                   {fmtCount(installs)}
                 </span>
               </div>
@@ -137,7 +137,7 @@ export default async function Image({
                 <span style={{ fontSize: 12, color: "#7a7468", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                   gh ★
                 </span>
-                <span style={{ fontSize: 18, color: "#1c1b18" }}>
+                <span style={{ fontSize: 18, color: "#1A1A18" }}>
                   {fmtCount(stars)}
                 </span>
               </div>

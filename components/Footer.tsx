@@ -1,3 +1,5 @@
+import { ClaudinhoLogo } from "./ClaudinhoLogo";
+
 interface FooterProps {
   stats: {
     skills: number;
@@ -13,7 +15,7 @@ export function Footer({ stats }: FooterProps) {
         <div className="brand">
           <div className="brand-stack">
             <a className="logo" href="/">
-              Claudinho
+              <ClaudinhoLogo height={30} dark />
             </a>
             <span className="brand-tag">ready-made skills</span>
           </div>
