@@ -2421,7 +2421,7 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
 .skill-card .card-trust::after {
   content: attr(data-tooltip);
   position: absolute;
-  bottom: calc(100% + 6px);
+  top: calc(100% + 5px);
   right: 0;
   background: var(--ink-1);
   color: #fff;

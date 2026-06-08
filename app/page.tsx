@@ -5,12 +5,11 @@ import {
   getBrowseSkills,
   getPublisherProfiles,
   getAllRepoInfos,
-  getAuditsBySlug,
+  getSkillTrustMap,
   type BrowseSkill,
   type DBPublisherRow,
   type PublisherProfile,
 } from "@/lib/db";
-import { auditRowsToInput, getSkillTrust, type SkillTrustStatus } from "@/lib/trust";
 import { Nav } from "@/components/Nav";
 
 // The landing reads aggregate registry data that doesn't need to be realtime.
@@ -30,7 +29,7 @@ const SUPPRESSED_PUBLISHERS = new Set(["doany-ai"]);
 
 const getLandingData = unstable_cache(
   async () => {
-    const [skills, repoInfos] = await Promise.all([getBrowseSkills(), getAllRepoInfos()]);
+    const [skills, repoInfos, trustMap] = await Promise.all([getBrowseSkills(), getAllRepoInfos(), getSkillTrustMap()]);
 
     // Publisher aggregates (avoids a second full-table scan).
     const pubMap = new Map<string, DBPublisherRow>();
@@ -70,9 +69,15 @@ const getLandingData = unstable_cache(
       if (arr.length < 2) arr.push(s);
     }
 
-    // Wall: top 10 most-installed enriched skills with 100k+ installs.
+    // Wall: top 10 most-installed enriched skills, max 1 per creator for diversity.
+    const seenWallOwners = new Set<string>();
     const wall = byInstalls
-      .filter(s => s.installs >= 100_000 && s.contentStatus === "ok")
+      .filter(s => {
+        if (s.installs < 100_000 || s.contentStatus !== "ok") return false;
+        if (seenWallOwners.has(s.ownerHandle)) return false;
+        seenWallOwners.add(s.ownerHandle);
+        return true;
+      })
       .slice(0, 10);
 
     // Hot this week: mix of skills.sh hot + trending, enriched only, top 8.
@@ -96,9 +101,10 @@ const getLandingData = unstable_cache(
       hotSkills,
       topSkillsByPub,
       pubProfiles: Object.fromEntries(pubProfiles),
+      trustMap,
     };
   },
-  ["landing-data-v15"],
+  ["landing-data-v16"],
   { revalidate: 600 }
 );
 import { Footer } from "@/components/Footer";
@@ -308,6 +314,7 @@ export default async function LandingPage() {
     hotSkills,
     topSkillsByPub,
     pubProfiles,
+    trustMap,
   } = await getLandingData();
 
   // Stats for Nav / Footer (they read .skills).
@@ -331,15 +338,6 @@ export default async function LandingPage() {
 
   const wallSkills = wall.map(toSkill);
   const featured = hotSkills.map(toSkill);
-
-  // Fetch trust for the featured cards (outside the cache — audit data is sparse).
-  const featuredSlugs = featured.map((s) => s.id);
-  const featuredAudits = await getAuditsBySlug(featuredSlugs);
-  const featuredTrust: Record<string, SkillTrustStatus> = {};
-  for (const [slug, rows] of Object.entries(featuredAudits)) {
-    const t = getSkillTrust(auditRowsToInput(rows));
-    if (t.status !== "pending") featuredTrust[slug] = t.status;
-  }
 
   return (
     <div className="lp accent-orange bg-cream">
@@ -452,7 +450,7 @@ export default async function LandingPage() {
           </div>
           <div className="lp-shelf-grid">
             {featured.map((s) => (
-              <SkillCard key={s.id} skill={s} context="shelf" trust={featuredTrust[s.id]} />
+              <SkillCard key={s.id} skill={s} context="shelf" trust={trustMap[s.id]} />
             ))}
           </div>
         </section>
