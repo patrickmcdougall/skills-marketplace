@@ -37,32 +37,21 @@ Deep context lives in `~/Documents/Claude/Projects/Skills marketplace/` — read
 ## Current state
 
 ### Working
-- 4 routes live: `/` (landing), `/browse`, `/skills/[slug]`, `/publishers/[slug]`
-- ~2200+ skills indexed in Supabase
-- Stars data populated
-- Mobile pass done
+- Routes: `/` (landing), `/skills` (browse), `/skills/[slug]` (detail), `/creators`, `/creators/[handle]`, `/i/[slug]` (install counter + packager)
+- 929+ skills pre-packaged as `.skill` files in Supabase Storage; on-demand packaging for the rest
+- Browse wired to Supabase (`getBrowseSkills()` in `lib/db.ts`) — not mock data
+- AI content pipeline live: `display_title`, `display_description`, `best_for`, `shelf`, `sub_shelf`, `tags` generated for skills with `content_status = 'ok'`
+- skills.sh API integrated — catalog sync (`sync-catalog`), install count sync (`sync-signals`), audit data (`sync-audit`)
+- Install counter + bot filtering at `/i/[slug]` — increments `skill_signal.install_count`
+- Publisher/creator profiles — real data from GitHub API via `sync-publisher-profiles`
+- OG images — exist for `/`, `/creators/[handle]`, `/skills/[slug]`
+- "Copy for Slack" button on skill detail pages (`CopyForSlack.tsx`)
+- Mobile nav hamburger drawer, active states, focus management
 
-### Broken / missing
-- **Shelf categorization broken** — all shelves show 0. `shelf/subShelf` fields empty in DB. LLM classification script not built yet.
-- **Card content insufficient** — skill names are technical. Raw SKILL.md descriptions are trigger-language, not user-friendly.
-- **Install counts all zero** — skills.sh scraper failing with 401 (missing `SKILLSSH_API_KEY`).
-- **Browse not wired to Supabase** — browse page still runs on mock data (`lib/data.ts`).
-- **No working install button** — no .skill file hosting, no redirect counter (`/i/[slug]`).
-- **Publisher profiles are shells** — routes exist, no real content.
-- **No OG/Twitter cards** — links preview as bare URLs.
-- **No "copy Slack message" button.**
-
----
-
-## Launch blockers (priority order)
-
-1. **skills.sh API key** → email skills-api@vercel.com → fixes catalog growth + historical install counts
-2. **AI content script** → one script run generates `display_title`, `display_description`, `bestFor`, `shelf`/`subShelf`/`tags` for all 2000+ skills
-3. **Wire browse to Supabase** → browse page currently runs on mock data
-4. **Redirect counter** (`/i/[slug]`) → Claudinho's own install tracking
-5. **Auto-generated publisher profiles** → pull from GitHub API, aggregate skills by shelf
-
-After these: OG image generation (`@vercel/og`), "copy Slack message" button on detail page.
+### Still rough / known gaps
+- **SecuritySection permissions** — fake pills hidden pending real permission model
+- **Shelf filter** — depends on `shelf` field being populated; coverage may be partial
+- **Install counts** — real-time accuracy limited by read-modify-write at scale (fine at current traffic)
 
 ---
 
