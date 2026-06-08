@@ -438,7 +438,7 @@ export default async function LandingPage() {
             <div>
               <h2 className="lp-shelf-title">Hot this week</h2>
               <p className="lp-shelf-blurb">
-                Trending and gaining installs fast on skills.sh right now.
+                Trending across the community right now.
               </p>
             </div>
             <div className="lp-shelf-right">

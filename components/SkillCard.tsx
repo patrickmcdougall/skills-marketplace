@@ -15,8 +15,8 @@ function TrustIcon({ status }: { status: SkillTrustStatus }) {
     return (
       <span
         className="card-trust verified"
-        title="Verified — passed all security checks"
-        aria-label="Verified"
+        data-tooltip="Passed all 3 security checks"
+        aria-label="Security verified"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
           <circle cx="7" cy="7" r="6.5" fill="var(--verified-soft)" stroke="var(--verified)" strokeWidth="1"/>
@@ -29,8 +29,8 @@ function TrustIcon({ status }: { status: SkillTrustStatus }) {
     return (
       <span
         className="card-trust flagged"
-        title="Flagged — review before installing"
-        aria-label="Flagged"
+        data-tooltip="Security concern — check detail page"
+        aria-label="Security flagged"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
           <path d="M7 1.5L12.5 11.5H1.5L7 1.5Z" fill="var(--accent-soft)" stroke="var(--accent)" strokeWidth="1" strokeLinejoin="round"/>
