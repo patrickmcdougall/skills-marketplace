@@ -1,5 +1,6 @@
 // Server-side data access — do not import in Client Components.
 import { createClient } from "@supabase/supabase-js";
+import { auditRowsToInput, getSkillTrust, type SkillTrustStatus } from "./trust";
 
 function serverDb() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -204,7 +205,7 @@ export async function getBrowseSkills(): Promise<BrowseSkill[]> {
     const { data, error } = await serverDb()
       .from("skill_listing")
       .select(
-        "slug, skill_name, description_excerpt, source_url, topics, category, last_indexed_at, display_title, display_description, best_for, shelf, sub_shelf, tags, content_status, skill_signal(install_count_estimate, install_count, stars)"
+        "slug, skill_name, description_excerpt, source_url, topics, category, last_indexed_at, display_title, display_description, best_for, shelf, sub_shelf, tags, content_status, skill_signal(install_count_estimate, install_count, stars, trending_rank, hot_rank)"
       )
       .eq("status", "indexed")
       .range(from, from + PAGE - 1);
@@ -224,7 +225,7 @@ export async function getBrowseSkills(): Promise<BrowseSkill[]> {
       sub_shelf: string | null;
       tags: string[] | null;
       content_status: string | null;
-      skill_signal: { install_count_estimate: number; install_count: number; stars: number } | null;
+      skill_signal: { install_count_estimate: number; install_count: number; stars: number; trending_rank: number | null; hot_rank: number | null } | null;
     };
     for (const row of data as unknown as BrowseRow[]) {
       out.push({
@@ -245,6 +246,8 @@ export async function getBrowseSkills(): Promise<BrowseSkill[]> {
         subShelf: row.sub_shelf,
         genTags: row.tags,
         contentStatus: row.content_status,
+        trendingRank: row.skill_signal?.trending_rank ?? null,
+        hotRank: row.skill_signal?.hot_rank ?? null,
       });
     }
     if (data.length < PAGE) break;
@@ -430,6 +433,34 @@ export async function getAuditsBySlug(
   const out: Record<string, SkillAuditRow[]> = {};
   for (const row of (data ?? []) as Row[]) {
     if (row.skill_audit?.length) out[row.slug] = row.skill_audit;
+  }
+  return out;
+}
+
+/**
+ * Compute trust status for every indexed skill in one pass.
+ * Only "verified" and "flagged" slugs are included — pending is omitted so
+ * SkillCard treats a missing entry as "no icon" without extra logic.
+ */
+export async function getSkillTrustMap(): Promise<Record<string, SkillTrustStatus>> {
+  type AuditMini = { provider_slug: string; status: string; risk_level: string | null; summary: string | null };
+  type Row = { slug: string; skill_audit: AuditMini[] };
+  const out: Record<string, SkillTrustStatus> = {};
+  let from = 0;
+  const PAGE = 1000;
+  for (;;) {
+    const { data, error } = await serverDb()
+      .from("skill_listing")
+      .select("slug, skill_audit(provider_slug, status, risk_level, summary)")
+      .eq("status", "indexed")
+      .range(from, from + PAGE - 1);
+    if (error || !data?.length) break;
+    for (const row of data as unknown as Row[]) {
+      const t = getSkillTrust(auditRowsToInput(row.skill_audit ?? []));
+      if (t.status !== "pending") out[row.slug] = t.status;
+    }
+    if (data.length < PAGE) break;
+    from += PAGE;
   }
   return out;
 }

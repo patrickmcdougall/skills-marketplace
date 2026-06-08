@@ -20,6 +20,7 @@ import type { BrowseSkill } from "@/lib/db";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { SkillCard } from "@/components/SkillCard";
+import type { SkillTrustStatus } from "@/lib/trust";
 
 const PAGE_SIZE = 12;
 
@@ -380,7 +381,7 @@ function searchSkills(skills: Skill[], q: string): Skill[] {
   });
 }
 
-function BrowsePageInner({ initialSkills, publisherNames }: { initialSkills: BrowseSkill[]; publisherNames: Record<string, string> }) {
+function BrowsePageInner({ initialSkills, publisherNames, trustMap }: { initialSkills: BrowseSkill[]; publisherNames: Record<string, string>; trustMap?: Record<string, SkillTrustStatus> }) {
   const allSkills = useMemo(() => initialSkills.map(s => toSkill(s, publisherNames)), [initialSkills, publisherNames]);
   const stats = useMemo(() => ({
     skills: initialSkills.length,
@@ -565,7 +566,7 @@ function BrowsePageInner({ initialSkills, publisherNames }: { initialSkills: Bro
             <>
               <div className="bp-grid">
                 {visibleSet.map((s) => (
-                  <SkillCard key={s.id} skill={s} context="browse" />
+                  <SkillCard key={s.id} skill={s} context="browse" trust={trustMap?.[s.id]} />
                 ))}
               </div>
               {filtered.length > visible && (
@@ -589,10 +590,10 @@ function BrowsePageInner({ initialSkills, publisherNames }: { initialSkills: Bro
   );
 }
 
-export function BrowseClient({ initialSkills, publisherNames }: { initialSkills: BrowseSkill[]; publisherNames: Record<string, string> }) {
+export function BrowseClient({ initialSkills, publisherNames, trustMap }: { initialSkills: BrowseSkill[]; publisherNames: Record<string, string>; trustMap?: Record<string, SkillTrustStatus> }) {
   return (
     <Suspense>
-      <BrowsePageInner initialSkills={initialSkills} publisherNames={publisherNames} />
+      <BrowsePageInner initialSkills={initialSkills} publisherNames={publisherNames} trustMap={trustMap} />
     </Suspense>
   );
 }

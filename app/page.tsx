@@ -5,10 +5,12 @@ import {
   getBrowseSkills,
   getPublisherProfiles,
   getAllRepoInfos,
+  getAuditsBySlug,
   type BrowseSkill,
   type DBPublisherRow,
   type PublisherProfile,
 } from "@/lib/db";
+import { auditRowsToInput, getSkillTrust, type SkillTrustStatus } from "@/lib/trust";
 import { Nav } from "@/components/Nav";
 
 // The landing reads aggregate registry data that doesn't need to be realtime.
@@ -20,13 +22,10 @@ export const revalidate = 600;
 // Derive everything the landing needs from one full scan, then cache ONLY the
 // small result — not the 2.2k-row array, which exceeds Next's 2MB data-cache
 // limit and silently fails to cache (forcing a slow re-scan every request).
-const WALL_CURATORS = new Set([
-  "obra", "mattpocock", "anthropic", "coreyhaines31", "addyosmani", "garrytan",
-]);
 
-// Handles always shown in the creators band regardless of install rank.
-const PINNED_PUBLISHERS = new Set(["garrytan", "addyosmani"]);
-// Handles excluded from the band even if they rank highly by installs.
+// Handles always shown first in the creators band regardless of star rank.
+const PINNED_PUBLISHERS = new Set(["garrytan"]);
+// Handles excluded from the band even if they rank highly.
 const SUPPRESSED_PUBLISHERS = new Set(["doany-ai"]);
 
 const getLandingData = unstable_cache(
@@ -53,17 +52,13 @@ const getLandingData = unstable_cache(
       }
       pubMap.set(s.ownerHandle, e);
     }
+    // Creators: sort by GH stars, pinned handles always first.
     const pubs = [...pubMap.values()].sort(
-      (a, b) => b.installs - a.installs || b.skillCount - a.skillCount
+      (a, b) => b.ghStars - a.ghStars || b.installs - a.installs
     );
-    // Always include pinned publishers; fill remaining slots from the ranked list.
     const pinned = pubs.filter(p => PINNED_PUBLISHERS.has(p.handle));
     const ranked = pubs.filter(p => !PINNED_PUBLISHERS.has(p.handle) && !SUPPRESSED_PUBLISHERS.has(p.handle));
     const topPubs = [...pinned, ...ranked].slice(0, 8);
-
-    const recent = [...skills].sort((a, b) =>
-      (b.verifiedDate || "").localeCompare(a.verifiedDate || "")
-    );
 
     // Top 2 skills per top-publisher by installs (for the publisher cards).
     const topHandles = new Set(topPubs.map((p) => p.handle));
@@ -75,24 +70,20 @@ const getLandingData = unstable_cache(
       if (arr.length < 2) arr.push(s);
     }
 
-    // Wall: skills from curated handles, interleaved by publisher so the wall
-    // looks diverse. Sorted by installs within each publisher's bucket so the
-    // best skills surface first. Fall back to all-publisher spread if the
-    // curated set is too thin (< 8 cards).
-    const wallByPub = new Map<string, BrowseSkill[]>();
-    for (const s of skills) {
-      if (!WALL_CURATORS.has(s.ownerHandle)) continue;
-      if (!wallByPub.has(s.ownerHandle)) wallByPub.set(s.ownerHandle, []);
-      const bucket = wallByPub.get(s.ownerHandle)!;
-      bucket.push(s);
-    }
-    for (const bucket of wallByPub.values()) {
-      bucket.sort((a, b) => b.installs - a.installs);
-    }
-    const wallCurated = interleaveByPublisher(wallByPub, 24);
-    const wall = wallCurated.length >= 8
-      ? wallCurated
-      : spreadByPublisher(recent, 16);
+    // Wall: top 10 most-installed enriched skills with 100k+ installs.
+    const wall = byInstalls
+      .filter(s => s.installs >= 100_000 && s.contentStatus === "ok")
+      .slice(0, 10);
+
+    // Hot this week: mix of skills.sh hot + trending, enriched only, top 8.
+    const hotSorted = [...skills]
+      .filter(s => s.contentStatus === "ok" && (s.hotRank !== null || s.trendingRank !== null))
+      .sort((a, b) => {
+        const aScore = Math.min(a.hotRank ?? Infinity, a.trendingRank ?? Infinity);
+        const bScore = Math.min(b.hotRank ?? Infinity, b.trendingRank ?? Infinity);
+        return aScore - bScore || b.installs - a.installs;
+      });
+    const hotSkills = hotSorted.slice(0, 8);
 
     const pubProfiles = await getPublisherProfiles(topPubs.map(p => p.handle));
 
@@ -102,12 +93,12 @@ const getLandingData = unstable_cache(
       totalInstalls,
       topPubs,
       wall,
-      spread: spreadByPublisher(recent, 16),
+      hotSkills,
       topSkillsByPub,
       pubProfiles: Object.fromEntries(pubProfiles),
     };
   },
-  ["landing-data-v13"],
+  ["landing-data-v15"],
   { revalidate: 600 }
 );
 import { Footer } from "@/components/Footer";
@@ -140,45 +131,6 @@ function initialsOf(handle: string): string {
   return handle.replace(/[^a-zA-Z0-9]/g, "").slice(0, 2).toUpperCase() || "??";
 }
 
-// Spread skills across publishers (one each, recent-first) so a single indexing
-// batch doesn't dominate, then backfill with the rest.
-function spreadByPublisher(skills: BrowseSkill[], limit: number): BrowseSkill[] {
-  const firstPer: BrowseSkill[] = [];
-  const leftover: BrowseSkill[] = [];
-  const seen = new Set<string>();
-  for (const s of skills) {
-    if (seen.has(s.ownerHandle)) leftover.push(s);
-    else {
-      seen.add(s.ownerHandle);
-      firstPer.push(s);
-    }
-  }
-  return [...firstPer, ...leftover].slice(0, limit);
-}
-
-// Round-robin across per-publisher buckets so no single publisher dominates
-// the wall. Each bucket should already be sorted by desired order (e.g. installs).
-function interleaveByPublisher(
-  byPub: Map<string, BrowseSkill[]>,
-  limit: number
-): BrowseSkill[] {
-  const buckets = [...byPub.values()];
-  const out: BrowseSkill[] = [];
-  let i = 0;
-  while (out.length < limit) {
-    let added = false;
-    for (const bucket of buckets) {
-      if (i < bucket.length) {
-        out.push(bucket[i]);
-        added = true;
-        if (out.length >= limit) break;
-      }
-    }
-    if (!added) break;
-    i++;
-  }
-  return out;
-}
 
 // ─── publisher card (real DB publisher) ───────────────────────────────────
 
@@ -241,7 +193,7 @@ function PubCard({
         {topSkills.map((s) => (
           <div className="row" key={s.id}>
             <span className="t">{s.title}</span>
-            {s.installs > 1000 && <span className="n">↓ {fmtCount(s.installs)}</span>}
+            {s.installs > 0 && <span className="n">↓ {fmtCount(s.installs)}</span>}
           </div>
         ))}
       </div>
@@ -353,7 +305,7 @@ export default async function LandingPage() {
     totalInstalls,
     topPubs,
     wall,
-    spread,
+    hotSkills,
     topSkillsByPub,
     pubProfiles,
   } = await getLandingData();
@@ -365,15 +317,29 @@ export default async function LandingPage() {
     installs: fmtCount(totalInstalls),
   };
 
-  // Skills shown on each publisher card: catalog picks take priority over DB top-by-installs.
+  // Skills shown on each publisher card: catalog picks take priority, but pad to 2
+  // with DB top-by-installs when fewer than 2 picks exist (e.g. obra has 1 pick).
   const byOwner = new Map<string, Skill[]>();
   for (const [handle, list] of Object.entries(topSkillsByPub)) {
     const picks = skillsByPublisher(handle).filter((s) => s.pick).slice(0, 2);
-    byOwner.set(handle, picks.length > 0 ? picks : list.map(toSkill));
+    const dbSkills = list.map(toSkill);
+    const merged = picks.length >= 2
+      ? picks
+      : [...picks, ...dbSkills.filter((d) => !picks.some((p) => p.id === d.id))].slice(0, 2);
+    byOwner.set(handle, merged);
   }
 
   const wallSkills = wall.map(toSkill);
-  const featured = spread.slice(0, 8).map(toSkill);
+  const featured = hotSkills.map(toSkill);
+
+  // Fetch trust for the featured cards (outside the cache — audit data is sparse).
+  const featuredSlugs = featured.map((s) => s.id);
+  const featuredAudits = await getAuditsBySlug(featuredSlugs);
+  const featuredTrust: Record<string, SkillTrustStatus> = {};
+  for (const [slug, rows] of Object.entries(featuredAudits)) {
+    const t = getSkillTrust(auditRowsToInput(rows));
+    if (t.status !== "pending") featuredTrust[slug] = t.status;
+  }
 
   return (
     <div className="lp accent-orange bg-cream">
@@ -399,6 +365,10 @@ export default async function LandingPage() {
         </div>
         <div className="stat-strip">
           <div className="stat">
+            <span className="v lp-num">{fmtCount(totalInstalls)}</span>
+            <span className="k">installs · all time</span>
+          </div>
+          <div className="stat">
             <div className="stat-v-row">
               <span className="v lp-num">{fmtCount(stats.skills)}</span>
               <span className="lp-trust-badge-sm" title="Every skill is automatically checked by three independent security firms">
@@ -411,12 +381,8 @@ export default async function LandingPage() {
             <span className="k">skills · every one security-checked</span>
           </div>
           <div className="stat">
-            <span className="v lp-num">{stats.creators}</span>
+            <span className="v lp-num">{fmtCount(stats.creators)}</span>
             <span className="k">creators · indexed</span>
-          </div>
-          <div className="stat">
-            <span className="v lp-num">{fmtCount(totalInstalls)}</span>
-            <span className="k">installs · all time</span>
           </div>
         </div>
       </header>
@@ -428,7 +394,7 @@ export default async function LandingPage() {
       <section className="lp-pubs" id="creators">
         <div className="lp-page">
           <div className="lp-section-eyebrow">
-            <span className="left">Creators · {stats.creators}</span>
+            <span className="left">Creators · {fmtCount(stats.creators)}</span>
             <Link className="right" href="/creators">view all →</Link>
           </div>
           <div className="head">
@@ -453,7 +419,7 @@ export default async function LandingPage() {
             ))}
             <Link className="lp-pub-end" href="/creators">
               <span className="t">
-                Browse all <span className="lp-num">{stats.creators}</span> creators
+                Browse all <span className="lp-num">{fmtCount(stats.creators)}</span> creators
               </span>
               <span className="a">→</span>
             </Link>
@@ -470,9 +436,9 @@ export default async function LandingPage() {
         <section className="lp-shelf">
           <div className="lp-shelf-head">
             <div>
-              <h2 className="lp-shelf-title">New this week</h2>
+              <h2 className="lp-shelf-title">Hot this week</h2>
               <p className="lp-shelf-blurb">
-                Skills added this week, ready to drag into Claude.
+                Trending and gaining installs fast on skills.sh right now.
               </p>
             </div>
             <div className="lp-shelf-right">
@@ -486,7 +452,7 @@ export default async function LandingPage() {
           </div>
           <div className="lp-shelf-grid">
             {featured.map((s) => (
-              <SkillCard key={s.id} skill={s} context="shelf" />
+              <SkillCard key={s.id} skill={s} context="shelf" trust={featuredTrust[s.id]} />
             ))}
           </div>
         </section>

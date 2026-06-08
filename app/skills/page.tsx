@@ -1,10 +1,14 @@
-import { getBrowseSkills, getPublisherProfiles } from "@/lib/db";
+import { getBrowseSkills, getPublisherProfiles, getSkillTrustMap } from "@/lib/db";
+import type { SkillTrustStatus } from "@/lib/trust";
 import { BrowseClient } from "./BrowseClient";
 
 export const revalidate = 600;
 
 export default async function SkillsPage() {
-  const skills = await getBrowseSkills();
+  const [skills, trustMap] = await Promise.all([
+    getBrowseSkills(),
+    getSkillTrustMap(),
+  ]);
 
   // Collect unique handles, fetch display names from publisher_profile.
   const handles = [...new Set(skills.map((s) => s.ownerHandle).filter(Boolean))];
@@ -18,5 +22,5 @@ export default async function SkillsPage() {
     }
   }
 
-  return <BrowseClient initialSkills={skills} publisherNames={publisherNames} />;
+  return <BrowseClient initialSkills={skills} publisherNames={publisherNames} trustMap={trustMap} />;
 }
