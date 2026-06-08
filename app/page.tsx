@@ -456,11 +456,11 @@ export default async function LandingPage() {
         </section>
       </main>
 
-      {/* How it works */}
-      <HowItWorks />
-
       {/* Trust / about */}
       <TrustAbout />
+
+      {/* How it works */}
+      <HowItWorks />
 
       {/* Footer */}
       <Footer stats={stats} />
