@@ -115,7 +115,7 @@ export default async function Image({
             {publisherHandle ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <span style={{ fontSize: 12, color: "#7a7468", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                  publisher
+                  creator
                 </span>
                 <span style={{ fontSize: 18, color: "#1c1b18" }}>
                   {publisherHandle}

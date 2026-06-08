@@ -130,6 +130,8 @@ export type BrowseSkill = {
   subShelf: string | null;
   genTags: string[] | null;
   contentStatus: string | null;  // 'pending' | 'ok' | 'review'
+  trendingRank: number | null;
+  hotRank: number | null;
 };
 
 // Raw publisher aggregate from DB (no catalog enrichment).
@@ -281,7 +283,7 @@ export async function getDBPublisherRows(): Promise<DBPublisherRow[]> {
     const handle = ownerFromUrl(row.source_url);
     if (!handle) continue;
     const entry = map.get(handle) ?? { installs: 0, ghStars: 0, count: 0 };
-    entry.installs += row.skill_signal?.install_count ?? 0;
+    entry.installs += (row.skill_signal?.install_count_estimate ?? 0) + (row.skill_signal?.install_count ?? 0);
     if (!seenRepos.has(row.source_url)) {
       // Prefer repo_info.stars (freshly synced) over skill_signal.stars (stale at index time).
       const repoPath = repoPathFromUrl(row.source_url);

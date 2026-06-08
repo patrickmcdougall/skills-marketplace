@@ -1,7 +1,7 @@
 interface FooterProps {
   stats: {
     skills: number;
-    publishers: number;
+    creators: number;
     installs: string;
   };
 }

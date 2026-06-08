@@ -170,7 +170,7 @@ export function CreatorsClient({
 
   const stats = useMemo(() => ({
     skills: rawRows.reduce((a, r) => a + r.skillCount, 0),
-    publishers: rawRows.length,
+    creators: rawRows.length,
     weekly: 6,
     installs: fmtCount(rawRows.reduce((a, r) => a + r.installs, 0)),
   }), [rawRows]);

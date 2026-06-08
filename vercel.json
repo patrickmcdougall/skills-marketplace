@@ -2,6 +2,29 @@
   "functions": {
     "app/i/[slug]/route.ts": {
       "maxDuration": 60
+    },
+    "app/api/cron/sync-catalog/route.ts": {
+      "maxDuration": 300
+    },
+    "app/api/cron/sync-audit/route.ts": {
+      "maxDuration": 300
+    },
+    "app/api/cron/generate-content/route.ts": {
+      "maxDuration": 300
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/sync-catalog",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/sync-audit",
+      "schedule": "0 4 * * 0"
+    },
+    {
+      "path": "/api/cron/generate-content",
+      "schedule": "0 5 * * *"
+    }
+  ]
 }

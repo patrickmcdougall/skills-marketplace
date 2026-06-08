@@ -3,7 +3,7 @@ import Link from "next/link";
 interface NavProps {
   stats: {
     skills: number;
-    publishers: number;
+    creators: number;
     installs: string;
   };
 }

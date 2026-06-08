@@ -103,8 +103,12 @@ export function fmtVerifiedDate(iso: string): string {
 export function fmtCount(n: number | null | undefined): string {
   if (n == null) return '0';
   if (n < 1000) return String(n);
-  const k = n / 1000;
-  return (k >= 10 ? k.toFixed(0) : k.toFixed(1).replace(/\.0$/, '')) + 'k';
+  if (n < 1_000_000) {
+    const k = n / 1000;
+    return (k >= 10 ? k.toFixed(0) : k.toFixed(1).replace(/\.0$/, '')) + 'k';
+  }
+  const m = n / 1_000_000;
+  return (m >= 10 ? m.toFixed(0) : m.toFixed(1).replace(/\.0$/, '')) + 'M';
 }
 
 // ─── shelves ──────────────────────────────────────────────────────────────
@@ -396,7 +400,7 @@ export const REAL_STATS = (() => {
   };
   return {
     skills,
-    publishers: Object.keys(PUBLISHERS).length,
+    creators: Object.keys(PUBLISHERS).length,
     weekly: 6,
     installs: fmt(installs),
   };

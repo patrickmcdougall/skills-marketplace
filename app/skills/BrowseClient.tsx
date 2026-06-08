@@ -384,7 +384,7 @@ function BrowsePageInner({ initialSkills, publisherNames }: { initialSkills: Bro
   const allSkills = useMemo(() => initialSkills.map(s => toSkill(s, publisherNames)), [initialSkills, publisherNames]);
   const stats = useMemo(() => ({
     skills: initialSkills.length,
-    publishers: new Set(initialSkills.map((s) => s.ownerHandle)).size,
+    creators: new Set(initialSkills.map((s) => s.ownerHandle)).size,
     weekly: 6,
     installs: fmtCount(initialSkills.reduce((a, s) => a + s.installs, 0)),
   }), [initialSkills]);

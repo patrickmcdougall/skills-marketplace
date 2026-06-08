@@ -5,7 +5,7 @@
  * scripts/curated-repos.txt with install counts as comments.
  *
  * Why skills.sh:
- *   - It's the production-scale registry. ~8,000+ skills with install
+ *   - It's the production-scale registry. 600,000+ skills with install
  *     counts — the one quality signal we can't generate ourselves.
  *   - First-party publishers (companies teaching how to use their own
  *     product) are flagged on a separate `/curated` endpoint.
@@ -23,11 +23,16 @@
  *
  * What this script does NOT do (yet):
  *   - Write per-skill install counts into skill_signal. That needs a slug
- *     match step. Worth doing — follow-up.
+ *     match step. Worth doing — follow-up. (sync-install-counts.ts does this.)
  *   - Use the /curated endpoint to tag first-party publishers. Worth doing
  *     when skill_listing gains an is_first_party column.
  *   - Pull audit results. Worth doing when skill_listing gains a verified
  *     status column.
+ *
+ * Auth: Vercel OIDC — no API key needed. Requires the project to have
+ *   OIDC Federation enabled (Project → Settings → OIDC Federation in the
+ *   Vercel dashboard). For local runs: `vercel link && vercel env pull`
+ *   then run this script normally.
  *
  * Run:
  *   npx tsx scripts/import-from-skillssh.ts
@@ -36,20 +41,18 @@
 import { config as loadEnv } from "dotenv";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { getVercelOidcToken } from "@vercel/oidc";
 
 loadEnv({ path: ".env.local" });
 
 // ---------- config ----------
 
 const API_BASE = "https://skills.sh/api/v1";
-const PER_PAGE = 500;                  // API max
-const MAX_PAGES = 30;                  // 30 * 500 = 15,000 — generous ceiling
-// Auth: 60 req/min unauthenticated, 600 req/min with API key.
-// Get a key by emailing skills-api@vercel.com (per https://skills.sh/docs/api).
-// Without a key we sleep 1.1s between calls; with a key we go faster.
-const SKILLSSH_API_KEY = process.env.SKILLSSH_API_KEY;
-const REQUEST_GAP_MS = SKILLSSH_API_KEY ? 150 : 1100;
-const USER_AGENT = "claudinho-importer/0.1 (+claudinho.app)";
+const PER_PAGE = 500;   // API max per page
+// No page cap — paginate until hasMore: false. The leaderboard only returns
+// skills with at least one install, so we naturally get the full installed catalog.
+const REQUEST_GAP_MS = 150;
+const USER_AGENT = "claudinho-importer/0.1 (+claudinho.xyz)";
 const CURATED_PATH = resolve(process.cwd(), "scripts/curated-repos.txt");
 
 // ---------- types ----------
@@ -76,113 +79,174 @@ type LeaderboardResponse = {
   };
 };
 
+type CuratedOwner = {
+  owner: string;
+  totalInstalls: number;
+  featuredRepo: string;
+  skills: SkillV1[];
+};
+
+type CuratedResponse = {
+  data: CuratedOwner[];
+  totalOwners: number;
+  totalSkills: number;
+};
+
 // ---------- main ----------
 
 async function main() {
-  const all = await loadSkills();
-  console.log(`[skillssh] loaded ${all.length} skills total`);
+  const token = await getVercelOidcToken();
 
-  // Filter: github only, not duplicate. (The snapshot from scrape-skillssh.ts
-  // doesn't set sourceType because all scraped paths are github-style — we
-  // default to "github" when missing.)
+  // Pull all three leaderboard views; merge by id, taking max installs.
+  // trending + hot surface repos with high velocity that rank low in all-time.
+  const all = await fetchAllSkillsAllViews(token);
+  console.log(`[skillssh] ${all.length} unique skills across all views`);
+
+  // First-party repos from the curated endpoint — companies that teach their
+  // own product. These get indexed regardless of leaderboard rank.
+  const firstPartyRepos = await fetchCuratedRepos(token);
+  console.log(`[skillssh] ${firstPartyRepos.size} first-party repos from /curated`);
+
+  // Filter: github only, not duplicate.
   const valid = all.filter((s) => (s.sourceType ?? "github") === "github" && !s.isDuplicate);
-  console.log(`[skillssh] ${valid.length} valid (github + non-duplicate)`);
 
-  // Group by owner/repo and sum installs.
-  const byRepo = new Map<string, { installs: number; skills: number }>();
+  // Group by owner/repo — sum installs across skills in that repo.
+  const byRepo = new Map<string, { installs: number; skills: number; firstParty: boolean }>();
+
   for (const s of valid) {
-    const entry = byRepo.get(s.source) ?? { installs: 0, skills: 0 };
+    const key = s.source;
+    const entry = byRepo.get(key) ?? { installs: 0, skills: 0, firstParty: firstPartyRepos.has(key.toLowerCase()) };
     entry.installs += s.installs;
     entry.skills += 1;
-    byRepo.set(s.source, entry);
+    byRepo.set(key, entry);
   }
-  console.log(`[skillssh] grouped into ${byRepo.size} distinct repos`);
+
+  // Also include first-party repos that didn't appear in the leaderboard at all
+  // (new publishers, well-known sources, repos with no tracked installs yet).
+  for (const repo of firstPartyRepos) {
+    const normalized = repo.toLowerCase();
+    // Find the canonical-case key already in the map.
+    const existing = [...byRepo.keys()].find(k => k.toLowerCase() === normalized);
+    if (!existing) {
+      byRepo.set(repo, { installs: 0, skills: 0, firstParty: true });
+    } else {
+      byRepo.get(existing)!.firstParty = true;
+    }
+  }
+
+  console.log(`[skillssh] ${byRepo.size} distinct repos (leaderboard + first-party)`);
 
   // Read existing curated list.
   const existing = readExistingRepos(CURATED_PATH);
   console.log(`[skillssh] curated-repos.txt currently has ${existing.size} repos`);
 
-  // What's new?
+  // New repos only. First-party repos sort before others; within each group,
+  // sort by installs desc.
   const newRepos = [...byRepo.entries()]
     .filter(([repo]) => !existing.has(repo.toLowerCase()))
-    .sort((a, b) => b[1].installs - a[1].installs);
+    .sort((a, b) => {
+      if (a[1].firstParty !== b[1].firstParty) return a[1].firstParty ? -1 : 1;
+      return b[1].installs - a[1].installs;
+    });
 
-  console.log(`[skillssh] ${newRepos.length} new repos to append`);
+  const newFirstParty = newRepos.filter(([, v]) => v.firstParty).length;
+  console.log(`[skillssh] ${newRepos.length} new repos to append (${newFirstParty} first-party)`);
 
   if (newRepos.length === 0) {
     console.log("[skillssh] nothing to add — curated list is already comprehensive.");
     return;
   }
 
-  // Append to curated-repos.txt.
   const append = renderAppendBlock(newRepos);
   writeFileSync(CURATED_PATH, readFileSync(CURATED_PATH, "utf8") + append);
 
   console.log(`[skillssh] appended ${newRepos.length} entries to ${CURATED_PATH}`);
   console.log(`[skillssh] top 10 by installs:`);
   for (const [repo, info] of newRepos.slice(0, 10)) {
-    console.log(`  ${info.installs.toString().padStart(8).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}  ${repo}  (${info.skills} skill${info.skills === 1 ? "" : "s"})`);
+    const tag = info.firstParty ? " [first-party]" : "";
+    const n = info.installs.toLocaleString("en-US");
+    console.log(`  ${n.padStart(12)}  ${repo}  (${info.skills} skill${info.skills === 1 ? "" : "s"})${tag}`);
   }
 
   console.log(`\n[skillssh] done. Next: npx tsx scripts/index-curated.ts`);
 }
 
-// ---------- data source ----------
-
-/**
- * Prefer the live skills.sh API if we have an API key. Otherwise read the
- * snapshot produced by scripts/scrape-skillssh.ts.
- */
-async function loadSkills(): Promise<SkillV1[]> {
-  if (SKILLSSH_API_KEY) {
-    console.log("[skillssh] using live API (SKILLSSH_API_KEY set)");
-    return await fetchAllSkills();
-  }
-  const snapshotPath = resolve(process.cwd(), "scripts/skillssh-snapshot.json");
-  if (!existsSync(snapshotPath)) {
-    throw new Error(
-      "No SKILLSSH_API_KEY in .env.local and no scripts/skillssh-snapshot.json on disk. " +
-        "Run `npx tsx scripts/scrape-skillssh.ts` first, or get a key from skills-api@vercel.com.",
-    );
-  }
-  console.log("[skillssh] using snapshot from scripts/skillssh-snapshot.json");
-  const raw = readFileSync(snapshotPath, "utf8");
-  const snap = JSON.parse(raw) as { skills: SkillV1[] };
-  return snap.skills;
-}
-
 // ---------- fetch ----------
 
-async function fetchAllSkills(): Promise<SkillV1[]> {
+/**
+ * Pull all three leaderboard views and merge by skill `id`, keeping the max
+ * installs seen across views. This catches repos that rank high in trending
+ * or hot but are buried in the all-time list.
+ */
+async function fetchAllSkillsAllViews(token: string): Promise<SkillV1[]> {
+  const byId = new Map<string, SkillV1>();
+  for (const view of ["all-time", "trending", "hot"] as const) {
+    const skills = await fetchLeaderboard(token, view);
+    for (const s of skills) {
+      const existing = byId.get(s.id);
+      if (!existing || s.installs > existing.installs) {
+        byId.set(s.id, s);
+      }
+    }
+    console.log(`[skillssh] after ${view}: ${byId.size} unique skills`);
+  }
+  return Array.from(byId.values());
+}
+
+async function fetchLeaderboard(token: string, view: "all-time" | "trending" | "hot"): Promise<SkillV1[]> {
   const out: SkillV1[] = [];
-  for (let page = 0; page < MAX_PAGES; page++) {
-    const url = `${API_BASE}/skills?view=all-time&per_page=${PER_PAGE}&page=${page}`;
-    const res = await fetch(url, { headers: buildHeaders() });
+  for (let page = 0; ; page++) {
+    const url = `${API_BASE}/skills?view=${view}&per_page=${PER_PAGE}&page=${page}`;
+    const res = await fetch(url, { headers: buildHeaders(token) });
     if (res.status === 401) {
       throw new Error(
-        "skills.sh returned 401 Unauthorized. Their docs say public endpoints don't need auth, " +
-          "but this one does. Email skills-api@vercel.com for an API key, then add SKILLSSH_API_KEY=... to .env.local and retry.",
+        "skills.sh returned 401. Make sure OIDC Federation is enabled in your Vercel project " +
+          "(Project → Settings → OIDC Federation) and you've run `vercel env pull` locally.",
       );
     }
-    if (!res.ok) {
-      throw new Error(`GET ${url} failed: ${res.status} ${res.statusText}`);
+    if (res.status === 429) {
+      const retry = res.headers.get("Retry-After") ?? "60";
+      console.warn(`[skillssh] rate limited — waiting ${retry}s`);
+      await sleep(parseInt(retry, 10) * 1000);
+      page--;
+      continue;
     }
+    if (!res.ok) throw new Error(`GET ${url} failed: ${res.status} ${res.statusText}`);
     const body = (await res.json()) as LeaderboardResponse;
     out.push(...body.data);
-    console.log(`[skillssh] page ${page}: +${body.data.length} (running total ${out.length}/${body.pagination.total})`);
     if (!body.pagination.hasMore) break;
     await sleep(REQUEST_GAP_MS);
   }
   return out;
 }
 
-function buildHeaders(): Record<string, string> {
-  const h: Record<string, string> = {
+/**
+ * Returns the set of `owner/repo` strings (lowercased) that skills.sh has
+ * identified as first-party — publishers teaching their own product.
+ * These are indexed unconditionally regardless of install count.
+ */
+async function fetchCuratedRepos(token: string): Promise<Set<string>> {
+  const url = `${API_BASE}/skills/curated`;
+  const res = await fetch(url, { headers: buildHeaders(token) });
+  if (!res.ok) throw new Error(`GET ${url} failed: ${res.status} ${res.statusText}`);
+  const body = (await res.json()) as CuratedResponse;
+  const repos = new Set<string>();
+  for (const owner of body.data) {
+    for (const skill of owner.skills) {
+      if ((skill.sourceType ?? "github") === "github" && !skill.isDuplicate) {
+        repos.add(skill.source.toLowerCase());
+      }
+    }
+  }
+  return repos;
+}
+
+function buildHeaders(token: string): Record<string, string> {
+  return {
     "User-Agent": USER_AGENT,
     accept: "application/json",
+    Authorization: `Bearer ${token}`,
   };
-  if (SKILLSSH_API_KEY) h["Authorization"] = `Bearer ${SKILLSSH_API_KEY}`;
-  return h;
 }
 
 // ---------- curated-repos.txt helpers ----------
@@ -202,20 +266,20 @@ function readExistingRepos(path: string): Set<string> {
   return out;
 }
 
-function renderAppendBlock(newRepos: [string, { installs: number; skills: number }][]): string {
+function renderAppendBlock(newRepos: [string, { installs: number; skills: number; firstParty: boolean }][]): string {
   const now = new Date().toISOString().slice(0, 10);
   const lines: string[] = [];
   lines.push("");
   lines.push(`# === skills.sh import (${now}) ===`);
   lines.push(`# Auto-appended by scripts/import-from-skillssh.ts.`);
-  lines.push(`# Numbers in comments are install totals from skills.sh at import time.`);
-  lines.push(`# These are candidates — index-curated.ts will verify each one and the report`);
-  lines.push(`# will flag any that came up empty.`);
+  lines.push(`# install counts = skills.sh totals at import time; first-party = from /curated endpoint.`);
+  lines.push(`# These are candidates — index-curated.ts will verify and flag empties.`);
   lines.push("");
   for (const [repo, info] of newRepos) {
     const installs = info.installs.toLocaleString("en-US");
     const skills = info.skills === 1 ? "1 skill" : `${info.skills} skills`;
-    lines.push(`${repo}  # ${installs} installs · ${skills}`);
+    const tag = info.firstParty ? " · first-party" : "";
+    lines.push(`${repo}  # ${installs} installs · ${skills}${tag}`);
   }
   return lines.join("\n") + "\n";
 }

@@ -1,17 +1,29 @@
 /**
  * scripts/scrape-skillssh.ts
  *
+ * SUPERSEDED — The skills.sh API is now available via Vercel OIDC (no API
+ * key needed). Use import-from-skillssh.ts and sync-install-counts.ts
+ * instead; both call the real API directly.
+ *
+ * This scraper was a workaround while the API was gated. The HTML-based
+ * install counts it produces are unreliable (all entries parsed as 600 due
+ * to rate-limit text appearing in the page). Do not use the snapshot it
+ * generates for install count data.
+ *
+ * Keeping this file for reference; safe to delete.
+ *
+ * ---
+ *
  * Claudinho — scrapes the public skills.sh leaderboard pages and writes
  * a snapshot to scripts/skillssh-snapshot.json.
  *
- * Why this exists:
- *   The skills.sh API endpoint at /api/v1/skills returns 401 without an
+ * Why this existed:
+ *   The skills.sh API endpoint at /api/v1/skills returned 401 without an
  *   API key, despite the docs saying public endpoints don't need auth.
- *   While we wait on a key from skills-api@vercel.com, the public HTML
- *   pages are still accessible — no auth required — and contain the same
- *   leaderboard data. This script fetches them, parses out the skills,
- *   and writes a snapshot in roughly the same shape the API would have
- *   returned.
+ *   While waiting on a key, the public HTML pages were accessible and
+ *   contained the same leaderboard data. This script fetched them, parsed
+ *   out the skills, and wrote a snapshot in roughly the same shape the API
+ *   would have returned.
  *
  *   import-from-skillssh.ts and sync-install-counts.ts both read this
  *   snapshot when no SKILLSSH_API_KEY is configured. Once the API key
