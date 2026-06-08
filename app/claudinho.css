@@ -8,7 +8,7 @@
   --bg:        #efece4;
   --paper:     #ffffff;
   --paper-2:   #f3f1e8;
-  --ink:       #1c1b18;
+  --ink:       #1A1A18;
   --ink-2:     #54524c;
   --ink-3:     #8e8b82;
   --ink-4:     #b9b6ac;
@@ -16,7 +16,7 @@
   --line-2:    #e8e5db;
   --line-3:    #efece2;
 
-  --accent:     #d8581c;
+  --accent:     #F25C1F;
   --accent-2:   #b4400e;
   --accent-soft:#fbe2d2;
 
@@ -66,7 +66,7 @@
 /* ─── page-level overrides ──────────────────────────────────────────────── */
 /* Re-declare brand tokens here so they beat Tailwind/shadcn's --accent in :root */
 .lp, .bp, .dp, .pp, .pl {
-  --accent:     #d8581c;
+  --accent:     #F25C1F;
   --accent-2:   #b4400e;
   --accent-soft:#fbe2d2;
 }
@@ -141,6 +141,7 @@ body.page-pp {
 }
 .lp-nav .logo-row {
   display: flex; align-items: center; gap: 16px;
+  margin-left: -10px;
 }
 .lp-nav .brand-stack {
   display: flex; flex-direction: column; gap: 1px;
@@ -151,22 +152,12 @@ body.page-pp {
   color: var(--ink-3);
   letter-spacing: 0.02em;
   white-space: nowrap;
+  padding-left: 10px;
 }
 .lp-nav .logo {
-  font-family: var(--font-geist-sans), sans-serif;
-  font-weight: 600;
-  font-size: 18px;
-  color: var(--ink);
-  letter-spacing: -0.025em;
-  display: inline-flex; align-items: center; gap: 9px;
+  display: inline-flex; align-items: center;
   text-decoration: none;
-}
-.lp-nav .logo::before {
-  content: "";
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--accent);
-  flex-shrink: 0;
+  line-height: 0;
 }
 .lp-nav .status {
   font-family: var(--font-jetbrains-mono), var(--font-geist-mono), monospace;
@@ -941,28 +932,19 @@ body.page-pp {
 }
 .lp-footer .brand-stack {
   display: flex; flex-direction: column; gap: 4px;
+  margin-left: -10px;
 }
 .lp-footer .brand-tag {
   font-family: var(--font-jetbrains-mono), var(--font-geist-mono), monospace;
   font-size: 11px;
   color: color-mix(in oklab, var(--paper-2) 60%, transparent);
   letter-spacing: 0.02em;
+  padding-left: 10px;
 }
 .lp-footer .brand .logo {
-  font-family: var(--font-geist-sans), sans-serif;
-  font-weight: 600;
-  font-size: 20px;
-  letter-spacing: -0.025em;
-  color: var(--paper-2);
-  display: inline-flex; align-items: center; gap: 11px;
+  display: inline-flex; align-items: center;
   text-decoration: none;
-}
-.lp-footer .brand .logo::before {
-  content: "";
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-  flex-shrink: 0;
+  line-height: 0;
 }
 .lp-footer .status-foot {
   margin-top: 8px;
@@ -2079,6 +2061,51 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
   margin: 0 0 16px;
 }
 
+/* Inline search in the creator page topbar */
+.pp-inline-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--line-2);
+  border-radius: 2px;
+  background: var(--paper);
+  padding: 0 10px;
+  flex: 1;
+  max-width: 340px;
+}
+.pp-inline-search .icon {
+  font-family: var(--font-jetbrains-mono), var(--font-geist-mono), monospace;
+  font-size: 13px;
+  color: var(--ink-4);
+  margin-right: 7px;
+  flex-shrink: 0;
+  user-select: none;
+}
+.pp-inline-search input {
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  padding: 7px 0;
+  min-width: 0;
+}
+.pp-inline-search input::placeholder { color: var(--ink-4); }
+.pp-inline-search-clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-4);
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+.pp-inline-search-clear:hover { color: var(--ink-2); }
+
 .pp-notfound {
   padding: 96px 0;
   text-align: center;
@@ -2633,3 +2660,166 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
   font-size: 10.5px;
   letter-spacing: 0.02em;
 }
+
+/* ─── copy button verified feedback (D7) ───────────────────────────────────── */
+.dp-install .cmd .copy.is-copied { color: var(--verified); }
+
+/* ─── outcome summary above install panel (D5) ─────────────────────────────── */
+.dp-outcome-summary {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  margin: 0 0 16px;
+}
+
+/* ─── text link style ───────────────────────────────────────────────────────── */
+.lp-text-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-size: 12.5px;
+}
+.lp-text-link:hover { color: var(--ink); }
+
+/* ─── clear-search button (P3 inline style → class) ────────────────────────── */
+.bp-search-clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-3);
+  font-size: 14px;
+  padding: 0 2px;
+  line-height: 1;
+}
+.bp-search-clear:hover { color: var(--ink); }
+
+/* ─── filter sub-shelf negative-margin → CSS class (P3) ────────────────────── */
+.bp-fsection.sub-shelf { margin-top: -16px; padding-top: 0; border-top: none; }
+
+/* ─── filter touch targets (P3) ────────────────────────────────────────────── */
+.bp-check, .bp-radio { min-height: 44px; }
+
+/* ─── hamburger button ──────────────────────────────────────────────────────── */
+.nav-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.nav-hamburger-icon,
+.nav-hamburger-icon::before,
+.nav-hamburger-icon::after {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--ink);
+  border-radius: 1px;
+  transition: transform 200ms ease, opacity 200ms ease;
+}
+.nav-hamburger-icon {
+  position: relative;
+}
+.nav-hamburger-icon::before,
+.nav-hamburger-icon::after {
+  content: "";
+  position: absolute;
+  left: 0;
+}
+.nav-hamburger-icon::before { top: -6px; }
+.nav-hamburger-icon::after  { top:  6px; }
+.nav-hamburger-icon.is-open { background: transparent; }
+.nav-hamburger-icon.is-open::before { transform: translateY(6px) rotate(45deg); }
+.nav-hamburger-icon.is-open::after  { transform: translateY(-6px) rotate(-45deg); }
+
+/* ─── nav drawer + backdrop ─────────────────────────────────────────────────── */
+.nav-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 27, 24, 0.4);
+  z-index: 19;
+}
+.nav-drawer {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg);
+  z-index: 20;
+  flex-direction: column;
+  padding: 80px 32px 32px;
+  transform: translateX(100%);
+  transition: transform 200ms ease;
+}
+.nav-drawer.is-open {
+  transform: translateX(0);
+}
+.nav-drawer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+.nav-drawer-links a {
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--ink-2);
+  text-decoration: none;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line-3);
+}
+.nav-drawer-links a:hover,
+.nav-drawer-links a[aria-current="page"] { color: var(--ink); }
+.nav-drawer-status {
+  padding-top: 24px;
+}
+.nav-status-chip {
+  font-family: var(--font-jetbrains-mono), var(--font-geist-mono), monospace;
+  font-size: 11px;
+  color: var(--ink-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-chip);
+  background: var(--paper);
+}
+.nav-status-chip::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--verified);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .nav-hamburger { display: inline-flex; }
+  .nav-desktop-links { display: none; }
+  .nav-backdrop { display: block; }
+  .nav-drawer { display: flex; }
+}
+
+/* ─── hero "How install works" text link ────────────────────────────────────── */
+.lp-hero .lp-text-link {
+  font-size: 13.5px;
+  color: var(--ink-3);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.lp-hero .lp-text-link:hover { color: var(--ink-2); }

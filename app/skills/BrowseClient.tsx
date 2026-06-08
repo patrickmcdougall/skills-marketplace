@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect, Suspense } from "react";
+import { useState, useMemo, useEffect, useRef, Suspense } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
   SHELVES,
@@ -85,10 +86,7 @@ function FilterSubShelf({
   const subs = SHELF_SUB_SHELVES[shelf] || [];
   if (subs.length === 0) return null;
   return (
-    <div
-      className="bp-fsection"
-      style={{ marginTop: -16, paddingTop: 0, borderTop: "none" }}
-    >
+    <div className="bp-fsection sub-shelf">
       <h3>
         <span>Sub-shelf</span>
         {value && <button onClick={() => onChange(null)}>clear</button>}
@@ -206,6 +204,18 @@ function BrowseTopBar({
 }) {
   const [open, setOpen] = useState(false);
   const current = SORT_OPTIONS.find((s) => s.id === sort) || SORT_OPTIONS[0];
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
 
   return (
     <div className="bp-topbar">
@@ -221,24 +231,17 @@ function BrowseTopBar({
         )}
       </div>
       <div className="right">
-        <div className="bp-sort">
+        <div className="bp-sort" ref={sortRef}>
           <button
             className="bp-sort-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpen((v) => !v);
-            }}
+            onClick={() => setOpen((v) => !v)}
           >
             <span className="lbl-k">sort:</span>
             <span className="v">{current.label}</span>
             <span className="caret">▾</span>
           </button>
           {open && (
-            <div
-              className="bp-sort-menu"
-              onClick={(e) => e.stopPropagation()}
-              onBlur={() => setOpen(false)}
-            >
+            <div className="bp-sort-menu">
               {SORT_OPTIONS.map((s) => (
                 <button
                   key={s.id}
@@ -327,15 +330,15 @@ function ActiveChips({
 
 // ─── empty state ─────────────────────────────────────────────────────────────
 
-function BrowseEmpty({ onClear }: { onClear: () => void }) {
+function BrowseEmpty() {
   return (
     <div className="bp-empty">
-      <h3>No skills match this filter.</h3>
-      <p>Try removing a filter, or browse all skills.</p>
+      <h3>Nothing in that combination yet.</h3>
+      <p>Try a different filter, or see everything.</p>
       <div className="actions">
-        <button className="lp-btn" onClick={onClear}>
-          Clear filters
-        </button>
+        <Link href="/skills" className="lp-btn">
+          Browse all skills
+        </Link>
       </div>
     </div>
   );
@@ -514,7 +517,7 @@ function BrowsePageInner({ initialSkills, publisherNames, trustMap }: { initialS
           {query && (
             <button
               onClick={() => { setQuery(""); setVisible(PAGE_SIZE); }}
-              style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-3)", fontSize: 14, padding: "0 2px" }}
+              className="bp-search-clear"
               aria-label="Clear search"
             >
               ×
@@ -561,7 +564,7 @@ function BrowsePageInner({ initialSkills, publisherNames, trustMap }: { initialS
           />
 
           {filtered.length === 0 ? (
-            <BrowseEmpty onClear={clearAll} />
+            <BrowseEmpty />
           ) : (
             <>
               <div className="bp-grid">

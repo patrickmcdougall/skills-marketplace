@@ -354,10 +354,10 @@ export default async function LandingPage() {
           work and install it in a click — no terminal.
         </p>
         <div className="actions">
-          <a href="#shelves" className="lp-btn solid">
+          <a href="#shelves" className="lp-btn accent">
             Browse skills →
           </a>
-          <a href="#how" className="lp-btn ghost">
+          <a href="#how" className="lp-text-link">
             How install works
           </a>
         </div>

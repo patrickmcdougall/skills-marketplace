@@ -113,7 +113,7 @@ export default async function SkillDetailPage({
   const repoPath = repoPathFromUrl(row.source_url);
   const repoName = repoPath.split("/")[1] ?? repoPath;
   const leaf = skillLeaf(row.skill_name);
-  const cmd = installCommand(repoPath, row.skill_name);
+  const cmd = installCommand(row.source_url, row.skill_name, row.skill_path);
   const signal = row.skill_signal;
 
   // Publisher — use curated catalog if available, fall back to GitHub owner
@@ -209,7 +209,7 @@ export default async function SkillDetailPage({
             </p>
             <div style={{ marginTop: 12 }}>
               <a
-                href={row.source_url}
+                href={row.skill_path ? `${row.source_url}/tree/main/${row.skill_path}` : row.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="lp-btn"
@@ -231,6 +231,13 @@ export default async function SkillDetailPage({
 
         {/* Right rail */}
         <aside className="dp-right">
+          {/* Outcome summary */}
+          <p className="dp-outcome-summary">
+            {row.content_status === "ok" && row.display_description
+              ? row.display_description
+              : (row.description_excerpt ?? "").slice(0, 120)}
+          </p>
+
           {/* Install card */}
           <InstallCard
             slug={slug}

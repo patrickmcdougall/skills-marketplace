@@ -21,6 +21,8 @@ export function InstallCard({
 }: InstallCardProps) {
   const [showCmd, setShowCmd] = useState(sourceOnly || installUnavailable);
   const [copied, setCopied] = useState(false);
+  const [opening, setOpening] = useState(false);
+  const [showFallback, setShowFallback] = useState(false);
 
   const copy = () => {
     if (typeof navigator !== "undefined") {
@@ -28,6 +30,15 @@ export function InstallCard({
     }
     setCopied(true);
     setTimeout(() => setCopied(false), 1400);
+  };
+
+  const openInClaudeCode = () => {
+    window.location.href = `claude://install?skill=${encodeURIComponent(installCommand)}`;
+    setOpening(true);
+    setTimeout(() => {
+      setOpening(false);
+      setShowFallback(true);
+    }, 2000);
   };
 
   const canDownload = !sourceOnly && !installUnavailable;
@@ -43,6 +54,30 @@ export function InstallCard({
           <p className="subscript">
             Drag into Cowork or Claude Desktop — no terminal needed.
           </p>
+          <div className="alt-row">
+            <button
+              className="alt"
+              onClick={openInClaudeCode}
+            >
+              {opening ? (
+                <span style={{ color: "var(--verified)" }}>Opening Claude Code…</span>
+              ) : (
+                <>Open in Claude Code →</>
+              )}
+            </button>
+          </div>
+          {showFallback && (
+            <p className="subscript" style={{ marginTop: 4 }}>
+              If it didn&apos;t open,{" "}
+              <button
+                className="lp-text-link"
+                onClick={() => { setShowCmd(true); setShowFallback(false); }}
+              >
+                copy the install command below
+              </button>
+              .
+            </p>
+          )}
         </>
       ) : (
         <p className="subscript" style={{ textAlign: "left", marginBottom: 4 }}>
@@ -64,7 +99,7 @@ export function InstallCard({
       {showCmd && (
         <div className="cmd">
           <code>{installCommand}</code>
-          <button className="copy" onClick={copy}>
+          <button className={`copy${copied ? " is-copied" : ""}`} onClick={copy}>
             {copied ? "copied" : "copy"}
           </button>
         </div>

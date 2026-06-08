@@ -122,18 +122,20 @@ export function SecuritySection({ trust }: SecuritySectionProps) {
         )}
       </div>
 
-      {/* What this skill can do — TODO: wire to real permission model */}
+      {/* What this skill can do — hidden until real permission data is available */}
       {/* TODO: Replace PLACEHOLDER_PERMISSIONS with real permissions derived from
                the skill's SKILL.md content or a future skill_permissions DB column.
                Shape: { label: string }[] — one entry per capability. */}
-      <div className="dp-sec-perms">
-        <div className="dp-sec-perms-label">What this skill can do</div>
-        <div className="dp-sec-perms-list">
-          {PLACEHOLDER_PERMISSIONS.map((p) => (
-            <span key={p.label} className="dp-sec-perm-pill">{p.label}</span>
-          ))}
+      {false && (
+        <div className="dp-sec-perms">
+          <div className="dp-sec-perms-label">What this skill can do</div>
+          <div className="dp-sec-perms-list">
+            {PLACEHOLDER_PERMISSIONS.map((p) => (
+              <span key={p.label} className="dp-sec-perm-pill">{p.label}</span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Three-source breakdown */}
       <div className="dp-sec-checks">
