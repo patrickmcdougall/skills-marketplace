@@ -15,7 +15,7 @@ export function DriftWall({ skills }: DriftWallProps) {
     <div className="lp-wall" aria-label="Drifting wall of recently-verified skills">
       <div className="lp-wall-track">
         {track.map((s, i) => (
-          <SkillCard key={`${s.id}-${i}`} skill={s} context="wall" />
+          <SkillCard key={`${s.id}-${i}`} skill={s} context="wall" trust="verified" />
         ))}
       </div>
     </div>
