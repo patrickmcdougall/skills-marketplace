@@ -13,30 +13,24 @@ interface SkillCardProps {
 function TrustIcon({ status }: { status: SkillTrustStatus }) {
   if (status === "verified") {
     return (
-      <span
-        className="card-trust verified"
-        data-tooltip="Passed all 3 security checks"
-        aria-label="Security verified"
-      >
+      <span className="card-trust verified" aria-label="Security verified">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
           <circle cx="7" cy="7" r="6.5" fill="var(--verified-soft)" stroke="var(--verified)" strokeWidth="1"/>
           <path d="M4.5 7l1.8 1.8 3.2-3.6" stroke="var(--verified)" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
+        <span className="card-trust-tip">Passed all 3 security checks</span>
       </span>
     );
   }
   if (status === "flagged") {
     return (
-      <span
-        className="card-trust flagged"
-        data-tooltip="Security concern — check detail page"
-        aria-label="Security flagged"
-      >
+      <span className="card-trust flagged" aria-label="Security flagged">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
           <path d="M7 1.5L12.5 11.5H1.5L7 1.5Z" fill="var(--accent-soft)" stroke="var(--accent)" strokeWidth="1" strokeLinejoin="round"/>
           <line x1="7" y1="5.5" x2="7" y2="8" stroke="var(--accent)" strokeWidth="1.3" strokeLinecap="round"/>
           <circle cx="7" cy="9.5" r="0.6" fill="var(--accent)"/>
         </svg>
+        <span className="card-trust-tip">Security concern — check detail page</span>
       </span>
     );
   }

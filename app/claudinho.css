@@ -2418,8 +2418,7 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
   position: relative;
   cursor: default;
 }
-.skill-card .card-trust::after {
-  content: attr(data-tooltip);
+.skill-card .card-trust-tip {
   position: absolute;
   top: calc(100% + 5px);
   right: 0;
@@ -2433,10 +2432,10 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.12s;
-  z-index: 10;
+  transition: opacity 0.15s;
+  z-index: 20;
 }
-.skill-card .card-trust:hover::after {
+.skill-card .card-trust:hover .card-trust-tip {
   opacity: 1;
 }
 
