@@ -582,16 +582,22 @@ body.page-pp {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 22px 16px 20px;
+  padding: 20px 18px;
+  background: var(--paper);
+  border: 1px solid var(--line-2);
   border-top: 2px solid var(--cat-color, var(--line));
+  border-radius: var(--r-card);
   text-decoration: none;
   color: inherit;
-  transition: background 120ms ease;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
   min-width: 0;
   overflow: hidden;
 }
 
-.lp-cat-card:hover { background: color-mix(in oklab, var(--cat-color, var(--ink)) 4%, transparent); }
+.lp-cat-card:hover {
+  border-color: var(--cat-color, var(--line));
+  box-shadow: 0 1px 0 0 var(--line-2), 0 6px 20px -10px rgba(28,27,24,0.10);
+}
 
 .lp-cat-card.cat-product   { --cat-color: var(--c-product); }
 .lp-cat-card.cat-marketing { --cat-color: var(--c-marketing); }
