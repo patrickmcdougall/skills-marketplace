@@ -45,3 +45,4 @@ next-env.d.ts
 
 # content generation checkpoint (resumable run state)
 .content-gen-checkpoint.json
+.gstack/

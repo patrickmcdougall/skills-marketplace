@@ -27,6 +27,22 @@ const PINNED_PUBLISHERS = new Set(["garrytan"]);
 // Handles excluded from the band even if they rank highly.
 const SUPPRESSED_PUBLISHERS = new Set(["doany-ai"]);
 
+// Curated picks for non-technical teams — shown in order on the landing page.
+const CURATED_SLUGS = [
+  "mattpocock-skills-grill-me",
+  "agentspace-so-runcomfy-agent-skills-video-edit",
+  "obra-superpowers-brainstorming",
+  "mattpocock-skills-to-prd",
+  "mattpocock-skills-triage",
+  "mattpocock-skills-handoff",
+  "anthropics-skills-pptx",
+  "coreyhaines31-marketingskills-seo-audit",
+  "anthropics-skills-pdf",
+  "coreyhaines31-marketingskills-copywriting",
+  "anthropics-skills-xlsx",
+  "coreyhaines31-marketingskills-content-strategy",
+];
+
 const getLandingData = unstable_cache(
   async () => {
     const [skills, repoInfos, trustMap] = await Promise.all([getBrowseSkills(), getAllRepoInfos(), getSkillTrustMap()]);
@@ -69,17 +85,6 @@ const getLandingData = unstable_cache(
       if (arr.length < 2) arr.push(s);
     }
 
-    // Wall: top 10 most-installed enriched skills, max 1 per creator for diversity.
-    const seenWallOwners = new Set<string>();
-    const wall = byInstalls
-      .filter(s => {
-        if (s.installs < 100_000 || s.contentStatus !== "ok") return false;
-        if (seenWallOwners.has(s.ownerHandle)) return false;
-        seenWallOwners.add(s.ownerHandle);
-        return true;
-      })
-      .slice(0, 10);
-
     // Hot this week: mix of skills.sh hot + trending, enriched only, top 8.
     const hotSorted = [...skills]
       .filter(s => s.contentStatus === "ok" && (s.hotRank !== null || s.trendingRank !== null))
@@ -90,6 +95,35 @@ const getLandingData = unstable_cache(
       });
     const hotSkills = hotSorted.slice(0, 8);
 
+    // Curated picks for the drift wall: pull in order of CURATED_SLUGS, skip any not in DB.
+    const slugIndex = new Map(skills.map(s => [s.slug, s]));
+    const curatedSkills = CURATED_SLUGS.map(slug => slugIndex.get(slug)).filter((s): s is BrowseSkill => s !== undefined);
+
+    // Shelf highlights: top 3 skills per shelf for the category browser.
+    const SHELF_DEFS = [
+      { id: "product",   title: "Product",          blurb: "Spec features, triage feedback, write PRDs.",       genShelf: "product" },
+      { id: "marketing", title: "Marketing",         blurb: "Draft campaigns, audit SEO, write copy.",           genShelf: "marketing" },
+      { id: "cs",        title: "Customer Success",  blurb: "Triage tickets, build onboarding, draft saves.",    genShelf: "customer-success" },
+      { id: "ops",       title: "Operations",        blurb: "Reconcile expenses, prepare docs, run hygiene.",    genShelf: "operations" },
+      { id: "eng",       title: "Engineering",       blurb: "Review PRs, generate tests, document code.",        genShelf: "engineering" },
+      { id: "design",    title: "Design",            blurb: "Audit UI, spec components, run a11y checks.",       genShelf: "design" },
+      { id: "sales",     title: "Sales",             blurb: "Cold outreach, follow-ups, pipeline summaries.",    genShelf: "sales" },
+      { id: "finance",   title: "Finance",           blurb: "Build runway models, prep investor updates.",       genShelf: "finance" },
+    ];
+    const topByGenShelf = new Map<string, BrowseSkill[]>();
+    for (const s of byInstalls) {
+      if (s.contentStatus !== "ok" || !s.genShelf) continue;
+      const arr = topByGenShelf.get(s.genShelf) ?? [];
+      if (arr.length < 3) { arr.push(s); topByGenShelf.set(s.genShelf, arr); }
+    }
+    const shelfHighlights = SHELF_DEFS
+      .map(def => {
+        const topSkills = topByGenShelf.get(def.genShelf) ?? [];
+        if (!topSkills.length) return null;
+        return { shelfId: def.id, shelfTitle: def.title, blurb: def.blurb, topSkills };
+      })
+      .filter((x): x is { shelfId: string; shelfTitle: string; blurb: string; topSkills: BrowseSkill[] } => x !== null);
+
     const pubProfiles = await getPublisherProfiles(topPubs.map(p => p.handle));
 
     return {
@@ -97,14 +131,15 @@ const getLandingData = unstable_cache(
       totalPublishers: pubs.length,
       totalInstalls,
       topPubs,
-      wall,
       hotSkills,
+      curatedSkills,
+      shelfHighlights,
       topSkillsByPub,
       pubProfiles: Object.fromEntries(pubProfiles),
       trustMap,
     };
   },
-  ["landing-data-v16"],
+  ["landing-data-v19"],
   { revalidate: 600 }
 );
 import { Footer } from "@/components/Footer";
@@ -310,8 +345,9 @@ export default async function LandingPage() {
     totalPublishers,
     totalInstalls,
     topPubs,
-    wall,
     hotSkills,
+    curatedSkills,
+    shelfHighlights,
     topSkillsByPub,
     pubProfiles,
     trustMap,
@@ -336,7 +372,7 @@ export default async function LandingPage() {
     byOwner.set(handle, merged);
   }
 
-  const wallSkills = wall.map(toSkill);
+  const driftSkills = curatedSkills.map(toSkill);
   const featured = hotSkills.map(toSkill);
 
   return (
@@ -385,8 +421,8 @@ export default async function LandingPage() {
         </div>
       </header>
 
-      {/* Drifting wall of recently-verified skills (real data) */}
-      <DriftWall skills={wallSkills} />
+      {/* Drifting wall of curated skills */}
+      <DriftWall skills={driftSkills} />
 
       {/* Creators band */}
       <section className="lp-pubs" id="creators">
@@ -425,12 +461,43 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* Recently verified (real data — replaces the un-categorized mock shelves) */}
+      {/* Shelves — category browser + hot this week */}
       <main className="lp-shelves lp-page" id="shelves">
-        <div className="lp-section-eyebrow">
-          <span className="left">Ready to install</span>
-          <span className="right">{fmtCount(stats.skills)} skills</span>
+        {/* Browse by role */}
+        <div className="lp-cat-section">
+          <div className="lp-shelf-head">
+            <div>
+              <h2 className="lp-shelf-title">Browse by role</h2>
+              <p className="lp-shelf-blurb">Skills organised by the job they do.</p>
+            </div>
+            <div className="lp-shelf-right">
+              <span><span className="count lp-num">{shelfHighlights.length}</span> categories</span>
+              <Link className="see-all" href="/skills">browse all →</Link>
+            </div>
+          </div>
+          <div className="lp-cat-grid">
+            {shelfHighlights.map(({ shelfId, shelfTitle, blurb, topSkills }) => {
+              const skills = topSkills.map(toSkill);
+              return (
+                <Link key={shelfId} className={`lp-cat-card cat-${shelfId}`} href={`/skills?shelf=${shelfId}`}>
+                  <span className="cat-title">{shelfTitle}</span>
+                  <p className="cat-blurb">{blurb}</p>
+                  <div className="cat-examples">
+                    <span className="cat-examples-label">example skills</span>
+                    {skills.map(s => (
+                      <div key={s.id} className="cat-ex-row">
+                        <span className="t">{s.title}</span>
+                        {s.installs > 0 && <span className="n">↓ {fmtCount(s.installs)}</span>}
+                      </div>
+                    ))}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
+
+        {/* Hot this week */}
         <section className="lp-shelf">
           <div className="lp-shelf-head">
             <div>
