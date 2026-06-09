@@ -11,7 +11,7 @@ function loadFont(): ArrayBuffer {
 }
 
 const STATS = [
-  { n: "2k+", k: "skills" },
+  { n: "12k+", k: "skills" },
   { n: "89", k: "creators" },
   { n: "181", k: "topics" },
 ];
@@ -70,7 +70,7 @@ export default function Image() {
             marginBottom: 40,
           }}
         >
-          <span>Two thousand community skills, sorted by the job they do.</span>
+          <span>12,000+ community skills, sorted by the job they do.</span>
         </div>
 
         {/* Bottom strip */}

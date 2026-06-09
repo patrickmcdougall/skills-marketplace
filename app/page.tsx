@@ -350,7 +350,7 @@ export default async function LandingPage() {
           to&nbsp;do.
         </h1>
         <p className="sub">
-          Two thousand community skills, sorted by the job they do. Find the one for your
+          12,000+ community skills, sorted by the job they do. Find the one for your
           work and install it in a click — no terminal.
         </p>
         <div className="actions">

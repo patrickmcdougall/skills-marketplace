@@ -28,21 +28,21 @@ export const metadata: Metadata = {
     template: "%s — Claudinho",
   },
   description:
-    "Two thousand community skills, sorted by the job they do. Find the one for your work and install it in a click — no terminal.",
+    "12,000+ community skills, sorted by the job they do. Find the one for your work and install it in a click — no terminal.",
   openGraph: {
     type: "website",
     url: BASE_URL,
     siteName: "Claudinho",
     title: "Claudinho — skills, built by the community",
     description:
-      "Two thousand community skills, sorted by the job they do. Find the one for your work and install it in a click — no terminal.",
+      "12,000+ community skills, sorted by the job they do. Find the one for your work and install it in a click — no terminal.",
     images: [{ url: "/og.png", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Claudinho — skills, built by the community",
     description:
-      "Two thousand community skills, sorted by the job they do. Find the one for your work and install it in a click — no terminal.",
+      "12,000+ community skills, sorted by the job they do. Find the one for your work and install it in a click — no terminal.",
     images: ["/og.png"],
   },
   icons: {
