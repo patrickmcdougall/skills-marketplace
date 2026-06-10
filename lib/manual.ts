@@ -136,13 +136,14 @@ export type CaseStudy = {
 
 // ─── theme order (mirrors the catalogue shelves, first wave first) ───────────
 
+// Wave-1 themes (those with live cases) float first.
 export const MANUAL_SHELF_ORDER: ShelfId[] = [
-  "ops",
-  "product",
   "finance",
+  "product",
+  "marketing",
+  "ops",
   "design",
   "sales",
-  "marketing",
 ];
 
 export const SHELF_TITLES: Record<ShelfId, string> = {
@@ -203,9 +204,9 @@ export const START_PAGES: GuidePage[] = [
           {
             title: "Give it your files",
             caption:
-              "Drag in a folder or a few files. Cowork reads the real files on your computer — no exporting, no renaming.",
+              "Drag in the file — here, a billing export that came out broken. Cowork reads the real files on your computer; no fixing it up first.",
             view: "drop-files",
-            files: ["nubank-may.pdf", "itau-may.csv", "amex-may.xlsx"],
+            files: ["billing-export-may.xlsx"],
           },
           {
             title: "Say what you want",
@@ -213,24 +214,24 @@ export const START_PAGES: GuidePage[] = [
               "One plain sentence — what you want at the end, not the steps. Ask it to check with you first and it asks before doing anything, the habit that prevents most bad outputs.",
             view: "compose",
             typed:
-              "Sort this folder of statements into a monthly expense report by category — and ask me first if anything's unclear.",
+              "Clean this export into a board-ready revenue report — totals by plan and region — and ask me first if anything looks off.",
             question:
-              "Got it. Two charges I can't place — want me to flag them for you rather than guess at a category?",
+              "Found 4 duplicated rows and one with shifted columns — want me to flag them for your review rather than fix them silently?",
           },
           {
             title: "It works, you review",
             caption:
               "Cowork does the multi-step part on its own and hands back a finished file. You already know what good looks like, so you check it in seconds.",
             view: "review",
-            resultTitle: "May expenses — categorized.xlsx",
-            resultMeta: "214 of 214 charges sorted · 4 categories · 2 flagged for you",
+            resultTitle: "May 2026 — Board revenue report.xlsx",
+            resultMeta: "214 transactions · totals by plan & region · 5 rows flagged for you",
           },
         ],
       },
       {
         kind: "callout",
         title: "So where do skills come in? They're optional.",
-        text: "Everything above worked without one. A **skill** is a saved playbook for a job you do again and again — it already knows your categories, your format, the steps. So the same job drops to an even shorter sentence (“do my monthly expenses for this folder”) and comes back the same way every time, with nothing to set up. That's what the rest of the Manual shows, and where the catalogue comes in.",
+        text: "Everything above worked without one. A **skill** is a saved playbook for a job you do again and again — it already knows your formats, your standards, the steps. So the same job drops to an even shorter sentence (“turn this export into the board report”) and comes back the same way every time, with nothing to set up. That's what the rest of the Manual shows, and where the catalogue comes in.",
       },
     ],
     next: { href: "/manual/start/when-to-use-it", label: "Next: when to use it" },
@@ -384,7 +385,7 @@ export const SKILLS_PAGES: GuidePage[] = [
       },
       {
         kind: "p",
-        text: "**It's not software, and there's nothing to code.** A skill is closer to a recipe card than an app. Install it once and Claude follows it whenever that job comes up. Your ask shrinks from a paragraph of instructions to “do my monthly expenses for this folder.”",
+        text: "**It's not software, and there's nothing to code.** A skill is closer to a recipe card than an app. Install it once and Claude follows it whenever that job comes up. Your ask shrinks from a paragraph of instructions to “turn this export into the board report.”",
       },
       {
         kind: "list",
@@ -442,7 +443,7 @@ export const SKILLS_PAGES: GuidePage[] = [
         text: "And the simplest filter of all: **start with one job you do every week and can judge in fifteen seconds.** If the skill nails that, trust compounds from there.",
       },
     ],
-    next: { href: "/manual/monthly-expenses-sorted", label: "Now see it all in action" },
+    next: { href: "/manual/clean-a-messy-export", label: "Now see it all in action" },
   },
 ];
 
@@ -451,95 +452,13 @@ export function getSkillsPage(topic: string): GuidePage | undefined {
 }
 
 // ─── content: Part 2 ─────────────────────────────────────────────────────────
-// Case 01 is the locked reference build (status: live). The remaining cases are
-// honest "coming soon" stubs — theme + scenario + the concept they'll teach —
-// until each is produced against a real skill with a captured before/after.
+// The flagship (clean-a-messy-export, Finance) is the locked reference build —
+// produced from a REAL run of anthropics/skills xlsx on a fabricated-but-
+// realistic broken billing export (artifacts archived in the planning folder).
+// Remaining cases are honest "coming soon" stubs until each gets the same
+// production run against its real skill.
 
 export const CASES: CaseStudy[] = [
-  // ── 01 · Operations · LIVE (reference build) ──
-  {
-    slug: "monthly-expenses-sorted",
-    shelf: "ops",
-    subShelf: "process-automation",
-    navLabel: "Monthly expenses, sorted",
-    title: "Stop hand-sorting your monthly expenses",
-    standfirst:
-      "Three accounts, cryptic line items, an hour with a spreadsheet — every single month. The same job, in about ninety seconds.",
-    status: "live",
-    concept: {
-      lead: "A skill is a saved playbook, not a clever prompt.",
-      body: "You didn't describe the categories, the file formats, or the layout — the skill carries all of that. Your half of the job shrinks to one plain sentence.",
-    },
-    skill: {
-      // TODO(task-5): swap for a real catalogue slug once selected from www.claudinho.xyz.
-      skillSlug: "monthly-expenses",
-      name: "monthly-expenses",
-      publisher: "patrickmcd",
-      blurb:
-        "Sorts a folder of bank and card statements into one categorized monthly report — aligned to the accounts and categories you set once.",
-      installCommand: "claude skill install patrickmcd/monthly-expenses",
-    },
-    scenario: [
-      "Every month, the same chore: download statements from three accounts, squint at cryptic line items, and tag each one into a spreadsheet your accountant expects. An hour gone — and you'll do it again in thirty days.",
-      "It's repetitive, rule-based, and identical every time, which makes it the perfect thing to hand off.",
-    ],
-    steps: [
-      {
-        title: "Drop the files in a folder",
-        body: "This month's statements — PDFs, CSVs, the Excel export. No renaming, no cleanup.",
-      },
-      {
-        title: "Type one sentence",
-        body: "The skill already knows your categories and your accountant's layout.",
-        typed: "Do my monthly expenses for this folder.",
-      },
-      {
-        title: "Review the report",
-        body: "Every charge tagged, totals per category, anything ambiguous flagged for a quick yes/no.",
-      },
-    ],
-    before: {
-      label: "Before — 214 raw rows",
-      lines: [
-        "AMZN MKTP*2K… R$ 89,90",
-        "UBER *TRIP R$ 24,10",
-        "STRIPE R$ 1.200,00",
-        "PADARIA DOIS… R$ 18,00",
-        "??? R$ 340,00",
-      ],
-    },
-    after: {
-      label: "After — categorized",
-      rows: [
-        { label: "Software", value: "R$ 3,420", dot: "#4571d8" },
-        { label: "Travel", value: "R$ 1,180", dot: "var(--accent)" },
-        { label: "Meals", value: "R$ 640", dot: "var(--verified)" },
-        { label: "Flagged (2)", value: "R$ 540", dot: "var(--ink-3)" },
-      ],
-      footer: "✓ 214 of 214 accounted for",
-    },
-    stats: [
-      { v: "~1 hr", k: "per month, back" },
-      { v: "0", k: "formulas written" },
-      { v: "1", k: "sentence typed" },
-    ],
-    install: [
-      {
-        title: "Open the skill on Claudinho & copy its command",
-        typed: "claude skill install patrickmcd/monthly-expenses",
-      },
-      {
-        title: "Paste it into the Claude desktop app",
-        body: "In Cowork mode. The skill is added in seconds.",
-      },
-      {
-        title: "Point Cowork at your folder, type the sentence",
-        body: "Select the folder of statements and ask plainly. Done.",
-      },
-    ],
-    nextCase: "call-notes-to-deck",
-  },
-
   // ── 02 · Product · soon ──
   {
     slug: "call-notes-to-deck",
@@ -675,22 +594,90 @@ export const CASES: CaseStudy[] = [
 
   // ── 08 · Finance · soon ──
   {
+    // ★ FLAGSHIP — built from a real run of anthropics/skills xlsx (2026-06-10).
+    // Numbers below are the run's actual output, not invented.
     slug: "clean-a-messy-export",
     shelf: "finance",
     subShelf: "reporting-dashboards",
-    navLabel: "Clean a messy export",
+    navLabel: "Messy export → board report",
     title: "Clean a messy export into a board-ready report",
     standfirst:
-      "The export came out broken — merged cells, junk rows, half the headers missing — and the meeting's at three.",
-    status: "soon",
+      "The billing export came out broken — junk rows, three date formats, half the amounts as text — and the board meeting's at three. Same file, board-ready, in one pass.",
+    status: "live",
     concept: {
       lead: "Cleanup and formatting is rule-based — a perfect handoff.",
-      body: "The same rules every time means you describe the output once and stop touching it.",
+      body: "Three date formats, currency-as-text, duplicated rows: every fix follows a rule, so none of it needs you. And what didn't follow a rule — four duplicates, one shifted row — landed in a “Flagged for review” tab instead of being silently guessed at. You get a working .xlsx with live formulas, not a screenshot of one.",
     },
-    skill: { skillSlug: "", name: "", publisher: "", blurb: "Takes a malformed export and returns a clean, formatted summary.", installCommand: "" },
+    skill: {
+      skillSlug: "anthropics-skills-xlsx",
+      name: "xlsx",
+      publisher: "anthropics",
+      blurb:
+        "Reads, fixes, and builds spreadsheet files end to end — cleaning messy exports into proper, formatted workbooks with live formulas and zero formula errors.",
+      installCommand: "npx skills add https://github.com/anthropics/skills/tree/main/xlsx",
+    },
     scenario: [
-      "The export came out broken — merged cells, junk rows, half the headers missing — and the meeting's at three.",
+      "Board meeting at three. The revenue export from your billing tool came out the way exports do: a junk title block, headers half missing, dates in three formats, 40% of the amounts as “R$ 1.234,56” text, stray subtotal lines — and, somewhere in 220 rows, a few duplicates you can't see.",
+      "It's repetitive, rule-based cleanup with an output you can judge at a glance — which makes it exactly the kind of work to hand off.",
     ],
+    steps: [
+      {
+        title: "Drop the export in",
+        body: "billing-export-may.xlsx, straight from the billing tool. Broken as-is — no pre-cleaning.",
+      },
+      {
+        title: "Type one sentence",
+        body: "The skill knows spreadsheet hygiene — formats, formulas, what to flag instead of guess.",
+        typed:
+          "Clean this export into a board-ready revenue report — totals by plan and region — and flag anything I should look at.",
+      },
+      {
+        title: "Review the workbook",
+        body: "A real .xlsx back: a Summary tab with live formulas, the cleaned data behind it, and a “Flagged for review” tab with the 5 rows it refused to fix silently.",
+      },
+    ],
+    before: {
+      label: "Before — 220 raw lines",
+      lines: [
+        "BILLING SYSTEM v4.2 — TRANSACTION EXPORT",
+        "2026-05-07 · AutoPeças Silva · Pro · 4470 · pago",
+        "12/05/2026 · Livraria Foco · Starter · R$ 245,00",
+        "May 3, 2026 · Mercado Aurora · PRO · 4470 · paid",
+        "--- SUBTOTAL PAGE 1 ---",
+        "· Construmax · Enterprise · 4900 · SP   Paid",
+      ],
+    },
+    after: {
+      label: "After — board-ready",
+      rows: [
+        { label: "Enterprise", value: "R$ 338,100", dot: "#4571d8" },
+        { label: "Pro", value: "R$ 178,055", dot: "var(--accent)" },
+        { label: "Starter", value: "R$ 55,370", dot: "var(--verified)" },
+        { label: "Flagged (5)", value: "for review", dot: "var(--ink-3)" },
+      ],
+      footer: "✓ 214 transactions · 20 customers · live formulas",
+    },
+    stats: [
+      { v: "~2 hrs", k: "of cleanup, back" },
+      { v: "5", k: "rows flagged, 0 guessed" },
+      { v: "1", k: "sentence typed" },
+    ],
+    install: [
+      {
+        title: "Open the skill on Claudinho & download it",
+        body: "One click — a single .skill file lands in your Downloads folder.",
+        typed: "npx skills add https://github.com/anthropics/skills/tree/main/xlsx",
+      },
+      {
+        title: "Drag the file into Cowork",
+        body: "Drop it into the Claude desktop app window. Installed — it lives under Customize → Skills.",
+      },
+      {
+        title: "Drop your export, type the sentence",
+        body: "Any messy spreadsheet, asked plainly. Done.",
+      },
+    ],
+    nextCase: "call-notes-to-deck",
   },
 
   // ── 09 · Marketing · soon ──

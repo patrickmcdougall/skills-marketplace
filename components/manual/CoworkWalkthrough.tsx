@@ -104,9 +104,9 @@ function StepView({ step }: { step: CoworkStep }) {
       return (
         <div className="cw-review">
           <div className="cw-progress">
-            <span className="cw-progress-done">Reading 3 files</span>
-            <span className="cw-progress-done">Categorizing 214 charges</span>
-            <span className="cw-progress-done">Building the report</span>
+            <span className="cw-progress-done">Reading 220 lines</span>
+            <span className="cw-progress-done">Cleaning + de-duplicating</span>
+            <span className="cw-progress-done">Building the summary, live formulas</span>
           </div>
           <div className="cw-result">
             <span className="cw-result-check">✓</span>

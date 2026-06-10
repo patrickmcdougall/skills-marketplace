@@ -47,7 +47,7 @@ export default function ManualIndexPage() {
           <Link className="mn-ocard" href={`/manual/${firstLive.slug}`}>
             <div className="k">See a real example</div>
             <h3>{firstLive.title}</h3>
-            <p>The same job in about ninety seconds — with a real before and after.</p>
+            <p>A real run: broken export in, board-ready workbook out — before and after included.</p>
           </Link>
         )}
       </div>
