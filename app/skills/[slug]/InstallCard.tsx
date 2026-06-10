@@ -232,6 +232,7 @@ function FeedbackPrompt({ slug }: { slug: string }) {
         aria-label="No, something went wrong"
         onClick={() => {
           track("feedback_down", slug);
+          remember();
           setState("comment");
         }}
         style={{ background: "none", border: "none", cursor: "pointer", fontSize: 15, padding: 2 }}
