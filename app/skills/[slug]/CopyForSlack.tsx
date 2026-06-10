@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { track } from "@/lib/track";
 
 interface CopyForSlackProps {
   title: string;
@@ -17,6 +18,7 @@ export function CopyForSlack({ title, bestFor, slug }: CopyForSlackProps) {
       ? `${title} — ${bestFor}\n${url}`
       : `${title}\n${url}`;
     navigator.clipboard?.writeText(lines);
+    track("copy_for_slack", slug);
     setToasted(true);
     setTimeout(() => setToasted(false), 2000);
   };
