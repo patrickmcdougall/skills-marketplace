@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { track } from "@/lib/track";
 
 interface InstallCardProps {
   slug: string;
@@ -23,16 +24,21 @@ export function InstallCard({
   const [copied, setCopied] = useState(false);
   const [opening, setOpening] = useState(false);
   const [showFallback, setShowFallback] = useState(false);
+  const [installed, setInstalled] = useState(false);
 
   const copy = () => {
     if (typeof navigator !== "undefined") {
       navigator.clipboard?.writeText(installCommand);
     }
+    track("install_copy_command", slug);
+    setInstalled(true);
     setCopied(true);
     setTimeout(() => setCopied(false), 1400);
   };
 
   const openInClaudeCode = () => {
+    track("install_claude_code", slug);
+    setInstalled(true);
     window.location.href = `claude://install?skill=${encodeURIComponent(installCommand)}`;
     setOpening(true);
     setTimeout(() => {
@@ -47,7 +53,14 @@ export function InstallCard({
     <div className="dp-install">
       {canDownload ? (
         <>
-          <a className="primary" href={`/i/${slug}`}>
+          <a
+            className="primary"
+            href={`/i/${slug}`}
+            onClick={() => {
+              track("install_download", slug);
+              setInstalled(true);
+            }}
+          >
             <span className="arrow">↓</span>
             Download .skill
           </a>
@@ -118,11 +131,113 @@ export function InstallCard({
         </a>
       </div>
 
+      {installed && <FeedbackPrompt slug={slug} />}
+
       {installCount !== undefined && installCount > 0 && (
         <p className="subscript" style={{ marginTop: 4, fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11 }}>
           {installCount.toLocaleString()} install{installCount === 1 ? "" : "s"}
         </p>
       )}
+    </div>
+  );
+}
+
+function FeedbackPrompt({ slug }: { slug: string }) {
+  const storageKey = `claudinho-fb:${slug}`;
+  const [state, setState] = useState<"ask" | "comment" | "done">(() => {
+    try {
+      return localStorage.getItem(storageKey) ? "done" : "ask";
+    } catch {
+      return "ask";
+    }
+  });
+  const [comment, setComment] = useState("");
+
+  const remember = () => {
+    try {
+      localStorage.setItem(storageKey, "1");
+    } catch {}
+  };
+
+  if (state === "done") {
+    return (
+      <p className="subscript" style={{ marginTop: 8 }}>
+        Thanks for the feedback.
+      </p>
+    );
+  }
+
+  if (state === "comment") {
+    return (
+      <form
+        style={{ display: "flex", gap: 6, marginTop: 8 }}
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (comment.trim()) track("feedback_comment", slug, comment.trim());
+          remember();
+          setState("done");
+        }}
+      >
+        <input
+          type="text"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="What went wrong? (optional)"
+          maxLength={500}
+          autoFocus
+          style={{
+            flex: 1,
+            fontSize: 12,
+            padding: "6px 8px",
+            border: "1px solid rgba(26,26,24,0.25)",
+            borderRadius: 2,
+            background: "transparent",
+            color: "inherit",
+          }}
+        />
+        <button className="alt" type="submit" style={{ width: "auto", padding: "6px 10px" }}>
+          Send
+        </button>
+      </form>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        marginTop: 8,
+        fontSize: 12,
+      }}
+    >
+      <span className="subscript" style={{ margin: 0 }}>
+        Did the skill work for you?
+      </span>
+      <button
+        type="button"
+        aria-label="Yes, it worked"
+        onClick={() => {
+          track("feedback_up", slug);
+          remember();
+          setState("done");
+        }}
+        style={{ background: "none", border: "none", cursor: "pointer", fontSize: 15, padding: 2 }}
+      >
+        👍
+      </button>
+      <button
+        type="button"
+        aria-label="No, something went wrong"
+        onClick={() => {
+          track("feedback_down", slug);
+          setState("comment");
+        }}
+        style={{ background: "none", border: "none", cursor: "pointer", fontSize: 15, padding: 2 }}
+      >
+        👎
+      </button>
     </div>
   );
 }
