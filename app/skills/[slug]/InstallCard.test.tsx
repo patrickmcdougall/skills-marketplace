@@ -210,6 +210,18 @@ describe("FeedbackPrompt", () => {
     expect(screen.getByText(THANKS)).toBeTruthy();
   });
 
+  it("rapid double-click on thumbs up fires feedback_up only once", async () => {
+    const { user } = setup();
+    await revealAndCopy(user);
+
+    await user.dblClick(screen.getByRole("button", { name: "Yes, it worked" }));
+
+    const upCalls = vi
+      .mocked(track)
+      .mock.calls.filter(([event]) => event === "feedback_up");
+    expect(upCalls).toHaveLength(1);
+  });
+
   it("localStorage.setItem throwing does not break the thumbs-up flow", async () => {
     storage.setItem.mockImplementation(() => {
       throw new Error("quota exceeded");

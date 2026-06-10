@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { track, MAX_DETAIL_LEN } from "@/lib/track";
 
 interface InstallCardProps {
@@ -152,6 +152,9 @@ function FeedbackPrompt({ slug }: { slug: string }) {
     }
   });
   const [comment, setComment] = useState("");
+  // Re-render removes the buttons, but a rapid double-click lands before
+  // that — guard so one answer can't fire two events.
+  const answered = useRef(false);
 
   const remember = () => {
     try {
@@ -203,6 +206,8 @@ function FeedbackPrompt({ slug }: { slug: string }) {
         className="dp-fb-btn"
         aria-label="Yes, it worked"
         onClick={() => {
+          if (answered.current) return;
+          answered.current = true;
           track("feedback_up", slug);
           remember();
           setState("done");
@@ -215,6 +220,8 @@ function FeedbackPrompt({ slug }: { slug: string }) {
         className="dp-fb-btn"
         aria-label="No, something went wrong"
         onClick={() => {
+          if (answered.current) return;
+          answered.current = true;
           track("feedback_down", slug);
           remember();
           setState("comment");

@@ -108,11 +108,11 @@ describe("POST /api/event", () => {
   });
 
   describe("length caps and coercion", () => {
-    it("skillSlug capped at 200 chars", async () => {
+    it("over-long skillSlug (>200 chars) rejected to null, not truncated", async () => {
       const body = JSON.stringify({ event: "feedback_up", skillSlug: "s".repeat(300) });
       await POST(makeRequest(body));
       expect(insertMock).toHaveBeenCalledWith(
-        expect.objectContaining({ skill_slug: "s".repeat(200) })
+        expect.objectContaining({ skill_slug: null })
       );
     });
 
@@ -146,6 +146,30 @@ describe("POST /api/event", () => {
       await POST(makeRequest(body));
       expect(insertMock).toHaveBeenCalledWith(
         expect.objectContaining({ skill_slug: null })
+      );
+    });
+
+    it("detail ignored for non-comment events", async () => {
+      const body = JSON.stringify({
+        event: "install_download",
+        skillSlug: "x",
+        detail: "spam payload",
+      });
+      await POST(makeRequest(body));
+      expect(insertMock).toHaveBeenCalledWith(
+        expect.objectContaining({ detail: null })
+      );
+    });
+
+    it("cap splitting a surrogate pair strips the lone surrogate", async () => {
+      const body = JSON.stringify({
+        event: "feedback_comment",
+        skillSlug: "x",
+        detail: "d".repeat(499) + "😀", // emoji = 2 UTF-16 units; cap cuts it in half
+      });
+      await POST(makeRequest(body));
+      expect(insertMock).toHaveBeenCalledWith(
+        expect.objectContaining({ detail: "d".repeat(499) })
       );
     });
   });

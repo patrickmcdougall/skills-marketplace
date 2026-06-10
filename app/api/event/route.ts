@@ -1,14 +1,10 @@
 import { NextRequest } from "next/server";
 import { serverDb } from "@/lib/db";
+import { isBot } from "@/lib/bot";
 import { TRACK_EVENTS, MAX_SLUG_LEN, MAX_DETAIL_LEN } from "@/lib/track";
 
 const ALLOWED_EVENTS = new Set<string>(TRACK_EVENTS);
 const SLUG_SHAPE = /^[a-zA-Z0-9._-]+$/;
-
-function isBot(req: NextRequest): boolean {
-  const ua = (req.headers.get("user-agent") ?? "").toLowerCase();
-  return ua.includes("bot") || ua.includes("crawler") || ua.includes("spider");
-}
 
 export async function POST(req: NextRequest) {
   let payload: { event?: unknown; skillSlug?: unknown; detail?: unknown };
@@ -27,11 +23,20 @@ export async function POST(req: NextRequest) {
     return Response.json({ ok: true });
   }
 
-  const rawSlug =
-    typeof payload.skillSlug === "string" ? payload.skillSlug.slice(0, MAX_SLUG_LEN) : null;
-  const skillSlug = rawSlug && SLUG_SHAPE.test(rawSlug) ? rawSlug : null;
+  // Reject (don't truncate) over-long slugs — a sliced slug matches no real
+  // skill and would be silent data corruption.
+  const skillSlug =
+    typeof payload.skillSlug === "string" &&
+    payload.skillSlug.length <= MAX_SLUG_LEN &&
+    SLUG_SHAPE.test(payload.skillSlug)
+      ? payload.skillSlug
+      : null;
+  // Only feedback_comment legitimately carries free text; strip a trailing
+  // lone surrogate the cap can create by splitting an emoji.
   const detail =
-    typeof payload.detail === "string" ? payload.detail.slice(0, MAX_DETAIL_LEN) : null;
+    event === "feedback_comment" && typeof payload.detail === "string"
+      ? payload.detail.slice(0, MAX_DETAIL_LEN).replace(/[\uD800-\uDBFF]$/, "") || null
+      : null;
 
   // Never fail the client over telemetry — but always leave an ops trace,
   // since supabase-js reports DB errors by resolving { error }, not throwing.
