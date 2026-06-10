@@ -3527,3 +3527,7 @@ a.mn-feat:hover .mn-feat-name { color: var(--accent-2); }
   margin-bottom: 3px;
 }
 .mn-leaf.sub { padding-left: 20px; }
+
+/* inline links inside guide copy */
+.mn-inline-link { color: var(--accent-2); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.mn-inline-link:hover { color: var(--accent); }

@@ -257,6 +257,10 @@ export const START_PAGES: GuidePage[] = [
         ],
       },
       { kind: "p", text: "A good Cowork task hits a few of these — not all five." },
+      {
+        kind: "p",
+        text: "One more habit: when the work is recurring and belongs together — one client, one process — keep it in a [Project](/manual/features/projects). A Project is a folder on your computer that Cowork works in, so every task starts warm instead of from scratch.",
+      },
     ],
     next: { href: "/manual/start/your-first-10-minutes", label: "Next: your first 10 minutes" },
   },
@@ -270,7 +274,7 @@ export const START_PAGES: GuidePage[] = [
       {
         kind: "list",
         items: [
-          "**Pick a skill** from the catalogue for a job you do often.",
+          "**Pick a real task** — one you already do and can judge in fifteen seconds. Not a test, the actual thing.",
           "**Give it context** — drop in a few files or a whole folder, or connect an app.",
           "**Describe the outcome**, not the steps. Say what you want at the end.",
           "**Make Claude ask first** — add “before you start, repeat my ask back and ask any clarifying questions.” This one habit prevents most bad outputs.",
@@ -279,6 +283,10 @@ export const START_PAGES: GuidePage[] = [
       {
         kind: "p",
         text: "Then step away and check the result. You already know what good looks like, so you'll see in seconds whether it's right, wrong, or 70% there.",
+      },
+      {
+        kind: "p",
+        text: "And when a task earns a repeat — same job next week, same job next month — that's the moment to **install a skill** for it, so next time is one short sentence.",
       },
     ],
     next: { href: "/manual/features", label: "Next: the features that matter" },
@@ -301,32 +309,32 @@ export const FEATURES: CoworkFeature[] = [
     slug: "projects",
     name: "Projects",
     icon: "projects",
-    text: "A home for work that belongs together. Keep one client's or one job's files and context in a Project, so Cowork picks up where you left off instead of starting cold every time.",
+    text: "A Project is a folder on your computer that Cowork works in. Keep one client's or one job's files there and every task starts warm — same context, same files, picking up where you left off.",
   },
   {
     slug: "scheduled",
     name: "Scheduled",
     icon: "scheduled",
-    text: "Set a task to run on its own — a Monday digest, a month-end report — and the finished result is waiting for you, no need to be at your desk.",
+    text: "Set a task to run on a schedule — type /schedule in any task. A weekday morning brief, a month-end report: the finished result is waiting when you sit down.",
   },
   {
     slug: "live-artifacts",
     name: "Live artifacts",
     icon: "live-artifacts",
-    text: "Deliverables that stay live instead of one-and-done — something Cowork builds that you keep open and can have it refresh or rework as things change.",
+    text: "Documents that stay up to date with live data from your connected apps — an unread-email digest, a week-at-a-glance — instead of a report that's stale the day after.",
   },
   {
     slug: "dispatch",
     name: "Dispatch",
     icon: "dispatch",
     badge: "Beta",
-    text: "Hand a task off to run in the background while you get on with something else, then come back to the result.",
+    text: "Pair your phone, and hand tasks to your computer from anywhere. Send it from the commute; Claude works on your desktop — files, apps, browser — and you pick up exactly where you left off.",
   },
   {
     slug: "customize",
     name: "Customize",
     icon: "customize",
-    text: "Make Cowork yours — set your preferences, add the skills and connectors you use, and shape how it works for the way you work.",
+    text: "Where everything that shapes Claude lives: the skills you've installed, the apps you've connected, and plugins. This is also where a new skill lands.",
   },
 ];
 
@@ -401,8 +409,8 @@ export const SKILLS_PAGES: GuidePage[] = [
         kind: "list",
         items: [
           "**Find a skill on Claudinho** — browse by what you do (operations, finance, sales…), not by technology.",
-          "**Download it** — every skill page has a download button that gives you a single `.skill` file.",
-          "**Drag the file into Cowork** — drop it into the Claude desktop app and the skill is added. That's the install.",
+          "**Click Download on its page** — a single `.skill` file lands in your Downloads folder.",
+          "**Drag that file into Cowork** — drop it into the Claude desktop app window and the skill is added. That's the install. (You'll find it afterwards under Customize → Skills.)",
           "**Ask in plain language** — Cowork now knows the playbook; one sentence puts it to work.",
         ],
       },
