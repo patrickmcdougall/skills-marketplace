@@ -1,5 +1,6 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
-import type { CoworkFeature } from "@/lib/playbook";
+import type { CoworkFeature } from "@/lib/manual";
 
 // Inline stroke icons (Lucide-style) so the list works in a Server Component and
 // matches the codebase convention of hand-rolled SVGs. Keys mirror Cowork's own
@@ -64,23 +65,24 @@ function FeatIcon({ icon }: { icon: CoworkFeature["icon"] }) {
 }
 
 // The real Cowork feature list — echoes the app's own sidebar (icon + label +
-// optional badge) with a plain-language line on what each one is for.
+// optional badge) with a plain-language line on what each one is for. Each row
+// links to the feature's own page in the Manual.
 export function FeatureList({ features }: { features: CoworkFeature[] }) {
   return (
-    <div className="pb-features">
+    <div className="mn-features">
       {features.map((f) => (
-        <div className="pb-feat" key={f.name}>
-          <span className="pb-feat-ico">
+        <Link className="mn-feat" href={`/manual/features/${f.slug}`} key={f.slug}>
+          <span className="mn-feat-ico">
             <FeatIcon icon={f.icon} />
           </span>
-          <div className="pb-feat-body">
-            <div className="pb-feat-head">
-              <span className="pb-feat-name">{f.name}</span>
-              {f.badge && <span className="pb-feat-badge">{f.badge}</span>}
+          <div className="mn-feat-body">
+            <div className="mn-feat-head">
+              <span className="mn-feat-name">{f.name}</span>
+              {f.badge && <span className="mn-feat-badge">{f.badge}</span>}
             </div>
-            <p className="pb-feat-text">{f.text}</p>
+            <p className="mn-feat-text">{f.text}</p>
           </div>
-        </div>
+        </Link>
       ))}
     </div>
   );

@@ -1,20 +1,20 @@
-// The Playbook — content model.
+// The Manual — content model.
 //
 // Two kinds of material live here:
-//   • IntroPage  — Part 1, general Cowork product-primer pages (skill-agnostic).
-//   • Play       — Part 2, a skill-anchored case following the four moves
+//   • GuidePage  — Part 1, general Cowork product-primer pages (skill-agnostic).
+//   • CaseStudy       — Part 2, a skill-anchored case following the four moves
 //                  (skill → scenario → see it work → install).
 //
 // Cases reference a real catalogue skill by `skillSlug`. Live install/star
 // signals are fetched at render time via getSkillBySlug — this file holds only
 // the authored copy + the join key, never hardcoded counts.
 //
-// Themes mirror catalogue shelves 1:1 (lib/data.ts shelf ids) so a Playbook
+// Themes mirror catalogue shelves 1:1 (lib/data.ts shelf ids) so a Manual
 // theme can sit beside its matching shelf.
 
 // ─── shared rich-text ───────────────────────────────────────────────────────
 // Authored, trusted content. Paragraph/list text supports a minimal **bold**
-// markup, rendered by the playbook components (see lib/playbook-render).
+// markup, rendered by the manual components.
 
 export type RichBlock =
   | { kind: "p"; text: string }
@@ -28,6 +28,8 @@ export type RichBlock =
 // One entry in the real Cowork feature list (mirrors the app's own sidebar).
 // `icon` is a stable key the FeatureList component maps to a lucide icon.
 export type CoworkFeature = {
+  /** Route slug under /manual/features/[feature]. */
+  slug: string;
   name: string;
   icon: "new-task" | "projects" | "scheduled" | "live-artifacts" | "dispatch" | "customize";
   badge?: string;
@@ -61,8 +63,8 @@ export type CoworkStep = {
 
 // ─── Part 1 — Intro to Cowork ────────────────────────────────────────────────
 
-export type IntroPage = {
-  topic: string; // route slug under /playbook/intro/[topic]
+export type GuidePage = {
+  topic: string; // route slug under /manual/start/[topic]
   order: number; // 1..N, drives "Intro · n of N" + next link
   navLabel: string; // short label in the left index
   title: string;
@@ -72,7 +74,7 @@ export type IntroPage = {
   next?: { href: string; label: string };
 };
 
-// ─── Part 2 — Plays (cases) ──────────────────────────────────────────────────
+// ─── Part 2 — Cases ──────────────────────────────────────────────────
 
 /** Catalogue shelf id (lib/data.ts) the case is filed under. */
 export type ShelfId =
@@ -85,7 +87,7 @@ export type ShelfId =
   | "ops"
   | "finance";
 
-export type PlayStep = { title: string; body?: string; typed?: string };
+export type CaseStep = { title: string; body?: string; typed?: string };
 
 export type BeforeAfterRow = { label: string; value: string; dot?: string };
 
@@ -103,8 +105,8 @@ export type SkillAnchor = {
   installCommand: string;
 };
 
-export type Play = {
-  slug: string; // route slug under /playbook/[slug]
+export type CaseStudy = {
+  slug: string; // route slug under /manual/[slug]
   shelf: ShelfId;
   subShelf: string;
   navLabel: string; // short label in the left index
@@ -122,19 +124,19 @@ export type Play = {
   scenario: string[];
 
   // ── full walkthrough — present only when status === "live" ──
-  steps?: [PlayStep, PlayStep, PlayStep];
+  steps?: [CaseStep, CaseStep, CaseStep];
   before?: { label: string; lines: string[] };
   after?: { label: string; rows: BeforeAfterRow[]; footer?: string };
   stats?: [{ v: string; k: string }, { v: string; k: string }, { v: string; k: string }];
-  install?: PlayStep[];
+  install?: CaseStep[];
 
-  /** Points to another Play (ideally a different shelf) to keep people moving. */
-  nextPlay?: string;
+  /** Points to another CaseStudy (ideally a different shelf) to keep people moving. */
+  nextCase?: string;
 };
 
 // ─── theme order (mirrors the catalogue shelves, first wave first) ───────────
 
-export const PLAYBOOK_SHELF_ORDER: ShelfId[] = [
+export const MANUAL_SHELF_ORDER: ShelfId[] = [
   "ops",
   "product",
   "finance",
@@ -156,7 +158,7 @@ export const SHELF_TITLES: Record<ShelfId, string> = {
 
 // ─── content: Part 1 ─────────────────────────────────────────────────────────
 
-export const INTRO_PAGES: IntroPage[] = [
+export const START_PAGES: GuidePage[] = [
   {
     topic: "what-cowork-is",
     order: 1,
@@ -228,10 +230,10 @@ export const INTRO_PAGES: IntroPage[] = [
       {
         kind: "callout",
         title: "So where do skills come in? They're optional.",
-        text: "Everything above worked without one. A **skill** is a saved playbook for a job you do again and again — it already knows your categories, your format, the steps. So the same job drops to an even shorter sentence (“do my monthly expenses for this folder”) and comes back the same way every time, with nothing to set up. That's what the rest of the Playbook shows, and where the catalogue comes in.",
+        text: "Everything above worked without one. A **skill** is a saved playbook for a job you do again and again — it already knows your categories, your format, the steps. So the same job drops to an even shorter sentence (“do my monthly expenses for this folder”) and comes back the same way every time, with nothing to set up. That's what the rest of the Manual shows, and where the catalogue comes in.",
       },
     ],
-    next: { href: "/playbook/intro/when-to-use-it", label: "Next: when to use it" },
+    next: { href: "/manual/start/when-to-use-it", label: "Next: when to use it" },
   },
   {
     topic: "when-to-use-it",
@@ -256,65 +258,11 @@ export const INTRO_PAGES: IntroPage[] = [
       },
       { kind: "p", text: "A good Cowork task hits a few of these — not all five." },
     ],
-    next: { href: "/playbook/intro/the-features-that-matter", label: "Next: the features that matter" },
-  },
-  {
-    topic: "the-features-that-matter",
-    order: 3,
-    navLabel: "The features that matter",
-    title: "The features that matter",
-    standfirst: "These are the things you'll actually see down the side of Cowork — and what each one is for.",
-    body: [
-      {
-        kind: "feature-list",
-        features: [
-          {
-            name: "New task",
-            icon: "new-task",
-            text: "Start a fresh piece of work. Drop in files, say what you want, and Cowork takes it from there. This is the everyday way in.",
-          },
-          {
-            name: "Projects",
-            icon: "projects",
-            text: "A home for work that belongs together. Keep one client's or one job's files and context in a Project, so Cowork picks up where you left off instead of starting cold every time.",
-          },
-          {
-            name: "Scheduled",
-            icon: "scheduled",
-            text: "Set a task to run on its own — a Monday digest, a month-end report — and the finished result is waiting for you, no need to be at your desk.",
-          },
-          {
-            name: "Live artifacts",
-            icon: "live-artifacts",
-            text: "Deliverables that stay live instead of one-and-done — something Cowork builds that you keep open and can have it refresh or rework as things change.",
-          },
-          {
-            name: "Dispatch",
-            icon: "dispatch",
-            badge: "Beta",
-            text: "Hand a task off to run in the background while you get on with something else, then come back to the result.",
-          },
-          {
-            name: "Customize",
-            icon: "customize",
-            text: "Make Cowork yours — set your preferences, add the skills and connectors you use, and shape how it works for the way you work.",
-          },
-        ],
-      },
-      {
-        kind: "p",
-        text: "Underneath all of these, two things do the heavy lifting: Cowork reads and writes the **real files** on your computer, and **connects to the apps** you already use (Slack, Gmail, Drive, your CRM) so it can pull and push without you exporting anything.",
-      },
-      {
-        kind: "p",
-        text: "And skills are an optional layer on top — a saved playbook that already knows which of these to reach for on a specific job.",
-      },
-    ],
-    next: { href: "/playbook/intro/your-first-10-minutes", label: "Next: your first 10 minutes" },
+    next: { href: "/manual/start/your-first-10-minutes", label: "Next: your first 10 minutes" },
   },
   {
     topic: "your-first-10-minutes",
-    order: 4,
+    order: 3,
     navLabel: "Your first 10 minutes",
     title: "Your first 10 minutes",
     standfirst: "Start with a real task you already know how to judge.",
@@ -333,15 +281,88 @@ export const INTRO_PAGES: IntroPage[] = [
         text: "Then step away and check the result. You already know what good looks like, so you'll see in seconds whether it's right, wrong, or 70% there.",
       },
     ],
+    next: { href: "/manual/features", label: "Next: the features that matter" },
   },
 ];
+
+// ─── content: Features ───────────────────────────────────────────────────────
+// Mirrors Cowork's own sidebar, one entry per feature. The overview page lists
+// them all; each also gets its own stub page at /manual/features/[slug] until
+// its full guide is produced.
+
+export const FEATURES: CoworkFeature[] = [
+  {
+    slug: "new-task",
+    name: "New task",
+    icon: "new-task",
+    text: "Start a fresh piece of work. Drop in files, say what you want, and Cowork takes it from there. This is the everyday way in.",
+  },
+  {
+    slug: "projects",
+    name: "Projects",
+    icon: "projects",
+    text: "A home for work that belongs together. Keep one client's or one job's files and context in a Project, so Cowork picks up where you left off instead of starting cold every time.",
+  },
+  {
+    slug: "scheduled",
+    name: "Scheduled",
+    icon: "scheduled",
+    text: "Set a task to run on its own — a Monday digest, a month-end report — and the finished result is waiting for you, no need to be at your desk.",
+  },
+  {
+    slug: "live-artifacts",
+    name: "Live artifacts",
+    icon: "live-artifacts",
+    text: "Deliverables that stay live instead of one-and-done — something Cowork builds that you keep open and can have it refresh or rework as things change.",
+  },
+  {
+    slug: "dispatch",
+    name: "Dispatch",
+    icon: "dispatch",
+    badge: "Beta",
+    text: "Hand a task off to run in the background while you get on with something else, then come back to the result.",
+  },
+  {
+    slug: "customize",
+    name: "Customize",
+    icon: "customize",
+    text: "Make Cowork yours — set your preferences, add the skills and connectors you use, and shape how it works for the way you work.",
+  },
+];
+
+export const FEATURES_OVERVIEW: {
+  title: string;
+  standfirst: string;
+  body: RichBlock[];
+  next?: { href: string; label: string };
+} = {
+  title: "The features that matter",
+  standfirst:
+    "These are the things you'll actually see down the side of Cowork — and what each one is for.",
+  body: [
+    { kind: "feature-list", features: FEATURES },
+    {
+      kind: "p",
+      text: "Underneath all of these, two things do the heavy lifting: Cowork reads and writes the **real files** on your computer, and **connects to the apps** you already use (Slack, Gmail, Drive, your CRM) so it can pull and push without you exporting anything.",
+    },
+    {
+      kind: "p",
+      text: "And skills are an optional layer on top — a saved playbook that already knows which of these to reach for on a specific job.",
+    },
+  ],
+  next: { href: "/manual/monthly-expenses-sorted", label: "Now see a real example" },
+};
+
+export function getFeature(slug: string): CoworkFeature | undefined {
+  return FEATURES.find((f) => f.slug === slug);
+}
 
 // ─── content: Part 2 ─────────────────────────────────────────────────────────
 // Case 01 is the locked reference build (status: live). The remaining cases are
 // honest "coming soon" stubs — theme + scenario + the concept they'll teach —
 // until each is produced against a real skill with a captured before/after.
 
-export const PLAYS: Play[] = [
+export const CASES: CaseStudy[] = [
   // ── 01 · Operations · LIVE (reference build) ──
   {
     slug: "monthly-expenses-sorted",
@@ -423,7 +444,7 @@ export const PLAYS: Play[] = [
         body: "Select the folder of statements and ask plainly. Done.",
       },
     ],
-    nextPlay: "call-notes-to-deck",
+    nextCase: "call-notes-to-deck",
   },
 
   // ── 02 · Product · soon ──
@@ -602,30 +623,30 @@ export const PLAYS: Play[] = [
 
 // ─── lookups ─────────────────────────────────────────────────────────────────
 
-export function getPlay(slug: string): Play | undefined {
-  return PLAYS.find((p) => p.slug === slug);
+export function getCase(slug: string): CaseStudy | undefined {
+  return CASES.find((p) => p.slug === slug);
 }
 
-export function getIntro(topic: string): IntroPage | undefined {
-  return INTRO_PAGES.find((i) => i.topic === topic);
+export function getStartPage(topic: string): GuidePage | undefined {
+  return START_PAGES.find((i) => i.topic === topic);
 }
 
-/** Cases grouped by shelf, in PLAYBOOK_SHELF_ORDER, skipping empty shelves. */
-export function playsByShelf(): { shelf: ShelfId; title: string; plays: Play[] }[] {
-  return PLAYBOOK_SHELF_ORDER.map((shelf) => ({
+/** Cases grouped by shelf, in MANUAL_SHELF_ORDER, skipping empty shelves. */
+export function casesByShelf(): { shelf: ShelfId; title: string; cases: CaseStudy[] }[] {
+  return MANUAL_SHELF_ORDER.map((shelf) => ({
     shelf,
     title: SHELF_TITLES[shelf],
-    plays: PLAYS.filter((p) => p.shelf === shelf),
-  })).filter((g) => g.plays.length > 0);
+    cases: CASES.filter((p) => p.shelf === shelf),
+  })).filter((g) => g.cases.length > 0);
 }
 
-export const LIVE_PLAY_COUNT = PLAYS.filter((p) => p.status === "live").length;
-export const TOTAL_TOPICS = INTRO_PAGES.length + PLAYS.length;
+export const LIVE_CASE_COUNT = CASES.filter((p) => p.status === "live").length;
+export const TOTAL_TOPICS = START_PAGES.length + 1 + FEATURES.length + CASES.length;
 
-// Work-in-progress gate. The Playbook is live in local dev and Vercel preview
+// Work-in-progress gate. The Manual is live in local dev and Vercel preview
 // builds, but hidden in production (routes 404, nav link removed) until launch.
 // Disabled only on a real production deployment — keyed on NODE_ENV too because
 // .env.local here carries a stale VERCEL_ENV="production" that would otherwise
 // switch it off in local dev. Flip on launch by removing this gate.
-export const PLAYBOOK_ENABLED =
+export const MANUAL_ENABLED =
   process.env.NODE_ENV !== "production" || process.env.VERCEL_ENV !== "production";

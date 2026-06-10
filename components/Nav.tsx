@@ -42,10 +42,10 @@ export function Nav({ stats }: NavProps) {
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  // Playbook is a WIP: shown in dev/preview, hidden in production until launch.
-  // Mirrors the server gate (lib/playbook PLAYBOOK_ENABLED). NODE_ENV guards
+  // The Manual is a WIP: shown in dev/preview, hidden in production until launch.
+  // Mirrors the server gate (lib/manual MANUAL_ENABLED). NODE_ENV guards
   // local dev, where a stale NEXT_PUBLIC_VERCEL_ENV would otherwise hide it.
-  const showPlaybook =
+  const showManual =
     process.env.NODE_ENV !== "production" ||
     process.env.NEXT_PUBLIC_VERCEL_ENV !== "production";
 
@@ -72,7 +72,7 @@ export function Nav({ stats }: NavProps) {
           <div className="links nav-desktop-links">
             <Link {...linkProps("/skills")}>Browse</Link>
             <Link {...linkProps("/creators")}>Creators</Link>
-            {showPlaybook && <Link {...linkProps("/playbook")}>Playbook</Link>}
+            {showManual && <Link {...linkProps("/manual")}>Manual</Link>}
             <a href="/#how">About</a>
           </div>
           <button
@@ -108,8 +108,8 @@ export function Nav({ stats }: NavProps) {
         <nav className="nav-drawer-links">
           <Link {...linkProps("/skills")} onClick={() => setOpen(false)}>Browse</Link>
           <Link {...linkProps("/creators")} onClick={() => setOpen(false)}>Creators</Link>
-          {showPlaybook && (
-            <Link {...linkProps("/playbook")} onClick={() => setOpen(false)}>Playbook</Link>
+          {showManual && (
+            <Link {...linkProps("/manual")} onClick={() => setOpen(false)}>Manual</Link>
           )}
           <a href="/#how" onClick={() => setOpen(false)}>About</a>
         </nav>

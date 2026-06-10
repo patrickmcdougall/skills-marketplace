@@ -1,22 +1,22 @@
-import type { CoworkStep } from "@/lib/playbook";
+import type { CoworkStep } from "@/lib/manual";
 
 // An illustrative, step-by-step walkthrough of the Cowork flow for first-time
 // users. The "windows" are stylized representations — NOT real screenshots —
 // labelled as such so the page stays honest (see the brief's mock rule).
 export function CoworkWalkthrough({ intro, steps }: { intro?: string; steps: CoworkStep[] }) {
   return (
-    <div className="pb-cw">
-      {intro && <p className="pb-cw-intro">{intro}</p>}
+    <div className="mn-cw">
+      {intro && <p className="mn-cw-intro">{intro}</p>}
 
-      <div className="pb-cw-steps">
+      <div className="mn-cw-steps">
         {steps.map((step, i) => (
-          <div className="pb-cw-step" key={i}>
-            <div className="pb-cw-num">{i + 1}</div>
-            <div className="pb-cw-text">
+          <div className="mn-cw-step" key={i}>
+            <div className="mn-cw-num">{i + 1}</div>
+            <div className="mn-cw-text">
               <h3>{step.title}</h3>
               <p>{step.caption}</p>
             </div>
-            <div className="pb-cw-frame">
+            <div className="mn-cw-frame">
               <CoworkWindow>
                 <StepView step={step} />
               </CoworkWindow>
@@ -25,7 +25,7 @@ export function CoworkWalkthrough({ intro, steps }: { intro?: string; steps: Cow
         ))}
       </div>
 
-      <p className="pb-cw-illus">Illustrative — a stylized view of the Cowork app, not a screenshot.</p>
+      <p className="mn-cw-illus">Illustrative — a stylized view of the Cowork app, not a screenshot.</p>
     </div>
   );
 }

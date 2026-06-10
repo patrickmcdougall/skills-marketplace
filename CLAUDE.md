@@ -41,7 +41,7 @@ The Vercel project is connected to GitHub (`patrickmcdougall/skills-marketplace`
 - **Push to `main` → production** (`claudinho.xyz`), automatically.
 - **Push any other branch → preview deployment** with its own URL (`…-git-<branch>-….vercel.app`). Use a branch to dogfood before going live.
 - **Never run `vercel --prod` (or `vercel` deploy) from local.** It ships the entire working tree — including untracked / WIP files — and overrides whatever git deployed. That is exactly how unfinished work has leaked to prod. Git is the source of truth: **prod = `main`**.
-- WIP that must stay off prod: keep it on a branch, or behind a gate (e.g. the Playbook's `PLAYBOOK_ENABLED` in `lib/playbook.ts` — live in dev/preview, 404 in production until launch).
+- WIP that must stay off prod: keep it on a branch, or behind a gate (e.g. the Manual's `MANUAL_ENABLED` in `lib/manual.ts` — live in dev/preview, 404 in production until launch).
 - `.env.local` carries a stale `VERCEL_ENV="production"`; env-based gates must also key on `NODE_ENV` so they don't trip in local dev.
 
 ---
