@@ -1,10 +1,12 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { FEATURES, getFeature, MANUAL_ENABLED } from "@/lib/manual";
 
-// Per-feature stub pages: the one-paragraph description from the overview plus
-// an honest "full guide in production" note, until each guide is written.
+// Per-feature stub pages: a real (sanitized) screenshot of the feature, the
+// one-paragraph description from the overview, and an honest "full guide in
+// production" note until each guide is written.
 
 export function generateStaticParams() {
   if (!MANUAL_ENABLED) return [];
@@ -58,6 +60,18 @@ export default async function FeaturePage({
         )}
       </h1>
       <p className="mn-lead">{f.text}</p>
+
+      <figure className="mn-shot">
+        <Image
+          src={`/manual/features/${f.slug}.png`}
+          alt={`The ${f.name} view in the Claude desktop app`}
+          width={1999}
+          height={1249}
+          sizes="(max-width: 980px) 100vw, 820px"
+          priority
+        />
+        <figcaption>Real screenshot · Claude desktop app, Cowork — personal details blurred</figcaption>
+      </figure>
 
       <div className="mn-soon">
         The full guide for {f.name} — what it&apos;s for, when to reach for it, and a worked

@@ -3531,3 +3531,19 @@ a.mn-feat:hover .mn-feat-name { color: var(--accent-2); }
 /* inline links inside guide copy */
 .mn-inline-link { color: var(--accent-2); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 .mn-inline-link:hover { color: var(--accent); }
+
+/* real screenshot frame on feature pages */
+.mn-shot { margin: 22px 0 8px; }
+.mn-shot img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 1px 0 var(--line-2), 0 10px 30px -18px rgba(28, 27, 24, 0.35);
+}
+.mn-shot figcaption {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 9px;
+}
