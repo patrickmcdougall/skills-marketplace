@@ -3514,3 +3514,16 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
 a.mn-feat { text-decoration: none; color: inherit; transition: background 120ms ease; }
 a.mn-feat:hover { background: var(--paper-2); }
 a.mn-feat:hover .mn-feat-name { color: var(--accent-2); }
+
+/* nested theme subgroups inside the Examples group */
+.mn-subgroup { margin: 10px 0 2px; }
+.mn-subtitle {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  padding: 0 8px 0 18px;
+  margin-bottom: 3px;
+}
+.mn-leaf.sub { padding-left: 20px; }

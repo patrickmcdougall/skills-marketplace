@@ -7,31 +7,57 @@ import Link from "next/link";
 export type IndexLeaf = {
   href: string;
   label: string;
-  dot?: "live" | "soon"; // intro leaves have no dot; cases do
+  dot?: "live" | "soon"; // guide leaves have no dot; cases do
+};
+
+export type IndexSubgroup = {
+  title: string;
+  leaves: IndexLeaf[];
 };
 
 export type IndexGroup = {
   title: string;
   count: number;
   leaves: IndexLeaf[];
+  /** Optional nested level — e.g. Examples → one subgroup per theme. */
+  subgroups?: IndexSubgroup[];
 };
 
 // The persistent left index: ALL material visible at once, grouped by topic,
 // with a search box that filters and the active item highlighted. Shared chrome
-// across every /manual route.
+// across every /manual route. Two levels: groups, and (for Examples) theme
+// subgroups nested inside one group.
 export function ManualIndex({ groups }: { groups: IndexGroup[] }) {
   const pathname = usePathname();
   const [q, setQ] = useState("");
   const query = q.trim().toLowerCase();
 
+  const matches = (l: IndexLeaf) => !query || l.label.toLowerCase().includes(query);
+
   const filtered = groups
     .map((g) => ({
       ...g,
-      leaves: query
-        ? g.leaves.filter((l) => l.label.toLowerCase().includes(query))
-        : g.leaves,
+      leaves: g.leaves.filter(matches),
+      subgroups: (g.subgroups ?? [])
+        .map((s) => ({ ...s, leaves: s.leaves.filter(matches) }))
+        .filter((s) => s.leaves.length > 0),
     }))
-    .filter((g) => g.leaves.length > 0);
+    .filter((g) => g.leaves.length > 0 || g.subgroups.length > 0);
+
+  const renderLeaf = (l: IndexLeaf, sub = false) => {
+    const active = pathname === l.href;
+    return (
+      <Link
+        key={l.href}
+        href={l.href}
+        className={`mn-leaf${sub ? " sub" : ""}${active ? " active" : ""}`}
+        aria-current={active ? "page" : undefined}
+      >
+        {l.dot && <span className={`mn-dot${l.dot === "soon" ? " soon" : ""}`} />}
+        {l.label}
+      </Link>
+    );
+  };
 
   return (
     <aside className="mn-sidebar" aria-label="Manual index">
@@ -55,20 +81,13 @@ export function ManualIndex({ groups }: { groups: IndexGroup[] }) {
             <span>{g.title}</span>
             <span className="n">{g.count}</span>
           </div>
-          {g.leaves.map((l) => {
-            const active = pathname === l.href;
-            return (
-              <Link
-                key={l.href}
-                href={l.href}
-                className={`mn-leaf${active ? " active" : ""}`}
-                aria-current={active ? "page" : undefined}
-              >
-                {l.dot && <span className={`mn-dot${l.dot === "soon" ? " soon" : ""}`} />}
-                {l.label}
-              </Link>
-            );
-          })}
+          {g.leaves.map((l) => renderLeaf(l))}
+          {g.subgroups.map((s) => (
+            <div className="mn-subgroup" key={s.title}>
+              <div className="mn-subtitle">{s.title}</div>
+              {s.leaves.map((l) => renderLeaf(l, true))}
+            </div>
+          ))}
         </div>
       ))}
     </aside>

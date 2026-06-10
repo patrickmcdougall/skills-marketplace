@@ -350,11 +350,96 @@ export const FEATURES_OVERVIEW: {
       text: "And skills are an optional layer on top — a saved playbook that already knows which of these to reach for on a specific job.",
     },
   ],
-  next: { href: "/manual/monthly-expenses-sorted", label: "Now see a real example" },
+  next: { href: "/manual/skills/where-skills-fit", label: "Next: where skills fit in" },
 };
 
 export function getFeature(slug: string): CoworkFeature | undefined {
   return FEATURES.find((f) => f.slug === slug);
+}
+
+// ─── content: Skills ─────────────────────────────────────────────────────────
+// The layer on top of Cowork — what a skill is, how to install one without a
+// terminal, and how to read the catalogue's trust signals. This is the bridge
+// between the Manual and the marketplace.
+
+export const SKILLS_PAGES: GuidePage[] = [
+  {
+    topic: "where-skills-fit",
+    order: 1,
+    navLabel: "Where skills fit in",
+    title: "Where skills fit in",
+    standfirst: "Cowork can do a job from scratch. A skill means it never has to.",
+    body: [
+      {
+        kind: "p",
+        text: "Everything in Getting started worked without a skill: files in, one plain sentence, a deliverable out. So what's a skill for? **A skill is a saved playbook for a job you do repeatedly.** It carries the steps, the format, the rules — your categories, your accountant's layout, your deck structure — so you never re-explain them.",
+      },
+      {
+        kind: "p",
+        text: "**It's not software, and there's nothing to code.** A skill is closer to a recipe card than an app. Install it once and Claude follows it whenever that job comes up. Your ask shrinks from a paragraph of instructions to “do my monthly expenses for this folder.”",
+      },
+      {
+        kind: "list",
+        items: [
+          "**The output comes back the same way every time** — the skill holds the standard.",
+          "**Your sentence gets shorter** — context lives in the skill, not your prompt.",
+          "**Nothing to set up again** — the second run is as easy as the tenth.",
+          "**Your process becomes shareable** — send the skill to a teammate and they get your way of doing it.",
+        ],
+      },
+    ],
+    next: { href: "/manual/skills/install-your-first-skill", label: "Next: install your first skill" },
+  },
+  {
+    topic: "install-your-first-skill",
+    order: 2,
+    navLabel: "Install your first skill",
+    title: "Install your first skill",
+    standfirst: "The fastest way in doesn't involve a terminal.",
+    body: [
+      {
+        kind: "list",
+        items: [
+          "**Find a skill on Claudinho** — browse by what you do (operations, finance, sales…), not by technology.",
+          "**Download it** — every skill page has a download button that gives you a single `.skill` file.",
+          "**Drag the file into Cowork** — drop it into the Claude desktop app and the skill is added. That's the install.",
+          "**Ask in plain language** — Cowork now knows the playbook; one sentence puts it to work.",
+        ],
+      },
+      {
+        kind: "p",
+        text: "Prefer a command? Every skill page also shows an install command you can copy and paste instead — same result, your choice.",
+      },
+    ],
+    next: { href: "/manual/skills/how-to-choose", label: "Next: how to pick a good skill" },
+  },
+  {
+    topic: "how-to-choose",
+    order: 3,
+    navLabel: "How to pick a good skill",
+    title: "How to pick a good skill",
+    standfirst: "The catalogue shows the signals. Here's how to read them.",
+    body: [
+      {
+        kind: "list",
+        items: [
+          "**Installs** — how many people actually use it. The strongest single signal.",
+          "**Stars** — community endorsement of the creator's work on GitHub.",
+          "**The creator** — every skill links to a real GitHub profile. A publisher with followers and a track record is staking a reputation.",
+          "**The “best for” line** — match it to your actual job, not the most impressive-sounding one.",
+        ],
+      },
+      {
+        kind: "p",
+        text: "And the simplest filter of all: **start with one job you do every week and can judge in fifteen seconds.** If the skill nails that, trust compounds from there.",
+      },
+    ],
+    next: { href: "/manual/monthly-expenses-sorted", label: "Now see it all in action" },
+  },
+];
+
+export function getSkillsPage(topic: string): GuidePage | undefined {
+  return SKILLS_PAGES.find((p) => p.topic === topic);
 }
 
 // ─── content: Part 2 ─────────────────────────────────────────────────────────
@@ -641,7 +726,8 @@ export function casesByShelf(): { shelf: ShelfId; title: string; cases: CaseStud
 }
 
 export const LIVE_CASE_COUNT = CASES.filter((p) => p.status === "live").length;
-export const TOTAL_TOPICS = START_PAGES.length + 1 + FEATURES.length + CASES.length;
+export const TOTAL_TOPICS =
+  START_PAGES.length + 1 + FEATURES.length + SKILLS_PAGES.length + CASES.length;
 
 // Work-in-progress gate. The Manual is live in local dev and Vercel preview
 // builds, but hidden in production (routes 404, nav link removed) until launch.

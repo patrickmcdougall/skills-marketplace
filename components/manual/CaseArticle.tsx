@@ -25,7 +25,7 @@ export function CaseArticle({
   return (
     <article>
       <div className="mn-crumb">
-        {shelfTitle} / <span className="o">{entry.navLabel}</span>
+        Examples / {shelfTitle} / <span className="o">{entry.navLabel}</span>
       </div>
       <h1>{entry.title}</h1>
       <p className="mn-lead">{entry.standfirst}</p>

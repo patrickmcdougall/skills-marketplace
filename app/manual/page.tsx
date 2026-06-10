@@ -5,18 +5,18 @@ import { START_PAGES, CASES, LIVE_CASE_COUNT, TOTAL_TOPICS } from "@/lib/manual"
 export const metadata: Metadata = {
   title: "The Manual — Claudinho",
   description:
-    "Learn Claude Cowork, then put it to work. A short product primer, then real case studies grouped by what you do — each ending with the skill that did it and how to install it.",
+    "How to get real work out of AI without writing code: Claude Cowork does the work, skills make it repeatable — taught through real examples, grouped by what you do.",
   openGraph: {
     type: "website",
     title: "The Manual — Claudinho",
     description:
-      "Learn Claude Cowork, then put it to work. Real case studies grouped by what you do — each ending with the skill that did it.",
+      "How to get real work out of AI without writing code — Cowork plus skills, taught through real examples.",
     url: "https://claudinho.xyz/manual",
   },
 };
 
 export default function ManualIndexPage() {
-  const firstIntro = START_PAGES[0];
+  const firstStart = START_PAGES[0];
   const firstLive = CASES.find((p) => p.status === "live");
 
   return (
@@ -24,26 +24,28 @@ export default function ManualIndexPage() {
       <div className="mn-crumb">
         <span className="o">The Manual</span>
       </div>
-      <h1>Learn Cowork, then put it to work.</h1>
+      <h1>Get real work out of AI. No code required.</h1>
       <p className="mn-lead">
-        Everything here teaches you to get real work done with Claude Cowork — no code, nothing to
-        learn first.
+        Most people&apos;s AI stops at a chat box. The Manual takes you past it — Cowork does the
+        work, skills make it repeatable, and none of it needs a developer.
       </p>
       <p>
-        The index on the left holds it all. <b>Intro to Cowork</b> is a five-minute primer on the
-        product. Below it, <b>case studies grouped by what you do</b> — each one a real job done with
-        a single skill, ending in the exact skill that did it and how to install it.
+        The index on the left holds it all, in order. <b>Getting started</b> is the five-minute
+        on-ramp. <b>Cowork features</b> tours the workspace. <b>Skills</b> covers the layer that
+        makes jobs repeatable — what they are, how to install one, how to choose. And{" "}
+        <b>Examples</b> shows real jobs done end to end, grouped by what you do, each ending in the
+        exact skill that did it.
       </p>
 
       <div className="mn-overview-cards">
-        <Link className="mn-ocard" href={`/manual/start/${firstIntro.topic}`}>
-          <div className="k">Start here · Intro</div>
+        <Link className="mn-ocard" href={`/manual/start/${firstStart.topic}`}>
+          <div className="k">Start here</div>
           <h3>What Cowork is</h3>
-          <p>The five-minute primer: what it is, when to reach for it, and your first 10 minutes.</p>
+          <p>The five-minute on-ramp: what it is, when to reach for it, and your first 10 minutes.</p>
         </Link>
         {firstLive && (
           <Link className="mn-ocard" href={`/manual/${firstLive.slug}`}>
-            <div className="k">See a real case</div>
+            <div className="k">See a real example</div>
             <h3>{firstLive.title}</h3>
             <p>The same job in about ninety seconds — with a real before and after.</p>
           </Link>
@@ -51,7 +53,7 @@ export default function ManualIndexPage() {
       </div>
 
       <div className="mn-updated">
-        Updated weekly · {TOTAL_TOPICS} topics · {LIVE_CASE_COUNT} live case
+        Updated weekly · {TOTAL_TOPICS} topics · {LIVE_CASE_COUNT} live example
         {LIVE_CASE_COUNT === 1 ? "" : "s"}
       </div>
     </article>
