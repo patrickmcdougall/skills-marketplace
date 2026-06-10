@@ -119,6 +119,25 @@ describe("InstallCard install actions", () => {
     expect(track).toHaveBeenCalledWith("install_download", SLUG);
     expect(screen.getByText(QUESTION)).toBeTruthy();
   });
+
+  it("sourceOnly: command pre-revealed, no download link, copy still tracks and prompts", async () => {
+    const user = userEvent.setup();
+    render(<InstallCard {...PROPS} sourceOnly />);
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+    });
+
+    expect(screen.queryByRole("link", { name: /download \.skill/i })).toBeNull();
+    expect(screen.getByText(PROPS.installCommand)).toBeTruthy();
+    expect(screen.getByText("This skill requires the install command below.")).toBeTruthy();
+
+    await user.click(screen.getByRole("button", { name: "copy" }));
+
+    expect(track).toHaveBeenCalledWith("install_copy_command", SLUG);
+    expect(screen.getByText(QUESTION)).toBeTruthy();
+  });
 });
 
 describe("FeedbackPrompt", () => {

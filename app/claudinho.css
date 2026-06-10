@@ -3509,3 +3509,30 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
   padding: 2px 8px;
 }
 .pb-feat-text { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+
+/* ── Feedback prompt (install card) ─────────────────────────────────────── */
+.dp-install .dp-fb { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.dp-install .dp-fb .subscript { margin: 0; }
+.dp-install .dp-fb-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 44px; min-height: 44px; padding: 2px;
+  background: none; border: none; border-radius: 2px;
+  font-size: 15px; cursor: pointer;
+}
+.dp-install .dp-fb-btn:hover { background: var(--paper-2); }
+.dp-install .dp-fb-form { display: flex; gap: 6px; margin-top: 8px; }
+.dp-install .dp-fb-input {
+  flex: 1; font: inherit; font-size: 12px; color: inherit;
+  padding: 6px 8px; background: transparent;
+  border: 1px solid var(--line); border-radius: 2px;
+}
+.dp-install .dp-fb-send {
+  font: inherit; font-size: 12px; color: inherit;
+  padding: 6px 10px; background: none; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 2px;
+}
+.dp-install .dp-fb-send:hover { background: var(--paper-2); }
+@media (max-width: 640px) {
+  /* 16px input floor stops iOS/iPadOS Safari zoom-on-focus */
+  .dp-install .dp-fb-input { font-size: 16px; min-height: 44px; }
+}

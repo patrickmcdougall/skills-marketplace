@@ -24,6 +24,9 @@ describe("POST /api/event", () => {
   beforeEach(() => {
     insertMock.mockReset().mockResolvedValue({ error: null });
     fromMock.mockClear();
+    // serverDb() from lib/db.ts validates these at call time
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://localhost:54321");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key");
   });
 
   describe("invalid JSON", () => {
@@ -36,6 +39,19 @@ describe("POST /api/event", () => {
 
     it("empty body → 400", async () => {
       const res = await POST(makeRequest(""));
+      expect(res.status).toBe(400);
+      expect(insertMock).not.toHaveBeenCalled();
+    });
+
+    it("JSON body 'null' → 400, no crash", async () => {
+      const res = await POST(makeRequest("null"));
+      expect(res.status).toBe(400);
+      expect(await res.json()).toEqual({ ok: false });
+      expect(insertMock).not.toHaveBeenCalled();
+    });
+
+    it("JSON body '42' (non-object) → 400", async () => {
+      const res = await POST(makeRequest("42"));
       expect(res.status).toBe(400);
       expect(insertMock).not.toHaveBeenCalled();
     });
@@ -121,14 +137,38 @@ describe("POST /api/event", () => {
         detail: null,
       });
     });
+
+    it("slug failing the shape check (HTML/URL garbage) → stored as null", async () => {
+      const body = JSON.stringify({
+        event: "feedback_up",
+        skillSlug: "<script>alert(1)</script>",
+      });
+      await POST(makeRequest(body));
+      expect(insertMock).toHaveBeenCalledWith(
+        expect.objectContaining({ skill_slug: null })
+      );
+    });
   });
 
   describe("insert failure swallowed", () => {
-    it("supabase insert rejecting → still ok:true", async () => {
+    it("supabase insert rejecting → still ok:true, error logged", async () => {
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
       insertMock.mockRejectedValueOnce(new Error("db down"));
       const res = await POST(makeRequest(VALID));
       expect(res.status).toBe(200);
       expect(await res.json()).toEqual({ ok: true });
+      expect(spy).toHaveBeenCalled();
+      spy.mockRestore();
+    });
+
+    it("supabase insert resolving with { error } → still ok:true, error logged", async () => {
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+      insertMock.mockResolvedValueOnce({ error: { message: "rls denied" } });
+      const res = await POST(makeRequest(VALID));
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ ok: true });
+      expect(spy).toHaveBeenCalledWith("site_event insert failed:", "rls denied");
+      spy.mockRestore();
     });
   });
 });

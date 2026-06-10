@@ -1,21 +1,9 @@
 import { NextRequest } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { serverDb } from "@/lib/db";
+import { TRACK_EVENTS, MAX_SLUG_LEN, MAX_DETAIL_LEN } from "@/lib/track";
 
-function serverDb() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-  return createClient(url, key, { auth: { persistSession: false } });
-}
-
-const ALLOWED_EVENTS = new Set([
-  "install_download",
-  "install_claude_code",
-  "install_copy_command",
-  "copy_for_slack",
-  "feedback_up",
-  "feedback_down",
-  "feedback_comment",
-]);
+const ALLOWED_EVENTS = new Set<string>(TRACK_EVENTS);
+const SLUG_SHAPE = /^[a-zA-Z0-9._-]+$/;
 
 function isBot(req: NextRequest): boolean {
   const ua = (req.headers.get("user-agent") ?? "").toLowerCase();
@@ -29,6 +17,9 @@ export async function POST(req: NextRequest) {
   } catch {
     return Response.json({ ok: false }, { status: 400 });
   }
+  if (payload === null || typeof payload !== "object") {
+    return Response.json({ ok: false }, { status: 400 });
+  }
 
   const event = typeof payload.event === "string" ? payload.event : "";
   if (!ALLOWED_EVENTS.has(event) || isBot(req)) {
@@ -36,15 +27,21 @@ export async function POST(req: NextRequest) {
     return Response.json({ ok: true });
   }
 
-  const skillSlug =
-    typeof payload.skillSlug === "string" ? payload.skillSlug.slice(0, 200) : null;
+  const rawSlug =
+    typeof payload.skillSlug === "string" ? payload.skillSlug.slice(0, MAX_SLUG_LEN) : null;
+  const skillSlug = rawSlug && SLUG_SHAPE.test(rawSlug) ? rawSlug : null;
   const detail =
-    typeof payload.detail === "string" ? payload.detail.slice(0, 500) : null;
+    typeof payload.detail === "string" ? payload.detail.slice(0, MAX_DETAIL_LEN) : null;
 
+  // Never fail the client over telemetry — but always leave an ops trace,
+  // since supabase-js reports DB errors by resolving { error }, not throwing.
   try {
-    await serverDb().from("site_event").insert({ event, skill_slug: skillSlug, detail });
-  } catch {
-    // Never fail the client over telemetry.
+    const { error } = await serverDb()
+      .from("site_event")
+      .insert({ event, skill_slug: skillSlug, detail });
+    if (error) console.error("site_event insert failed:", error.message);
+  } catch (err) {
+    console.error("site_event insert threw:", err);
   }
   return Response.json({ ok: true });
 }

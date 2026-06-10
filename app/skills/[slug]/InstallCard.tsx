@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { track } from "@/lib/track";
+import { track, MAX_DETAIL_LEN } from "@/lib/track";
 
 interface InstallCardProps {
   slug: string;
@@ -170,7 +170,7 @@ function FeedbackPrompt({ slug }: { slug: string }) {
   if (state === "comment") {
     return (
       <form
-        style={{ display: "flex", gap: 6, marginTop: 8 }}
+        className="dp-fb-form"
         onSubmit={(e) => {
           e.preventDefault();
           if (comment.trim()) track("feedback_comment", slug, comment.trim());
@@ -180,22 +180,15 @@ function FeedbackPrompt({ slug }: { slug: string }) {
       >
         <input
           type="text"
+          className="dp-fb-input"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder="What went wrong? (optional)"
-          maxLength={500}
+          aria-label="What went wrong"
+          maxLength={MAX_DETAIL_LEN}
           autoFocus
-          style={{
-            flex: 1,
-            fontSize: 12,
-            padding: "6px 8px",
-            border: "1px solid rgba(26,26,24,0.25)",
-            borderRadius: 2,
-            background: "transparent",
-            color: "inherit",
-          }}
         />
-        <button className="alt" type="submit" style={{ width: "auto", padding: "6px 10px" }}>
+        <button className="dp-fb-send" type="submit">
           Send
         </button>
       </form>
@@ -203,39 +196,29 @@ function FeedbackPrompt({ slug }: { slug: string }) {
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        marginTop: 8,
-        fontSize: 12,
-      }}
-    >
-      <span className="subscript" style={{ margin: 0 }}>
-        Did the skill work for you?
-      </span>
+    <div className="dp-fb">
+      <span className="subscript">Did the skill work for you?</span>
       <button
         type="button"
+        className="dp-fb-btn"
         aria-label="Yes, it worked"
         onClick={() => {
           track("feedback_up", slug);
           remember();
           setState("done");
         }}
-        style={{ background: "none", border: "none", cursor: "pointer", fontSize: 15, padding: 2 }}
       >
         👍
       </button>
       <button
         type="button"
+        className="dp-fb-btn"
         aria-label="No, something went wrong"
         onClick={() => {
           track("feedback_down", slug);
           remember();
           setState("comment");
         }}
-        style={{ background: "none", border: "none", cursor: "pointer", fontSize: 15, padding: 2 }}
       >
         👎
       </button>

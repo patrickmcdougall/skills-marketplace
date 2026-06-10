@@ -34,4 +34,21 @@ describe("CopyForSlack", () => {
     );
     expect(screen.getByText("Copied — paste it in Slack")).toBeTruthy();
   });
+
+  it("null bestFor copies title and URL only", async () => {
+    const user = userEvent.setup();
+    render(<CopyForSlack title="My Skill" bestFor={null} slug="my-skill" />);
+
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+    });
+
+    await user.click(screen.getByRole("button", { name: /copy for slack/i }));
+
+    expect(writeText).toHaveBeenCalledWith(
+      `My Skill\n${window.location.origin}/skills/my-skill`
+    );
+  });
 });
