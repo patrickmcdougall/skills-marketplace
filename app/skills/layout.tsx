@@ -1,20 +1,20 @@
 import type { Metadata } from "next";
-import { ALL_SKILLS } from "@/lib/data";
 
-const count = ALL_SKILLS.length;
+const description =
+  "Browse 12,000+ community Claude skills, sorted by the job they do. Find the one for your work and install it in a click — no terminal.";
 
 export const metadata: Metadata = {
   title: "Browse skills",
-  description: `Browse and filter ${count} verified Claude skills by role, stage, setup, and creator. Every skill is installed and re-verified weekly.`,
+  description,
   openGraph: {
     title: "Browse skills — Claudinho",
-    description: `Browse and filter ${count} verified Claude skills by role, stage, setup, and creator.`,
+    description,
     url: "https://claudinho.xyz/skills",
   },
   twitter: {
     card: "summary_large_image",
     title: "Browse skills — Claudinho",
-    description: `Browse and filter ${count} verified Claude skills by role, stage, setup, and creator.`,
+    description,
   },
 };
 
