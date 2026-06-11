@@ -4,7 +4,8 @@ import { BrowseClient } from "@/app/skills/BrowseClient";
 
 export const metadata: Metadata = {
   title: "Search skills",
-  description: "Search across verified Claude skills by name, creator, or topic.",
+  description:
+    "Search 12,000+ community Claude skills by name, creator, or topic — and install in a click, no terminal.",
 };
 
 export default async function SearchPage() {
