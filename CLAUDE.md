@@ -28,9 +28,11 @@ Deep context lives in `~/Documents/Claude/Projects/Skills marketplace/` — read
 ## Tech stack
 
 - Next.js (App Router) + Vercel
-- Supabase — two tables: `skill_listing` (one row per skill), `skill_signal` (stars, forks, install count)
+- Supabase — core tables: `skill_listing` (one row per skill), `skill_signal` (stars, forks, install count), `site_event` (funnel events + feedback), plus `publisher_profile`, `repo_info`, `skill_audit`
+- RLS is enabled on all public tables with no policies — the anon client (`lib/supabase.ts`) reads them as silently EMPTY result sets; server code must use `serverDb()` from `lib/db.ts` (service role, bypasses RLS)
 - Tailwind + shadcn/ui
 - Scripts in `scripts/` — indexing pipeline, content rewrite, install count sync
+- Tests: `npm test` (vitest; component tests run in jsdom with @testing-library)
 
 ---
 
@@ -54,10 +56,12 @@ The Vercel project is connected to GitHub (`patrickmcdougall/skills-marketplace`
 - Browse wired to Supabase (`getBrowseSkills()` in `lib/db.ts`) — not mock data
 - AI content pipeline live: `display_title`, `display_description`, `best_for`, `shelf`, `sub_shelf`, `tags` generated for skills with `content_status = 'ok'`
 - skills.sh API integrated — catalog sync (`sync-catalog`), install count sync (`sync-signals`), audit data (`sync-audit`)
-- Install counter + bot filtering at `/i/[slug]` — increments `skill_signal.install_count`
+- Install counter + bot filtering at `/i/[slug]` — increments `skill_signal.install_count` (bot filter is the shared `isBot()` in `lib/bot.ts`)
+- Install funnel event tracking — `track()` in `lib/track.ts` (sendBeacon, fire-and-forget) → `POST /api/event` → `site_event` table; event names whitelisted via `TRACK_EVENTS`, bot hits dropped with the same shared `isBot()`
+- Post-install feedback prompt on skill detail (`InstallCard.tsx`) — 👍/👎 after any install action, optional comment on 👎, answered-state remembered per skill in localStorage
 - Publisher/creator profiles — real data from GitHub API via `sync-publisher-profiles`
 - OG images — exist for `/`, `/creators/[handle]`, `/skills/[slug]`
-- "Copy for Slack" button on skill detail pages (`CopyForSlack.tsx`)
+- "Copy for Slack" button on skill detail pages (`CopyForSlack.tsx`) — copies + fires `copy_for_slack` event
 - Mobile nav hamburger drawer, active states, focus management
 
 ### Still rough / known gaps

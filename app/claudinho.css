@@ -2811,8 +2811,6 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
 }
 .bp-search-clear:hover { color: var(--ink); }
 
-/* ─── filter sub-shelf negative-margin → CSS class (P3) ────────────────────── */
-.bp-fsection.sub-shelf { margin-top: -16px; padding-top: 0; border-top: none; }
 
 /* ─── filter touch targets (P3) ────────────────────────────────────────────── */
 .bp-check, .bp-radio { min-height: 44px; }
@@ -3588,3 +3586,36 @@ a.mn-feat:hover .mn-feat-name { color: var(--accent-2); }
 
 /* "you type / what comes back" labels around the See-it-work demo */
 .mn-youtype { font-size: 14px; color: var(--ink-2); margin: 0 0 8px; }
+
+/* ── Feedback prompt (install card) ─────────────────────────────────────── */
+.dp-install .dp-fb { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.dp-install .dp-fb .subscript { margin: 0; }
+.dp-install .dp-fb-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 44px; min-height: 44px; padding: 2px;
+  background: none; border: none; border-radius: 2px;
+  font-size: 15px; cursor: pointer;
+}
+.dp-install .dp-fb-btn:hover { background: var(--paper-2); }
+.dp-install .dp-fb-form { display: flex; gap: 6px; margin-top: 8px; }
+.dp-install .dp-fb-input {
+  flex: 1; font: inherit; font-size: 12px; color: inherit;
+  padding: 6px 8px; background: transparent;
+  border: 1px solid var(--line); border-radius: 2px;
+}
+.dp-install .dp-fb-send {
+  font: inherit; font-size: 12px; color: inherit;
+  padding: 6px 10px; background: none; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 2px;
+}
+.dp-install .dp-fb-send:hover { background: var(--paper-2); }
+@media (max-width: 640px) {
+  /* 16px input floor stops iOS/iPadOS Safari zoom-on-focus */
+  .dp-install .dp-fb-input { font-size: 16px; min-height: 44px; }
+}
+
+/* Nested sub-shelf list (renders inside the active shelf's li) */
+.bp-subshelf-nested {
+  margin-top: 2px;
+  margin-bottom: 6px;
+}

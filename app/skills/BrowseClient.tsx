@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef, Suspense } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -12,31 +12,35 @@ import {
   applyFilters,
   publisherListForCurrent,
   shelfLabel,
-  genShelfId,
-  fmtCount,
+  subShelfLabel,
   type BrowseFilters,
   type Skill,
 } from "@/lib/data";
-import type { BrowseSkill } from "@/lib/db";
+import type { BrowseProps, Catalog } from "@/lib/catalog";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { SkillCard } from "@/components/SkillCard";
-import type { SkillTrustStatus } from "@/lib/trust";
 
 const PAGE_SIZE = 12;
 
 // ─── sidebar: shelf filter ──────────────────────────────────────────────────
 
-function FilterShelf({
+export function FilterShelf({
   value,
   onToggle,
   onClear,
   counts,
+  subShelf,
+  onSubShelf,
+  subShelfCounts,
 }: {
   value: string[];
   onToggle: (id: string) => void;
   onClear: () => void;
   counts: Record<string, number>;
+  subShelf: string | null;
+  onSubShelf: (val: string | null) => void;
+  subShelfCounts: Record<string, number>;
 }) {
   return (
     <div className="bp-fsection">
@@ -48,6 +52,10 @@ function FilterShelf({
         {SHELVES.map((sh) => {
           const c = counts[sh.id] || 0;
           const active = value.includes(sh.id);
+          // Sub-shelves nest under their parent shelf, and only when exactly
+          // one shelf is selected (sub-shelf filtering is single-shelf scoped).
+          const subs =
+            active && value.length === 1 ? SHELF_SUB_SHELVES[sh.id] || [] : [];
           return (
             <li key={sh.id}>
               <button
@@ -60,49 +68,24 @@ function FilterShelf({
                 <span>{sh.title}</span>
                 <span className="num">{c}</span>
               </button>
+              {subs.length > 0 && (
+                <ul className="bp-radio-list bp-subshelf bp-subshelf-nested">
+                  {subs.map((s) => (
+                    <li key={s}>
+                      <button
+                        className={`bp-radio${subShelf === s ? " is-active" : ""}`}
+                        onClick={() => onSubShelf(subShelf === s ? null : s)}
+                      >
+                        <span>{subShelfLabel(s)}</span>
+                        <span className="num">{subShelfCounts[s] || 0}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </li>
           );
         })}
-      </ul>
-    </div>
-  );
-}
-
-// ─── sidebar: sub-shelf ─────────────────────────────────────────────────────
-
-function FilterSubShelf({
-  shelves,
-  value,
-  onChange,
-  counts,
-}: {
-  shelves: string[];
-  value: string | null;
-  onChange: (val: string | null) => void;
-  counts: Record<string, number>;
-}) {
-  if (shelves.length !== 1) return null;
-  const shelf = shelves[0];
-  const subs = SHELF_SUB_SHELVES[shelf] || [];
-  if (subs.length === 0) return null;
-  return (
-    <div className="bp-fsection sub-shelf">
-      <h3>
-        <span>Sub-shelf</span>
-        {value && <button onClick={() => onChange(null)}>clear</button>}
-      </h3>
-      <ul className="bp-radio-list bp-subshelf">
-        {subs.map((s) => (
-          <li key={s}>
-            <button
-              className={`bp-radio${value === s ? " is-active" : ""}`}
-              onClick={() => onChange(value === s ? null : s)}
-            >
-              <span>{s}</span>
-              <span className="num">{counts[s] || 0}</span>
-            </button>
-          </li>
-        ))}
       </ul>
     </div>
   );
@@ -291,7 +274,7 @@ function ActiveChips({
   if (filters.subShelf) {
     chips.push({
       k: "sub",
-      label: filters.subShelf,
+      label: subShelfLabel(filters.subShelf),
       remove: () => onRemove("subShelf"),
     });
   }
@@ -346,27 +329,15 @@ function BrowseEmpty() {
 
 // ─── main browse page ─────────────────────────────────────────────────────────
 
-// Map a BrowseSkill to the Skill shape that existing filter/sort/card logic expects.
-function toSkill(s: BrowseSkill, publisherNames: Record<string, string>): Skill {
-  // Prefer generated COPY only when content_status is 'ok'; use the generated
-  // shelf/tags for classification whenever present (ok or review).
-  const ok = s.contentStatus === "ok";
-  const sid = genShelfId(s.genShelf);
-  return {
-    id: s.slug,
-    title: ok && s.displayTitle ? s.displayTitle : s.title,
-    desc: ok && s.displayDescription ? s.displayDescription : s.desc,
-    publisher: s.ownerHandle,
-    publisherDisplayName: publisherNames[s.ownerHandle],
-    installs: s.installs,
-    stars: s.stars,
-    verifiedDate: s.verifiedDate,
-    version: "",
-    shelfTitle: s.genShelf ? shelfLabel(sid) : (s.category ?? ""),
-    shelfId: s.genShelf ? sid : (s.category?.toLowerCase().replace(/\s+/g, "-") ?? ""),
-    subShelf: s.subShelf ?? undefined,
-    tags: [...(s.genTags && s.genTags.length ? s.genTags : s.topics), s.repoName],
-  };
+// Reads URL params and feeds them to the page. Isolated so useSearchParams()
+// only suspends this empty component instead of bailing the whole browse tree
+// out of server rendering.
+function SearchParamsSync({ onParams }: { onParams: (q: string | null, sort: string | null) => void }) {
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    onParams(searchParams.get("q"), searchParams.get("sort"));
+  }, [searchParams, onParams]);
+  return null;
 }
 
 const compact = (s: string) => s.toLowerCase().replace(/[\s-]/g, "");
@@ -384,40 +355,62 @@ function searchSkills(skills: Skill[], q: string): Skill[] {
   });
 }
 
-function BrowsePageInner({ initialSkills, publisherNames, trustMap }: { initialSkills: BrowseSkill[]; publisherNames: Record<string, string>; trustMap?: Record<string, SkillTrustStatus> }) {
-  const allSkills = useMemo(() => initialSkills.map(s => toSkill(s, publisherNames)), [initialSkills, publisherNames]);
-  const stats = useMemo(() => ({
-    skills: initialSkills.length,
-    creators: new Set(initialSkills.map((s) => s.ownerHandle)).size,
-    weekly: 6,
-    installs: fmtCount(initialSkills.reduce((a, s) => a + s.installs, 0)),
-  }), [initialSkills]);
-  const searchParams = useSearchParams();
+function BrowsePageInner({
+  initialSkills,
+  totalCount,
+  initialShelfCounts,
+  initialPublishers,
+  initialTrust,
+  stats,
+}: BrowseProps) {
+  // The page ships with only the first slice of the catalog server-rendered.
+  // The full catalog arrives via /api/catalog after hydration; until then all
+  // derived views fall back to the precomputed initial props.
+  const [catalog, setCatalog] = useState<Catalog | null>(null);
 
-  // Initialise from URL params so /search?q=... and /skills?sort=... work.
-  const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/catalog")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: Catalog | null) => {
+        if (!cancelled && data?.skills?.length) setCatalog(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const allSkills = catalog?.skills ?? initialSkills;
+  const trustMap = catalog?.trust ?? initialTrust;
+
+  const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<BrowseFilters>({
     shelves: [],
     subShelf: null,
     publishers: [],
   });
-  const [sort, setSort] = useState(() => {
-    const s = searchParams.get("sort");
-    return s && SORT_OPTIONS.find((o) => o.id === s) ? s : "installs";
-  });
-
-  useEffect(() => {
-    const s = searchParams.get("sort");
-    if (s && SORT_OPTIONS.find((o) => o.id === s)) setSort(s);
-  }, [searchParams]);
+  const [sort, setSort] = useState("installs");
   const [visible, setVisible] = useState(PAGE_SIZE);
+
+  // URL params (/search?q=..., /skills?sort=...) sync in from the
+  // Suspense-wrapped <SearchParamsSync> so reading them doesn't opt this whole
+  // tree out of server rendering.
+  const applyParams = useCallback((q: string | null, s: string | null) => {
+    if (q !== null) {
+      setQuery(q);
+      setVisible(PAGE_SIZE);
+    }
+    if (s && SORT_OPTIONS.find((o) => o.id === s)) setSort(s);
+  }, []);
 
   const filtered = useMemo(
     () => searchSkills(sortSkills(applyFilters(allSkills, filters), sort), query),
-    [filters, sort, query]
+    [allSkills, filters, sort, query]
   );
 
   const shelfCounts = useMemo(() => {
+    if (!catalog) return initialShelfCounts;
     const base = applyFilters(allSkills, {
       ...filters,
       shelves: [],
@@ -426,7 +419,7 @@ function BrowsePageInner({ initialSkills, publisherNames, trustMap }: { initialS
     const counts: Record<string, number> = {};
     for (const s of base) counts[s.shelfId] = (counts[s.shelfId] || 0) + 1;
     return counts;
-  }, [filters]);
+  }, [catalog, allSkills, initialShelfCounts, filters]);
 
   const subShelfCounts = useMemo(() => {
     if (!filters.shelves || filters.shelves.length !== 1) return {};
@@ -434,12 +427,13 @@ function BrowsePageInner({ initialSkills, publisherNames, trustMap }: { initialS
     const counts: Record<string, number> = {};
     for (const s of base) if (s.subShelf) counts[s.subShelf] = (counts[s.subShelf] || 0) + 1;
     return counts;
-  }, [filters]);
+  }, [allSkills, filters]);
 
   const publisherList = useMemo(() => {
+    if (!catalog) return initialPublishers;
     const base = applyFilters(allSkills, { ...filters, publishers: [] });
     return publisherListForCurrent(base);
-  }, [filters]);
+  }, [catalog, allSkills, initialPublishers, filters]);
 
   const toggleShelf = (id: string) => {
     setFilters((f) => {
@@ -496,10 +490,23 @@ function BrowsePageInner({ initialSkills, publisherNames, trustMap }: { initialS
     setVisible(PAGE_SIZE);
   };
 
+  // Until the full catalog loads, an unfiltered view only holds the initial
+  // slice — report the real catalog total instead of the slice length.
+  const hasNarrowing =
+    query.trim() !== "" ||
+    filters.shelves.length > 0 ||
+    !!filters.subShelf ||
+    filters.publishers.length > 0;
+  const total = catalog ? allSkills.length : totalCount;
+  const matchCount = catalog || hasNarrowing ? filtered.length : total;
+
   const visibleSet = filtered.slice(0, visible);
 
   return (
     <div className="lp bp accent-orange bg-cream">
+      <Suspense fallback={null}>
+        <SearchParamsSync onParams={applyParams} />
+      </Suspense>
       <Nav stats={stats} />
 
       <header className="bp-head bp-page">
@@ -533,12 +540,9 @@ function BrowsePageInner({ initialSkills, publisherNames, trustMap }: { initialS
             onToggle={toggleShelf}
             onClear={clearShelves}
             counts={shelfCounts}
-          />
-          <FilterSubShelf
-            shelves={filters.shelves}
-            value={filters.subShelf}
-            onChange={setSubShelf}
-            counts={subShelfCounts}
+            subShelf={filters.subShelf}
+            onSubShelf={setSubShelf}
+            subShelfCounts={subShelfCounts}
           />
           <FilterPublisher
             list={publisherList}
@@ -550,8 +554,8 @@ function BrowsePageInner({ initialSkills, publisherNames, trustMap }: { initialS
 
         <div className="bp-main">
           <BrowseTopBar
-            count={filtered.length}
-            total={allSkills.length}
+            count={matchCount}
+            total={total}
             sort={sort}
             onSort={setSort}
           />
@@ -572,14 +576,14 @@ function BrowsePageInner({ initialSkills, publisherNames, trustMap }: { initialS
                   <SkillCard key={s.id} skill={s} context="browse" trust={trustMap?.[s.id]} />
                 ))}
               </div>
-              {filtered.length > visible && (
+              {matchCount > visible && (
                 <button
                   className="bp-loadmore"
                   onClick={() => setVisible((v) => v + PAGE_SIZE)}
                 >
-                  Load {Math.min(PAGE_SIZE, filtered.length - visible)} more
+                  Load {Math.min(PAGE_SIZE, matchCount - visible)} more
                   <span className="ct">
-                    ({filtered.length - visible} remaining)
+                    ({matchCount - visible} remaining)
                   </span>
                 </button>
               )}
@@ -593,10 +597,6 @@ function BrowsePageInner({ initialSkills, publisherNames, trustMap }: { initialS
   );
 }
 
-export function BrowseClient({ initialSkills, publisherNames, trustMap }: { initialSkills: BrowseSkill[]; publisherNames: Record<string, string>; trustMap?: Record<string, SkillTrustStatus> }) {
-  return (
-    <Suspense>
-      <BrowsePageInner initialSkills={initialSkills} publisherNames={publisherNames} trustMap={trustMap} />
-    </Suspense>
-  );
+export function BrowseClient(props: BrowseProps) {
+  return <BrowsePageInner {...props} />;
 }

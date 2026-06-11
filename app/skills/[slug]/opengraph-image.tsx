@@ -145,12 +145,6 @@ export default async function Image({
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#2e8a4f" }} />
-              <span style={{ fontSize: 13, color: "#45413b", letterSpacing: "0.02em" }}>
-                verified
-              </span>
-            </div>
             <span style={{ fontSize: 14, color: "#7a7468", letterSpacing: "0.04em" }}>
               claudinho.xyz
             </span>
