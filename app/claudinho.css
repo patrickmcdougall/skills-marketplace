@@ -3568,12 +3568,6 @@ a.mn-feat:hover .mn-feat-name { color: var(--accent-2); }
 /* typed sentences read as chat, not code — rounder bubble, Geist (swapped above).
    Install commands are the exception: inside .mn-install they stay mono. */
 .mn-typed { border-radius: 10px; font-size: 13px; }
-.mn-install .mn-typed {
-  font-family: var(--font-jetbrains-mono), monospace;
-  font-weight: 400;
-  border-radius: 2px;
-  font-size: 12.5px;
-}
 .cw-typed { border-radius: 10px; }
 
 /* "use it for:" example line on feature rows */
@@ -3591,3 +3585,6 @@ a.mn-feat:hover .mn-feat-name { color: var(--accent-2); }
   padding: 2px 7px;
   color: var(--ink-2);
 }
+
+/* "you type / what comes back" labels around the See-it-work demo */
+.mn-youtype { font-size: 14px; color: var(--ink-2); margin: 0 0 8px; }

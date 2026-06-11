@@ -71,22 +71,15 @@ export function CaseArticle({
         <p key={i}>{para}</p>
       ))}
 
-      {/* ── Move 3: see it work (live only) ── */}
-      {isLive && entry.steps && (
+      {/* ── Move 3: see it work — the sentence + the result (live only) ── */}
+      {isLive && entry.sentence && (
         <>
           <h2 className="mn-h2">See it work</h2>
-          <div className="mn-steps">
-            {entry.steps.map((s, i) => (
-              <div className="mn-step" key={i}>
-                <div className="mn-step-n">{i + 1}</div>
-                <div>
-                  <h3>{s.title}</h3>
-                  {s.body && <p><RichText text={s.body} /></p>}
-                  {s.typed && <span className="mn-typed">{s.typed}</span>}
-                </div>
-              </div>
-            ))}
-          </div>
+          <p className="mn-youtype">You give Cowork the broken file and one sentence:</p>
+          <p>
+            <span className="mn-typed">{entry.sentence}</span>
+          </p>
+          <p className="mn-youtype">And this is what comes back:</p>
 
           {entry.before && entry.after && (
             <div className="mn-ba">
@@ -148,13 +141,13 @@ export function CaseArticle({
         </div>
       )}
 
-      {/* ── Move 4: install it, step by step (live only) ── */}
-      {isLive && entry.install && (
+      {/* ── Move 4: ONE end-to-end flow, install first (live only) ── */}
+      {isLive && entry.howTo && (
         <>
-          <h2 className="mn-h2">Install it, step by step</h2>
+          <h2 className="mn-h2">Do it yourself, step by step</h2>
           {/* mn-install keeps the command in mono — the one place code-font belongs */}
           <div className="mn-steps mn-install">
-            {entry.install.map((s, i) => (
+            {entry.howTo.map((s, i) => (
               <div className="mn-step" key={i}>
                 <div className="mn-step-n">{i + 1}</div>
                 <div>

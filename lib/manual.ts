@@ -126,11 +126,13 @@ export type CaseStudy = {
   scenario: string[];
 
   // ── full walkthrough — present only when status === "live" ──
-  steps?: [CaseStep, CaseStep, CaseStep];
+  /** The one sentence you give Cowork — shown in "See it work" with the result. */
+  sentence?: string;
   before?: { label: string; lines: string[] };
   after?: { label: string; rows: BeforeAfterRow[]; footer?: string };
   stats?: [{ v: string; k: string }, { v: string; k: string }, { v: string; k: string }];
-  install?: CaseStep[];
+  /** ONE end-to-end flow, install first: download → drag in → use → review. */
+  howTo?: CaseStep[];
 
   /** Points to another CaseStudy (ideally a different shelf) to keep people moving. */
   nextCase?: string;
@@ -442,7 +444,7 @@ export const SKILLS_PAGES: GuidePage[] = [
           "**Find a skill on Claudinho** — [browse by what you do](/skills) (operations, finance, sales…), not by technology.",
           "**Click Download on its page** — a single `.skill` file lands in your Downloads folder.",
           "**Drag that file into Cowork** — drop it into the Claude desktop app window and the skill is added. That's the install. (You'll find it afterwards under Customize → Skills.)",
-          "**Ask in plain language** — Cowork now knows the playbook; one sentence puts it to work.",
+          "**Ask in plain language** — you don't need to mention the skill by name. Claude knows what each installed skill is for and uses it automatically when the job matches.",
         ],
       },
       {
@@ -654,22 +656,8 @@ export const CASES: CaseStudy[] = [
       "You know this file. You download the revenue export from your billing tool and it arrives ugly: a junk title block, headers half missing, dates in three different formats, almost half the amounts typed as text (“R$ 1.234,56”), stray subtotal lines — and a few duplicates hiding somewhere in 220 rows.",
       "So you fix it by hand: delete the junk, retype the amounts, hunt the duplicates, build the totals. An hour or two, every month. That's the part you hand off — it's repetitive, it follows rules, and you can judge the result at a glance.",
     ],
-    steps: [
-      {
-        title: "Drop the export in",
-        body: "billing-export-may.xlsx, straight from the billing tool. Broken as-is — no pre-cleaning.",
-      },
-      {
-        title: "Type one sentence",
-        body: "The skill knows spreadsheet hygiene — formats, formulas, what to flag instead of guess.",
-        typed:
-          "Clean this export into a board-ready revenue report — totals by plan and region — and flag anything I should look at.",
-      },
-      {
-        title: "Review the spreadsheet",
-        body: "A real Excel file back: a Summary tab whose formulas still work — change a number and the totals update — the cleaned data behind it, and a “Flagged for review” tab with the 5 rows it refused to fix silently.",
-      },
-    ],
+    sentence:
+      "Clean this export into a board-ready revenue report — totals by plan and region — and flag anything I should look at.",
     before: {
       label: "Before — 220 raw lines",
       lines: [
@@ -696,18 +684,28 @@ export const CASES: CaseStudy[] = [
       { v: "5", k: "rows flagged, 0 guessed" },
       { v: "1", k: "sentence typed" },
     ],
-    install: [
+    howTo: [
       {
         title: "Download the skill",
         body: "[Click here to download it](/i/anthropics-skills-xlsx) — or use the Download button on [its Claudinho page](/skills/anthropics-skills-xlsx). A file called anthropics-skills-xlsx.skill lands in your Downloads folder.",
       },
       {
         title: "Drag that file into Cowork",
-        body: "Open your Downloads folder and drag the file into the Claude desktop app window, like attaching a file to a chat. Installed — it shows up under Customize → Skills.",
+        body: "Open your Downloads folder and drag the file into the Claude desktop app window, like attaching a file to a chat. It shows up under Customize → Skills. Steps 1 and 2 are once — from now on you start at step 3.",
       },
       {
-        title: "Drop your export, type the sentence",
-        body: "Any messy spreadsheet, asked plainly. Done.",
+        title: "Start a task and drop your export in",
+        body: "Broken as-is — no pre-cleaning, no renaming.",
+      },
+      {
+        title: "Type the sentence",
+        body: "You don't need to mention the skill: Claude sees a spreadsheet job and uses it on its own.",
+        typed:
+          "Clean this export into a board-ready revenue report — totals by plan and region — and flag anything I should look at.",
+      },
+      {
+        title: "Review the spreadsheet",
+        body: "A real Excel file back: a Summary tab whose formulas still work — change a number and the totals update — the cleaned data behind it, and a “Flagged for review” tab with the rows it refused to fix silently.",
       },
     ],
     nextCase: "call-notes-to-deck",
