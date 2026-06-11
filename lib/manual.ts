@@ -347,9 +347,9 @@ export const FEATURES: CoworkFeature[] = [
     slug: "customize",
     name: "Customize",
     icon: "customize",
-    text: "Where your installed skills and connected apps live. When you install a skill, this is where it lands.",
+    text: "Where your skills and connected apps live. Installed skills land here — and “Create new skills” lets you teach Claude your own process in plain language.",
     example:
-      "Add the skills your team uses, so a report comes out the same no matter who asks for it.",
+      "Add the skills your team uses, so a report comes out the same no matter who asks. Or create one from how YOU write proposals.",
   },
 ];
 
@@ -410,6 +410,22 @@ export const SKILLS_PAGES: GuidePage[] = [
           "**Your process becomes shareable** — send the skill to a teammate and they get your way of doing it.",
         ],
       },
+      {
+        kind: "h2",
+        text: "Three ways to get a skill",
+      },
+      {
+        kind: "list",
+        items: [
+          "**Pick one ready-made** — the [catalogue](/skills) has thousands, built by Anthropic and by people who do the job. Fastest path: install and go.",
+          "**Make one yours** — a skill is a file of instructions on your computer, so you can ask Claude to adapt one you've installed: “take this report skill and use our categories and our tone.” Have it saved under your own name and the original stays untouched.",
+          "**Create your own** — in Cowork, Customize → Create new skills. Teach Claude your process in plain language: how you write proposals, how your team formats updates.",
+        ],
+      },
+      {
+        kind: "p",
+        text: "Most people start with the first, move to the second once a skill almost fits, and build from scratch only when the process is truly theirs.",
+      },
     ],
     next: { href: "/manual/skills/install-your-first-skill", label: "Next: install your first skill" },
   },
@@ -432,6 +448,10 @@ export const SKILLS_PAGES: GuidePage[] = [
       {
         kind: "p",
         text: "Prefer a command? Every skill page also shows an install command you can copy and paste instead — same result, your choice.",
+      },
+      {
+        kind: "p",
+        text: "And nothing is locked: once installed, a skill is yours. Ask Claude to adjust it to your format anytime — or [make your own version](/manual/skills/where-skills-fit).",
       },
     ],
     next: { href: "/manual/skills/how-to-choose", label: "Next: how to pick a good skill" },
