@@ -34,7 +34,7 @@ export function CaseArticle({
       {/* ── Move 1: the skill (protagonist) ── */}
       {hasSkill && (
         <>
-          <h2 className="mn-h2">The skill this case uses</h2>
+          <h2 className="mn-h2">The skill that does it</h2>
           <div className="mn-skillrow">
             <div className="ico">$_</div>
             <div>
