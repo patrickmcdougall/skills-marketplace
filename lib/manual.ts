@@ -636,7 +636,7 @@ export const CASES: CaseStudy[] = [
     navLabel: "Messy export → board report",
     title: "Clean a messy export into a board-ready report",
     standfirst:
-      "The billing export came out broken — junk rows, three date formats, half the amounts as text — and the board meeting's at three. Same file, board-ready, in one pass.",
+      "You download the export, it comes out a mess, and you spend an hour turning it into something presentable. This removes that hour.",
     status: "live",
     concept: {
       lead: "Cleanup and formatting is rule-based — a perfect handoff.",
@@ -651,8 +651,8 @@ export const CASES: CaseStudy[] = [
       installCommand: "npx skills add https://github.com/anthropics/skills/tree/main/xlsx",
     },
     scenario: [
-      "Board meeting at three. The revenue export from your billing tool came out the way exports do: a junk title block, headers half missing, dates in three formats, 40% of the amounts as “R$ 1.234,56” text, stray subtotal lines — and, somewhere in 220 rows, a few duplicates you can't see.",
-      "It's repetitive, rule-based cleanup with an output you can judge at a glance — which makes it exactly the kind of work to hand off.",
+      "You know this file. You download the revenue export from your billing tool and it arrives ugly: a junk title block, headers half missing, dates in three different formats, almost half the amounts typed as text (“R$ 1.234,56”), stray subtotal lines — and a few duplicates hiding somewhere in 220 rows.",
+      "So you fix it by hand: delete the junk, retype the amounts, hunt the duplicates, build the totals. An hour or two, every month. That's the part you hand off — it's repetitive, it follows rules, and you can judge the result at a glance.",
     ],
     steps: [
       {
