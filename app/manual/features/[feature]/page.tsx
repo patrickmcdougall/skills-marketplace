@@ -2,14 +2,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { FEATURES, getFeature, MANUAL_ENABLED } from "@/lib/manual";
+import { FEATURES, getFeature, MANUAL_ENABLED, SHOW_WIP } from "@/lib/manual";
 
 // Per-feature stub pages: a real (sanitized) screenshot of the feature, the
 // one-paragraph description from the overview, and an honest "full guide in
 // production" note until each guide is written.
 
 export function generateStaticParams() {
-  if (!MANUAL_ENABLED) return [];
+  if (!MANUAL_ENABLED || !SHOW_WIP) return [];
   return FEATURES.map((f) => ({ feature: f.slug }));
 }
 
@@ -41,7 +41,7 @@ export default async function FeaturePage({
 }) {
   const { feature } = await params;
   const f = getFeature(feature);
-  if (!f) notFound();
+  if (!f || !SHOW_WIP) notFound();
 
   const idx = FEATURES.findIndex((x) => x.slug === f.slug);
   const next = FEATURES[idx + 1];

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getAllSkillSlugs, getDBPublisherRows } from "@/lib/db";
-import { START_PAGES, SKILLS_PAGES, FEATURES, CASES } from "@/lib/manual";
+import { START_PAGES, SKILLS_PAGES, CASES } from "@/lib/manual";
 
 const BASE = "https://claudinho.xyz";
 
@@ -26,11 +26,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${BASE}/manual/skills/${p.topic}`,
       changeFrequency: "monthly" as const,
       priority: 0.6,
-    })),
-    ...FEATURES.map((f) => ({
-      url: `${BASE}/manual/features/${f.slug}`,
-      changeFrequency: "monthly" as const,
-      priority: 0.5,
     })),
     ...CASES.filter((c) => c.status === "live").map((c) => ({
       url: `${BASE}/manual/${c.slug}`,

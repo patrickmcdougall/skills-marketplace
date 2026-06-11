@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import type { CoworkFeature } from "@/lib/manual";
+import { SHOW_WIP, type CoworkFeature } from "@/lib/manual";
 
 // Inline stroke icons (Lucide-style) so the list works in a Server Component and
 // matches the codebase convention of hand-rolled SVGs. Keys mirror Cowork's own
@@ -70,23 +70,36 @@ function FeatIcon({ icon }: { icon: CoworkFeature["icon"] }) {
 export function FeatureList({ features }: { features: CoworkFeature[] }) {
   return (
     <div className="mn-features">
-      {features.map((f) => (
-        <Link className="mn-feat" href={`/manual/features/${f.slug}`} key={f.slug}>
-          <span className="mn-feat-ico">
-            <FeatIcon icon={f.icon} />
-          </span>
-          <div className="mn-feat-body">
-            <div className="mn-feat-head">
-              <span className="mn-feat-name">{f.name}</span>
-              {f.badge && <span className="mn-feat-badge">{f.badge}</span>}
+      {features.map((f) => {
+        const body = (
+          <>
+            <span className="mn-feat-ico">
+              <FeatIcon icon={f.icon} />
+            </span>
+            <div className="mn-feat-body">
+              <div className="mn-feat-head">
+                <span className="mn-feat-name">{f.name}</span>
+                {f.badge && <span className="mn-feat-badge">{f.badge}</span>}
+              </div>
+              <p className="mn-feat-text">{f.text}</p>
+              <p className="mn-feat-eg">
+                <span className="k">Use it for:</span> {f.example}
+              </p>
             </div>
-            <p className="mn-feat-text">{f.text}</p>
-            <p className="mn-feat-eg">
-              <span className="k">Use it for:</span> {f.example}
-            </p>
+          </>
+        );
+        // Per-feature guide pages are WIP-gated: rows link in dev/preview,
+        // render unlinked in production until each guide ships.
+        return SHOW_WIP ? (
+          <Link className="mn-feat" href={`/manual/features/${f.slug}`} key={f.slug}>
+            {body}
+          </Link>
+        ) : (
+          <div className="mn-feat" key={f.slug}>
+            {body}
           </div>
-        </Link>
-      ))}
+        );
+      })}
     </div>
   );
 }

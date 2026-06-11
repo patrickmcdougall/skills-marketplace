@@ -898,3 +898,15 @@ export const TOTAL_TOPICS =
 // LAUNCHED 2026-06-11. To take the Manual off production again, restore the
 // env-keyed gate (see git history) or set this to false on a branch.
 export const MANUAL_ENABLED = true;
+
+// WIP pages (feature-guide stubs, example stubs) stay off production: visible
+// in dev/preview for production work, hidden (404 + absent from the index) on
+// the live site until each is finished. NODE_ENV guard for the stale local
+// VERCEL_ENV — same caveat as the old launch gate.
+export const SHOW_WIP =
+  process.env.NODE_ENV !== "production" || process.env.VERCEL_ENV !== "production";
+
+/** Cases visible in the current environment (prod = live only). */
+export function visibleCases(): CaseStudy[] {
+  return SHOW_WIP ? CASES : CASES.filter((c) => c.status === "live");
+}
