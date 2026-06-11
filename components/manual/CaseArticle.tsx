@@ -164,6 +164,11 @@ export function CaseArticle({
               </div>
             ))}
           </div>
+          {entry.skill.installCommand && (
+            <p className="mn-cmd-alt">
+              Prefer a command? <code>{entry.skill.installCommand}</code> does the same.
+            </p>
+          )}
           <div className="mn-cta">
             {skillHref && (
               <Link className="mn-btn-accent" href={skillHref}>

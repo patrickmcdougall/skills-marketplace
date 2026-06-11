@@ -698,12 +698,11 @@ export const CASES: CaseStudy[] = [
     ],
     install: [
       {
-        title: "Open the skill on Claudinho & download it",
-        body: "One click — a single .skill file lands in your Downloads folder.",
-        typed: "npx skills add https://github.com/anthropics/skills/tree/main/xlsx",
+        title: "Open the skill on Claudinho",
+        body: "Click the Download button on its page — a single .skill file lands in your Downloads folder.",
       },
       {
-        title: "Drag the file into Cowork",
+        title: "Drag that file into Cowork",
         body: "Drop it into the Claude desktop app window. Installed — it lives under Customize → Skills.",
       },
       {
