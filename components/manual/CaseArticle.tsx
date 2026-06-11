@@ -34,7 +34,6 @@ export function CaseArticle({
       {/* ── Move 1: the skill (protagonist) ── */}
       {hasSkill && (
         <>
-          <h2 className="mn-h2">The skill that does it</h2>
           <div className="mn-skillrow">
             <div className="ico">$_</div>
             <div>
@@ -66,7 +65,7 @@ export function CaseArticle({
       )}
 
       {/* ── Move 2: the scenario — scannable bullets, not a text blob ── */}
-      <h2 className="mn-h2">The scenario</h2>
+      <h2 className="mn-h2">The problem</h2>
       {entry.scenario.length > 1 ? (
         <ul className="mn-list">
           {entry.scenario.map((para, i) => (
@@ -84,7 +83,7 @@ export function CaseArticle({
       {/* ── Move 3: see it work — the sentence + the result (live only) ── */}
       {isLive && entry.sentence && (
         <>
-          <h2 className="mn-h2">See it work</h2>
+          <h2 className="mn-h2">How it works</h2>
           <p className="mn-youtype">You give Cowork the broken file and one sentence:</p>
           <p>
             <span className="mn-typed">{entry.sentence}</span>
@@ -136,7 +135,7 @@ export function CaseArticle({
       {/* ── live: the value you got · stub: what the case will teach ── */}
       {isLive && entry.value ? (
         <>
-          <h2 className="mn-h2">What you get</h2>
+          <h2 className="mn-h2">Why use it</h2>
           <ul className="mn-list">
             {entry.value.map((v, i) => (
               <li key={i}>
@@ -147,7 +146,7 @@ export function CaseArticle({
         </>
       ) : (
         <>
-          <h2 className="mn-h2">What you&apos;ll learn</h2>
+          <h2 className="mn-h2">Why use it</h2>
           <p>
             <b>{entry.concept.lead}</b> {entry.concept.body}
           </p>
