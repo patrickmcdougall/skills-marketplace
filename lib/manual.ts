@@ -781,24 +781,94 @@ export const CASES: CaseStudy[] = [
     nextCase: "call-notes-to-deck",
   },
 
-  // ── 09 · Marketing · soon ──
+  // ── 09 · Marketing · LIVE — real run of coreyhaines31/competitor-profiling
+  // (2026-06-11). Real subject profiled from scraped pages following the
+  // skill's template; 7 sections, 4 gaps flagged. Artifact in planning
+  // folder, case-03/. Published copy keeps the competitor generic.
   {
     slug: "competitor-teardown",
     shelf: "marketing",
     subShelf: "positioning-messaging",
-    navLabel: "Competitor teardown",
-    title: "A competitor teardown you can hand a partner",
+    navLabel: "Competitor profile",
+    title: "Profile a competitor without losing the day",
     standfirst:
-      "A partner wants a read on three competitors by tomorrow — positioning, pricing, the gaps — and you'd normally lose a day to it.",
-    status: "soon",
+      "“How do we compare to them?” usually costs an afternoon of tabs and a doc of fragments. This makes it one sentence.",
+    status: "live",
     concept: {
       lead: "Skills chain steps — research, then structure, then write.",
-      body: "Each step feeds the next, so a vague ask comes back as a finished teardown.",
+      body: "Each step feeds the next, so a vague ask comes back as a finished profile.",
     },
-    skill: { skillSlug: "", name: "", publisher: "", blurb: "Researches a set of rivals and returns a structured teardown.", installCommand: "" },
-    scenario: [
-      "A partner wants a read on three competitors by tomorrow — positioning, pricing, the gaps — and you'd normally lose a day to it.",
+    value: [
+      "**The afternoon back** — the structure asks the questions; the research fills them in.",
+      "**An answer, not a link pile** — organized to answer “how do we compare”, not to store bookmarks.",
+      "**Gaps stay visible** — what can't be verified gets flagged (4 items in our run), never papered over.",
+      "**Comparable** — same structure every time, so two competitors sit side by side.",
     ],
+    skill: {
+      skillSlug: "coreyhaines31-marketingskills-competitor-profiling",
+      name: "competitor-profiling",
+      publisher: "coreyhaines31",
+      blurb:
+        "Turns a competitor's website into a structured profile — positioning, pricing, strengths, weaknesses — with every claim traced to a source.",
+      installCommand:
+        "npx skills add https://github.com/coreyhaines31/marketingskills/tree/main/competitor-profiling",
+    },
+    scenario: [
+      "**Someone asks how you compare** to a competitor — a partner, an investor, a big prospect.",
+      "**So you open the tabs** — their site, the pricing page, reviews, LinkedIn — and paste fragments into a doc until it sort of answers the question.",
+    ],
+    sentence:
+      "Profile this competitor from their website — positioning, pricing, where they win and lose, and how we sell against them. Flag anything you can't verify.",
+    before: {
+      label: "Before — nine tabs and a doc",
+      lines: [
+        "tab: their homepage (again)",
+        "tab: pricing — “contact sales”, of course",
+        "tab: reviews, page 3",
+        "notes.doc: “they do stablecoins?? check”",
+        "the question, still unanswered: how do we compare?",
+      ],
+    },
+    after: {
+      label: "After — one structured profile",
+      rows: [
+        { label: "Positioning", value: "in one line", dot: "#4571d8" },
+        { label: "Pricing teardown", value: "model + the gates", dot: "var(--accent)" },
+        { label: "Win / lose vs you", value: "with evidence", dot: "var(--verified)" },
+        { label: "Flagged (4)", value: "not guessed", dot: "var(--ink-3)" },
+      ],
+      footer: "✓ 7 sections, every claim sourced from their own pages",
+    },
+    stats: [
+      { v: "~½ day", k: "of tab-hopping, back" },
+      { v: "4", k: "gaps flagged, 0 guessed" },
+      { v: "1", k: "sentence typed" },
+    ],
+    howTo: [
+      {
+        title: "Download the skill",
+        body: "[Click here to download it](/i/coreyhaines31-marketingskills-competitor-profiling) — or use the Download button on [its Claudinho page](/skills/coreyhaines31-marketingskills-competitor-profiling). A .skill file lands in your Downloads folder.",
+      },
+      {
+        title: "Drag that file into Cowork",
+        body: "Open your Downloads folder and drag the file into the Claude desktop app window. Steps 1 and 2 are once — from now on you start at step 3.",
+      },
+      {
+        title: "Start a task — no files needed",
+        body: "Just name the competitor, or paste their website address.",
+      },
+      {
+        title: "Type the sentence",
+        body: "You don't need to mention the skill: Claude recognizes competitor research and uses it on its own.",
+        typed:
+          "Profile this competitor from their website — positioning, pricing, where they win and lose, and how we sell against them. Flag anything you can't verify.",
+      },
+      {
+        title: "Review the profile",
+        body: "Same structure every time, so profiles compare side by side. Gaps are marked, not filled in.",
+      },
+    ],
+    nextCase: "clean-a-messy-export",
   },
 ];
 
