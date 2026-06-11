@@ -484,6 +484,63 @@ export const SHELF_SUB_SHELVES: Record<string, string[]> = {
   finance: ["runway-forecasting", "investor-relations", "bookkeeping-reconciliation", "reporting-dashboards"],
 };
 
+// Friendly display names for the AI-generated sub_shelf slugs. The slug stays
+// the stored/filter value; only presentation changes. Unknown future slugs
+// fall back to Title Case in subShelfLabel().
+const SUB_SHELF_LABELS: Record<string, string> = {
+  // product
+  discovery: "Discovery",
+  specification: "Specification",
+  communication: "Communication",
+  "training-enablement": "Training & Enablement",
+  // eng
+  "planning-thinking": "Planning & Thinking",
+  "code-review": "Code Review",
+  "debugging-investigation": "Debugging & Investigation",
+  "pipelines-data": "Pipelines & Data",
+  "workflow-sprint-structure": "Workflow & Sprint Structure",
+  "skill-authoring": "Skill Authoring",
+  // design
+  "critique-review": "Critique & Review",
+  "craft-polish": "Craft & Polish",
+  accessibility: "Accessibility",
+  "systems-handoff": "Systems & Handoff",
+  // marketing
+  "seo-content": "SEO & Content",
+  "positioning-messaging": "Positioning & Messaging",
+  "landing-pages": "Landing Pages",
+  "campaigns-launches": "Campaigns & Launches",
+  "swipe-inspiration": "Swipe & Inspiration",
+  // sales
+  "outreach-prospecting": "Outreach & Prospecting",
+  "discovery-qualification": "Discovery & Qualification",
+  "demo-followup": "Demo & Follow-up",
+  "pipeline-deal-management": "Pipeline & Deal Management",
+  // cs
+  "ticket-triage": "Ticket Triage",
+  "retention-churn-save": "Retention & Churn Saves",
+  onboarding: "Onboarding",
+  "health-insights": "Health Insights",
+  // ops
+  "vendor-procurement": "Vendors & Procurement",
+  "compliance-security": "Compliance & Security",
+  "process-automation": "Process Automation",
+  "people-team-ops": "People & Team Ops",
+  // finance
+  "runway-forecasting": "Runway & Forecasting",
+  "investor-relations": "Investor Relations",
+  "bookkeeping-reconciliation": "Bookkeeping & Reconciliation",
+  "reporting-dashboards": "Reporting & Dashboards",
+};
+
+export function subShelfLabel(id: string): string {
+  if (SUB_SHELF_LABELS[id]) return SUB_SHELF_LABELS[id];
+  return id
+    .split("-")
+    .map((w) => (w === "seo" ? "SEO" : w.charAt(0).toUpperCase() + w.slice(1)))
+    .join(" ");
+}
+
 export const SORT_OPTIONS = [
   { id: 'installs', label: 'Most installed' },
   { id: 'stars', label: 'GitHub stars' },

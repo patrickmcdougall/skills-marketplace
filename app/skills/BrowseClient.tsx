@@ -12,6 +12,7 @@ import {
   applyFilters,
   publisherListForCurrent,
   shelfLabel,
+  subShelfLabel,
   genShelfId,
   fmtCount,
   type BrowseFilters,
@@ -78,7 +79,7 @@ export function FilterShelf({
                         className={`bp-radio${subShelf === s ? " is-active" : ""}`}
                         onClick={() => onSubShelf(subShelf === s ? null : s)}
                       >
-                        <span>{s}</span>
+                        <span>{subShelfLabel(s)}</span>
                         <span className="num">{subShelfCounts[s] || 0}</span>
                       </button>
                     </li>
@@ -276,7 +277,7 @@ function ActiveChips({
   if (filters.subShelf) {
     chips.push({
       k: "sub",
-      label: filters.subShelf,
+      label: subShelfLabel(filters.subShelf),
       remove: () => onRemove("subShelf"),
     });
   }

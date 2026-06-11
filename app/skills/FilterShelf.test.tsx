@@ -3,7 +3,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FilterShelf } from "./BrowseClient";
-import { SHELVES, SHELF_SUB_SHELVES } from "@/lib/data";
+import { SHELVES, SHELF_SUB_SHELVES, subShelfLabel } from "@/lib/data";
 
 (globalThis as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -44,7 +44,7 @@ describe("FilterShelf nested sub-shelves", () => {
   it("renders no sub-shelf list when no shelf is selected", () => {
     setup();
     expect(document.querySelector(".bp-subshelf-nested")).toBeNull();
-    expect(screen.queryByText(SUBS[0])).toBeNull();
+    expect(screen.queryByText(subShelfLabel(SUBS[0]))).toBeNull();
   });
 
   it("nests the sub-shelf list inside the active shelf's list item", () => {
@@ -55,7 +55,19 @@ describe("FilterShelf nested sub-shelves", () => {
     const li = nested!.closest("li")!;
     expect(li.textContent).toContain(shelfWithSubs.title);
     for (const s of SUBS) {
-      expect(li.textContent).toContain(s);
+      expect(li.textContent).toContain(subShelfLabel(s));
+    }
+  });
+
+  it("shows friendly labels, not raw slugs", () => {
+    setup({ value: [shelfWithSubs.id] });
+    const slugLike = SUBS.find((s) => s.includes("-"));
+    if (slugLike) {
+      expect(screen.queryByText(slugLike)).toBeNull();
+      expect(screen.getByText(subShelfLabel(slugLike))).toBeTruthy();
+      // a friendly label has spaces and capitals, no bare kebab-case
+      expect(subShelfLabel(slugLike)).not.toContain("-");
+      expect(subShelfLabel(slugLike)[0]).toBe(subShelfLabel(slugLike)[0].toUpperCase());
     }
   });
 
@@ -68,12 +80,13 @@ describe("FilterShelf nested sub-shelves", () => {
     const user = userEvent.setup();
     const { onSubShelf } = setup({ value: [shelfWithSubs.id] });
 
-    await user.click(screen.getByRole("button", { name: new RegExp(SUBS[0]) }));
+    const subName = new RegExp(subShelfLabel(SUBS[0]), "i");
+    await user.click(screen.getByRole("button", { name: subName }));
     expect(onSubShelf).toHaveBeenCalledWith(SUBS[0]);
 
     cleanup();
     const second = setup({ value: [shelfWithSubs.id], subShelf: SUBS[0] });
-    const activeBtn = screen.getByRole("button", { name: new RegExp(SUBS[0]) });
+    const activeBtn = screen.getByRole("button", { name: subName });
     expect(activeBtn.className).toContain("is-active");
     await user.click(activeBtn);
     expect(second.onSubShelf).toHaveBeenCalledWith(null);
