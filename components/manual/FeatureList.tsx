@@ -81,6 +81,9 @@ export function FeatureList({ features }: { features: CoworkFeature[] }) {
               {f.badge && <span className="mn-feat-badge">{f.badge}</span>}
             </div>
             <p className="mn-feat-text">{f.text}</p>
+            <p className="mn-feat-eg">
+              <span className="k">Use it for:</span> {f.example}
+            </p>
           </div>
         </Link>
       ))}

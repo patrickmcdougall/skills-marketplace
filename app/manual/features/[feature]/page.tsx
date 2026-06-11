@@ -60,6 +60,9 @@ export default async function FeaturePage({
         )}
       </h1>
       <p className="mn-lead">{f.text}</p>
+      <p>
+        <b>Use it for:</b> {f.example}
+      </p>
 
       <figure className="mn-shot">
         <Image

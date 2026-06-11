@@ -2983,7 +2983,8 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
 
 .mn-group { margin-bottom: 18px; }
 .mn-grouptitle {
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 600;
   font-size: 10.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -3016,7 +3017,8 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
 /* ─── content panel ─────────────────────────────────────────────────────────── */
 .mn-content { padding: 48px 60px 100px; max-width: 880px; }
 .mn-crumb {
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 600;
   font-size: 11.5px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -3034,7 +3036,8 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
 }
 .mn-h2 {
   font-size: 13px;
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--ink-3);
@@ -3064,7 +3067,8 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
   background: var(--accent);
 }
 .mn-updated {
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 600;
   font-size: 11.5px;
   color: var(--ink-3);
   margin-top: 34px;
@@ -3143,7 +3147,8 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
   display: inline-block;
   background: var(--ink);
   color: var(--bg);
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 600;
   font-size: 12.5px;
   padding: 9px 13px;
   margin-top: 9px;
@@ -3163,7 +3168,8 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
 }
 .mn-panel.before .mn-panel-body { color: var(--ink-3); }
 .mn-lbl {
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 600;
   font-size: 10.5px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -3237,7 +3243,8 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
 }
 .mn-ocard:hover { border-color: var(--ink-3); transform: translateY(-2px); }
 .mn-ocard .k {
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 600;
   font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--ink-3);
 }
@@ -3275,7 +3282,8 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
 .mn-surf-head {
   background: var(--paper-2);
   border-bottom: 1px solid var(--line);
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 600;
   font-size: 10.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -3285,7 +3293,8 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
 .mn-surf-row:last-child { border-bottom: none; }
 .mn-surf-name { font-size: 15px; font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 8px; }
 .mn-surf-where {
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 600;
   font-size: 12px;
   color: var(--ink-3);
 }
@@ -3338,7 +3347,8 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
 .mn-cw-text p { margin: 0; font-size: 14.5px; color: var(--ink-2); line-height: 1.5; }
 .mn-cw-frame { grid-column: 2; grid-row: 2; }
 .mn-cw-illus {
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 600;
   font-size: 11px;
   color: var(--ink-3);
   margin: 4px 0 0;
@@ -3363,7 +3373,8 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
 .cw-dot { width: 9px; height: 9px; border-radius: 999px; background: var(--line); }
 .cw-bar-title {
   margin-left: 8px;
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 600;
   font-size: 11px;
   color: var(--ink-3);
 }
@@ -3372,7 +3383,8 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
 /* view: pick a skill */
 .cw-skills-head,
 .cw-drop-label {
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 600;
   font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--ink-3);
   margin-bottom: 10px;
@@ -3415,13 +3427,14 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
   background: var(--bg);
 }
 .cw-file-ico { width: 11px; height: 13px; border-radius: 2px; background: var(--accent-soft); border: 1px solid #f0cdbb; flex: none; }
-.cw-drop-hint { font-family: var(--font-jetbrains-mono), monospace; font-size: 11px; color: var(--ink-3); margin-top: 11px; }
+.cw-drop-hint { font-family: var(--font-geist-sans), sans-serif; font-size: 11px; color: var(--ink-3); margin-top: 11px; }
 
 /* view: compose / chat */
 .cw-chat { display: flex; flex-direction: column; gap: 12px; }
 .cw-msg-who {
   display: block;
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 600;
   font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--ink-4); margin-bottom: 4px;
 }
@@ -3439,7 +3452,8 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
 /* view: review */
 .cw-progress { display: flex; flex-direction: column; gap: 6px; margin-bottom: 13px; }
 .cw-progress-done {
-  font-family: var(--font-jetbrains-mono), monospace; font-size: 12px; color: var(--ink-3);
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 600; font-size: 12px; color: var(--ink-3);
   display: flex; align-items: center; gap: 8px;
 }
 .cw-progress-done::before { content: "✓"; color: var(--verified); font-size: 12px; }
@@ -3456,7 +3470,7 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
   display: flex; align-items: center; justify-content: center; font-size: 14px;
 }
 .cw-result-title { font-size: 14px; font-weight: 600; color: var(--ink); }
-.cw-result-meta { font-family: var(--font-jetbrains-mono), monospace; font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }
+.cw-result-meta { font-family: var(--font-geist-sans), sans-serif; font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }
 
 /* ─── intro: optional-skill callout (accent-tinted aside) ───────────────────── */
 .mn-callout {
@@ -3500,7 +3514,8 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
 .mn-feat-head { display: flex; align-items: center; gap: 9px; margin: 3px 0 3px; }
 .mn-feat-name { font-size: 15.5px; font-weight: 600; color: var(--ink); }
 .mn-feat-badge {
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 600;
   font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase;
   color: var(--ink-3);
   background: var(--paper-2);
@@ -3518,7 +3533,8 @@ a.mn-feat:hover .mn-feat-name { color: var(--accent-2); }
 /* nested theme subgroups inside the Examples group */
 .mn-subgroup { margin: 10px 0 2px; }
 .mn-subtitle {
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 600;
   font-size: 9.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -3542,8 +3558,24 @@ a.mn-feat:hover .mn-feat-name { color: var(--accent-2); }
   box-shadow: 0 1px 0 var(--line-2), 0 10px 30px -18px rgba(28, 27, 24, 0.35);
 }
 .mn-shot figcaption {
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 600;
   font-size: 11px;
   color: var(--ink-3);
   margin-top: 9px;
 }
+
+/* typed sentences read as chat, not code — rounder bubble, Geist (swapped above).
+   Install commands are the exception: inside .mn-install they stay mono. */
+.mn-typed { border-radius: 10px; font-size: 13px; }
+.mn-install .mn-typed {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-weight: 400;
+  border-radius: 2px;
+  font-size: 12.5px;
+}
+.cw-typed { border-radius: 10px; }
+
+/* "use it for:" example line on feature rows */
+.mn-feat-eg { margin: 7px 0 0; font-size: 13px; line-height: 1.5; color: var(--ink-3); }
+.mn-feat-eg .k { font-weight: 600; color: var(--ink-2); }

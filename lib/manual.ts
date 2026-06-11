@@ -34,6 +34,8 @@ export type CoworkFeature = {
   icon: "new-task" | "projects" | "scheduled" | "live-artifacts" | "dispatch" | "customize";
   badge?: string;
   text: string;
+  /** Concrete "use it for:" example — how someone actually organizes with it. */
+  example: string;
 };
 
 // One row of the "ways to use Claude" comparison grid (the top-down map on the
@@ -181,7 +183,7 @@ export const START_PAGES: GuidePage[] = [
           { name: "Chat", where: "App + web", bestFor: "Quick answers, explanations, brainstorms" },
           { name: "Claude in Chrome", where: "Your browser", bestFor: "Reading and acting on web pages for you" },
           { name: "Claude Code", where: "Your terminal", bestFor: "Building and editing software — for developers" },
-          { name: "Cowork", where: "Desktop app", bestFor: "Multi-step work on your own files and apps", highlight: true },
+          { name: "Cowork", where: "Desktop app", bestFor: "Real work on your files and apps, start to finish", highlight: true },
         ],
       },
       {
@@ -260,7 +262,7 @@ export const START_PAGES: GuidePage[] = [
       { kind: "p", text: "A good Cowork task hits a few of these — not all five." },
       {
         kind: "p",
-        text: "One more habit: when the work is recurring and belongs together — one client, one process — keep it in a [Project](/manual/features/projects). A Project is a folder on your computer that Cowork works in, so every task starts warm instead of from scratch.",
+        text: "One more habit: when the work is recurring and belongs together — one client, one process — keep it in a [Project](/manual/features/projects). A Project is a folder on your computer that Cowork works in, so every task starts with the background already known instead of from scratch.",
       },
     ],
     next: { href: "/manual/start/your-first-10-minutes", label: "Next: your first 10 minutes" },
@@ -304,38 +306,50 @@ export const FEATURES: CoworkFeature[] = [
     slug: "new-task",
     name: "New task",
     icon: "new-task",
-    text: "Start a fresh piece of work. Drop in files, say what you want, and Cowork takes it from there. This is the everyday way in.",
+    text: "Where everyday work starts. Drop in files, say what you want, Cowork does it.",
+    example:
+      "“Summarize this contract.” “Draft a renewal email from this thread.” “Compare these three proposals.” One task per job.",
   },
   {
     slug: "projects",
     name: "Projects",
     icon: "projects",
-    text: "A Project is a folder on your computer that Cowork works in. Keep one client's or one job's files there and every task starts warm — same context, same files, picking up where you left off.",
+    text: "A Project is a folder on your computer that Cowork works in. Tasks inside it start with the files and history already there — no re-explaining.",
+    example:
+      "One project per area of your life: the company, each big client, your personal finances. Open the right one and Claude already knows the background.",
   },
   {
     slug: "scheduled",
     name: "Scheduled",
     icon: "scheduled",
-    text: "Set a task to run on a schedule — type /schedule in any task. A weekday morning brief, a month-end report: the finished result is waiting when you sit down.",
+    text: "Set a task to repeat on its own — type /schedule in any task. The result is waiting when you sit down.",
+    example:
+      "A 6 a.m. brief of your calendar and inbox. A Friday team summary. A month-end revenue report that builds itself.",
   },
   {
     slug: "live-artifacts",
     name: "Live artifacts",
     icon: "live-artifacts",
-    text: "Documents that stay up to date with live data from your connected apps — an unread-email digest, a week-at-a-glance — instead of a report that's stale the day after.",
+    text: "A document that keeps itself up to date by pulling from the apps you've connected — instead of a report that's stale the day after.",
+    example:
+      "A week-at-a-glance page built from your calendar. A running list of emails still waiting on your reply.",
   },
   {
     slug: "dispatch",
     name: "Dispatch",
     icon: "dispatch",
     badge: "Beta",
-    text: "Pair your phone, and hand tasks to your computer from anywhere. Send it from the commute; Claude works on your desktop — files, apps, browser — and you pick up exactly where you left off.",
+    text: "Pair your phone and send tasks to your computer from anywhere. Claude works on your desktop; the result is waiting when you're back.",
+    example:
+      "On the way to the office: “get the notes ready for my 10 a.m.” Done by the time you arrive.",
   },
   {
     slug: "customize",
     name: "Customize",
     icon: "customize",
-    text: "Where everything that shapes Claude lives: the skills you've installed, the apps you've connected, and plugins. This is also where a new skill lands.",
+    text: "Where your installed skills and connected apps live. When you install a skill, this is where it lands.",
+    example:
+      "Add the skills your team uses, so a report comes out the same no matter who asks for it.",
   },
 ];
 
@@ -606,7 +620,7 @@ export const CASES: CaseStudy[] = [
     status: "live",
     concept: {
       lead: "Cleanup and formatting is rule-based — a perfect handoff.",
-      body: "Three date formats, currency-as-text, duplicated rows: every fix follows a rule, so none of it needs you. And what didn't follow a rule — four duplicates, one shifted row — landed in a “Flagged for review” tab instead of being silently guessed at. You get a working .xlsx with live formulas, not a screenshot of one.",
+      body: "Three date formats, amounts typed as text, duplicated rows: every fix follows a rule, so none of it needs you. What didn't follow a rule — four duplicates, one broken row — landed in a “Flagged for review” tab instead of being guessed at. And you get a working Excel file, not a picture of one.",
     },
     skill: {
       skillSlug: "anthropics-skills-xlsx",
@@ -632,8 +646,8 @@ export const CASES: CaseStudy[] = [
           "Clean this export into a board-ready revenue report — totals by plan and region — and flag anything I should look at.",
       },
       {
-        title: "Review the workbook",
-        body: "A real .xlsx back: a Summary tab with live formulas, the cleaned data behind it, and a “Flagged for review” tab with the 5 rows it refused to fix silently.",
+        title: "Review the spreadsheet",
+        body: "A real Excel file back: a Summary tab whose formulas still work — change a number and the totals update — the cleaned data behind it, and a “Flagged for review” tab with the 5 rows it refused to fix silently.",
       },
     ],
     before: {
@@ -655,7 +669,7 @@ export const CASES: CaseStudy[] = [
         { label: "Starter", value: "R$ 55,370", dot: "var(--verified)" },
         { label: "Flagged (5)", value: "for review", dot: "var(--ink-3)" },
       ],
-      footer: "✓ 214 transactions · 20 customers · live formulas",
+      footer: "✓ 214 transactions · 20 customers · formulas that update",
     },
     stats: [
       { v: "~2 hrs", k: "of cleanup, back" },

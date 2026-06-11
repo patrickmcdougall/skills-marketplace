@@ -151,7 +151,8 @@ export function CaseArticle({
       {isLive && entry.install && (
         <>
           <h2 className="mn-h2">Install it, step by step</h2>
-          <div className="mn-steps">
+          {/* mn-install keeps the command in mono — the one place code-font belongs */}
+          <div className="mn-steps mn-install">
             {entry.install.map((s, i) => (
               <div className="mn-step" key={i}>
                 <div className="mn-step-n">{i + 1}</div>
