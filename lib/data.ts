@@ -490,11 +490,11 @@ export const SHELF_SUB_SHELVES: Record<string, string[]> = {
 const SUB_SHELF_LABELS: Record<string, string> = {
   // product
   discovery: "Discovery",
-  specification: "Specification",
+  specification: "Specs & Requirements",
   communication: "Communication",
   "training-enablement": "Training & Enablement",
   // eng
-  "planning-thinking": "Planning & Thinking",
+  "planning-thinking": "Planning & Problem-Solving",
   "code-review": "Code Review",
   "debugging-investigation": "Debugging & Investigation",
   "pipelines-data": "Pipelines & Data",
@@ -504,13 +504,13 @@ const SUB_SHELF_LABELS: Record<string, string> = {
   "critique-review": "Critique & Review",
   "craft-polish": "Craft & Polish",
   accessibility: "Accessibility",
-  "systems-handoff": "Systems & Handoff",
+  "systems-handoff": "Design Systems & Handoff",
   // marketing
   "seo-content": "SEO & Content",
   "positioning-messaging": "Positioning & Messaging",
   "landing-pages": "Landing Pages",
   "campaigns-launches": "Campaigns & Launches",
-  "swipe-inspiration": "Swipe & Inspiration",
+  "swipe-inspiration": "Swipe Files & Inspiration",
   // sales
   "outreach-prospecting": "Outreach & Prospecting",
   "discovery-qualification": "Discovery & Qualification",
@@ -518,9 +518,9 @@ const SUB_SHELF_LABELS: Record<string, string> = {
   "pipeline-deal-management": "Pipeline & Deal Management",
   // cs
   "ticket-triage": "Ticket Triage",
-  "retention-churn-save": "Retention & Churn Saves",
+  "retention-churn-save": "Churn & Retention",
   onboarding: "Onboarding",
-  "health-insights": "Health Insights",
+  "health-insights": "Account Health",
   // ops
   "vendor-procurement": "Vendors & Procurement",
   "compliance-security": "Compliance & Security",
