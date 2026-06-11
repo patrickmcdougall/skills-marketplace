@@ -13,6 +13,14 @@ export function RichText({ text }: { text: string }): ReactNode {
         }
         const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
         if (link) {
+          // /i/ routes serve file downloads — plain anchor, not client navigation.
+          if (link[2].startsWith("/i/")) {
+            return (
+              <a key={i} href={link[2]} className="mn-inline-link">
+                {link[1]}
+              </a>
+            );
+          }
           return (
             <Link key={i} href={link[2]} className="mn-inline-link">
               {link[1]}

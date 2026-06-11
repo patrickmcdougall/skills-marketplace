@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RichText } from "./RichText";
 import type { CaseStudy } from "@/lib/manual";
 import { SHELF_TITLES, getCase } from "@/lib/manual";
 
@@ -80,7 +81,7 @@ export function CaseArticle({
                 <div className="mn-step-n">{i + 1}</div>
                 <div>
                   <h3>{s.title}</h3>
-                  {s.body && <p>{s.body}</p>}
+                  {s.body && <p><RichText text={s.body} /></p>}
                   {s.typed && <span className="mn-typed">{s.typed}</span>}
                 </div>
               </div>
@@ -158,7 +159,7 @@ export function CaseArticle({
                 <div className="mn-step-n">{i + 1}</div>
                 <div>
                   <h3>{s.title}</h3>
-                  {s.body && <p>{s.body}</p>}
+                  {s.body && <p><RichText text={s.body} /></p>}
                   {s.typed && <span className="mn-typed">{s.typed}</span>}
                 </div>
               </div>

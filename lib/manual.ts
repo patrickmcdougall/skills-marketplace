@@ -439,7 +439,7 @@ export const SKILLS_PAGES: GuidePage[] = [
       {
         kind: "list",
         items: [
-          "**Find a skill on Claudinho** — browse by what you do (operations, finance, sales…), not by technology.",
+          "**Find a skill on Claudinho** — [browse by what you do](/skills) (operations, finance, sales…), not by technology.",
           "**Click Download on its page** — a single `.skill` file lands in your Downloads folder.",
           "**Drag that file into Cowork** — drop it into the Claude desktop app window and the skill is added. That's the install. (You'll find it afterwards under Customize → Skills.)",
           "**Ask in plain language** — Cowork now knows the playbook; one sentence puts it to work.",
@@ -698,12 +698,12 @@ export const CASES: CaseStudy[] = [
     ],
     install: [
       {
-        title: "Open the skill on Claudinho",
-        body: "Click the Download button on its page — a single .skill file lands in your Downloads folder.",
+        title: "Download the skill",
+        body: "[Click here to download it](/i/anthropics-skills-xlsx) — or use the Download button on [its Claudinho page](/skills/anthropics-skills-xlsx). A file called anthropics-skills-xlsx.skill lands in your Downloads folder.",
       },
       {
         title: "Drag that file into Cowork",
-        body: "Drop it into the Claude desktop app window. Installed — it lives under Customize → Skills.",
+        body: "Open your Downloads folder and drag the file into the Claude desktop app window, like attaching a file to a chat. Installed — it shows up under Customize → Skills.",
       },
       {
         title: "Drop your export, type the sentence",
