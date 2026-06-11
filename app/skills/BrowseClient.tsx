@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef, Suspense } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -343,6 +343,17 @@ function BrowseEmpty() {
 
 // ─── main browse page ─────────────────────────────────────────────────────────
 
+// Reads URL params and feeds them to the page. Isolated so useSearchParams()
+// only suspends this empty component instead of bailing the whole browse tree
+// out of server rendering.
+function SearchParamsSync({ onParams }: { onParams: (q: string | null, sort: string | null) => void }) {
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    onParams(searchParams.get("q"), searchParams.get("sort"));
+  }, [searchParams, onParams]);
+  return null;
+}
+
 const compact = (s: string) => s.toLowerCase().replace(/[\s-]/g, "");
 
 function searchSkills(skills: Skill[], q: string): Skill[] {
@@ -386,25 +397,26 @@ function BrowsePageInner({
 
   const allSkills = catalog?.skills ?? initialSkills;
   const trustMap = catalog?.trust ?? initialTrust;
-  const searchParams = useSearchParams();
 
-  // Initialise from URL params so /search?q=... and /skills?sort=... work.
-  const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
+  const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<BrowseFilters>({
     shelves: [],
     subShelf: null,
     publishers: [],
   });
-  const [sort, setSort] = useState(() => {
-    const s = searchParams.get("sort");
-    return s && SORT_OPTIONS.find((o) => o.id === s) ? s : "installs";
-  });
-
-  useEffect(() => {
-    const s = searchParams.get("sort");
-    if (s && SORT_OPTIONS.find((o) => o.id === s)) setSort(s);
-  }, [searchParams]);
+  const [sort, setSort] = useState("installs");
   const [visible, setVisible] = useState(PAGE_SIZE);
+
+  // URL params (/search?q=..., /skills?sort=...) sync in from the
+  // Suspense-wrapped <SearchParamsSync> so reading them doesn't opt this whole
+  // tree out of server rendering.
+  const applyParams = useCallback((q: string | null, s: string | null) => {
+    if (q !== null) {
+      setQuery(q);
+      setVisible(PAGE_SIZE);
+    }
+    if (s && SORT_OPTIONS.find((o) => o.id === s)) setSort(s);
+  }, []);
 
   const filtered = useMemo(
     () => searchSkills(sortSkills(applyFilters(allSkills, filters), sort), query),
@@ -506,6 +518,9 @@ function BrowsePageInner({
 
   return (
     <div className="lp bp accent-orange bg-cream">
+      <Suspense fallback={null}>
+        <SearchParamsSync onParams={applyParams} />
+      </Suspense>
       <Nav stats={stats} />
 
       <header className="bp-head bp-page">
@@ -600,9 +615,5 @@ function BrowsePageInner({
 }
 
 export function BrowseClient(props: BrowseProps) {
-  return (
-    <Suspense>
-      <BrowsePageInner {...props} />
-    </Suspense>
-  );
+  return <BrowsePageInner {...props} />;
 }
