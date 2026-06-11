@@ -498,7 +498,9 @@ export function getSkillsPage(topic: string): GuidePage | undefined {
 // production run against its real skill.
 
 export const CASES: CaseStudy[] = [
-  // ── 02 · Product · soon ──
+  // ── 02 · Product · LIVE — real run of anthropics/skills pptx (2026-06-11).
+  // Input: 3 fabricated-but-realistic discovery-call note files; output: a real
+  // 9-slide .pptx (artifacts in the planning folder, case-02/). Numbers genuine.
   {
     slug: "call-notes-to-deck",
     shelf: "product",
@@ -506,23 +508,82 @@ export const CASES: CaseStudy[] = [
     navLabel: "Call notes → deck",
     title: "Turn a folder of call notes into a client-ready deck",
     standfirst:
-      "Pages of notes from three discovery calls and a meeting in two hours. The thinking is done — it's the assembling into slides that eats the afternoon.",
-    status: "soon",
+      "Your notes already hold the thinking. Turning them into a presentable deck is the afternoon this removes.",
+    status: "live",
     concept: {
       lead: "Skills work from your files, not just chat.",
       body: "Point it at the folder and the deck comes back built — structure, flow, and all.",
     },
+    value: [
+      "**An afternoon of slide assembly back** — the thinking was in your notes; the skill builds the deck.",
+      "**Nothing invented** — every slide traces to the calls. What wasn't clear became an “Open questions” slide, not a guess.",
+      "**A real PowerPoint file** — designed slides you open, reword and present. Not a wall of bullets to copy over.",
+      "**Repeatable** — next client, same sentence.",
+    ],
     skill: {
-      skillSlug: "", // TODO(task-5): real Product/communication skill
-      name: "",
-      publisher: "",
+      skillSlug: "anthropics-skills-pptx",
+      name: "pptx",
+      publisher: "anthropics",
       blurb:
-        "Reads a folder of raw notes and produces a sectioned, presentable deck with a coherent flow.",
-      installCommand: "",
+        "Creates and edits real PowerPoint files — turns raw material into designed, presentable slides you can open and tweak.",
+      installCommand: "npx skills add https://github.com/anthropics/skills/tree/main/pptx",
     },
     scenario: [
-      "You've got pages of notes from three discovery calls and a meeting in two hours. The thinking is done — it's the assembling into slides that eats the afternoon.",
+      "**You finish three discovery calls** with pages of notes — fragments, action items, half-sentences spread across files.",
+      "**Before the client sees anything**, someone turns that into a deck: structure, story, slides. An afternoon, every time.",
     ],
+    sentence:
+      "Turn these call notes into a client-ready deck — what we heard, what we propose, timeline and next steps — and put anything unclear on an open-questions slide.",
+    before: {
+      label: "Before — 3 files of raw notes",
+      lines: [
+        "- finance closes the month in ~3 days of csv hell",
+        "- chargebacks tracked... by email?? est R$ 40k/mo (NOT SURE, check)",
+        "- POS contract maybe locked until mar/2027?? legal has it",
+        "- they want a pilot BEFORE black friday. hard requirement",
+        "NEXT: send intro material by friday (DONT FORGET)",
+      ],
+    },
+    after: {
+      label: "After — a 9-slide deck",
+      rows: [
+        { label: "What we heard", value: "4 pains", dot: "#4571d8" },
+        { label: "The proposal", value: "3 phases", dot: "var(--accent)" },
+        { label: "Timeline", value: "to Black Friday", dot: "var(--verified)" },
+        { label: "Open questions", value: "3 — not guessed", dot: "var(--ink-3)" },
+      ],
+      footer: "✓ 3 calls → 9 designed slides · a real .pptx",
+    },
+    stats: [
+      { v: "~1 aft.", k: "of assembly, back" },
+      { v: "3", k: "unknowns flagged, 0 guessed" },
+      { v: "1", k: "sentence typed" },
+    ],
+    howTo: [
+      {
+        title: "Download the skill",
+        body: "[Click here to download it](/i/anthropics-skills-pptx) — or use the Download button on [its Claudinho page](/skills/anthropics-skills-pptx). A file called anthropics-skills-pptx.skill lands in your Downloads folder.",
+      },
+      {
+        title: "Drag that file into Cowork",
+        body: "Open your Downloads folder and drag the file into the Claude desktop app window. Steps 1 and 2 are once — from now on you start at step 3.",
+      },
+      {
+        title: "Start a task and drop your notes in",
+        body: "The whole folder — every file, as messy as it is.",
+      },
+      {
+        title: "Type the sentence",
+        body: "You don't need to mention the skill: Claude sees a deck job and uses it on its own.",
+        typed:
+          "Turn these call notes into a client-ready deck — what we heard, what we propose, timeline and next steps — and put anything unclear on an open-questions slide.",
+      },
+      {
+        title: "Review the deck",
+        body: "Open the .pptx, adjust the wording, present. The structure and the design are already done.",
+      },
+    ],
+    nextCase: "competitor-teardown",
   },
 
   // ── 03 · Product · soon ──
