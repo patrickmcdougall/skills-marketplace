@@ -2811,8 +2811,6 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
 }
 .bp-search-clear:hover { color: var(--ink); }
 
-/* ─── filter sub-shelf negative-margin → CSS class (P3) ────────────────────── */
-.bp-fsection.sub-shelf { margin-top: -16px; padding-top: 0; border-top: none; }
 
 /* ─── filter touch targets (P3) ────────────────────────────────────────────── */
 .bp-check, .bp-radio { min-height: 44px; }
@@ -3535,4 +3533,10 @@ details[open] .dp-skill-preview-toggle .close-arrow { display: inline; }
 @media (max-width: 640px) {
   /* 16px input floor stops iOS/iPadOS Safari zoom-on-focus */
   .dp-install .dp-fb-input { font-size: 16px; min-height: 44px; }
+}
+
+/* Nested sub-shelf list (renders inside the active shelf's li) */
+.bp-subshelf-nested {
+  margin-top: 2px;
+  margin-bottom: 6px;
 }

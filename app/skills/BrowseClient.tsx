@@ -27,16 +27,22 @@ const PAGE_SIZE = 12;
 
 // ─── sidebar: shelf filter ──────────────────────────────────────────────────
 
-function FilterShelf({
+export function FilterShelf({
   value,
   onToggle,
   onClear,
   counts,
+  subShelf,
+  onSubShelf,
+  subShelfCounts,
 }: {
   value: string[];
   onToggle: (id: string) => void;
   onClear: () => void;
   counts: Record<string, number>;
+  subShelf: string | null;
+  onSubShelf: (val: string | null) => void;
+  subShelfCounts: Record<string, number>;
 }) {
   return (
     <div className="bp-fsection">
@@ -48,6 +54,10 @@ function FilterShelf({
         {SHELVES.map((sh) => {
           const c = counts[sh.id] || 0;
           const active = value.includes(sh.id);
+          // Sub-shelves nest under their parent shelf, and only when exactly
+          // one shelf is selected (sub-shelf filtering is single-shelf scoped).
+          const subs =
+            active && value.length === 1 ? SHELF_SUB_SHELVES[sh.id] || [] : [];
           return (
             <li key={sh.id}>
               <button
@@ -60,49 +70,24 @@ function FilterShelf({
                 <span>{sh.title}</span>
                 <span className="num">{c}</span>
               </button>
+              {subs.length > 0 && (
+                <ul className="bp-radio-list bp-subshelf bp-subshelf-nested">
+                  {subs.map((s) => (
+                    <li key={s}>
+                      <button
+                        className={`bp-radio${subShelf === s ? " is-active" : ""}`}
+                        onClick={() => onSubShelf(subShelf === s ? null : s)}
+                      >
+                        <span>{s}</span>
+                        <span className="num">{subShelfCounts[s] || 0}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </li>
           );
         })}
-      </ul>
-    </div>
-  );
-}
-
-// ─── sidebar: sub-shelf ─────────────────────────────────────────────────────
-
-function FilterSubShelf({
-  shelves,
-  value,
-  onChange,
-  counts,
-}: {
-  shelves: string[];
-  value: string | null;
-  onChange: (val: string | null) => void;
-  counts: Record<string, number>;
-}) {
-  if (shelves.length !== 1) return null;
-  const shelf = shelves[0];
-  const subs = SHELF_SUB_SHELVES[shelf] || [];
-  if (subs.length === 0) return null;
-  return (
-    <div className="bp-fsection sub-shelf">
-      <h3>
-        <span>Sub-shelf</span>
-        {value && <button onClick={() => onChange(null)}>clear</button>}
-      </h3>
-      <ul className="bp-radio-list bp-subshelf">
-        {subs.map((s) => (
-          <li key={s}>
-            <button
-              className={`bp-radio${value === s ? " is-active" : ""}`}
-              onClick={() => onChange(value === s ? null : s)}
-            >
-              <span>{s}</span>
-              <span className="num">{counts[s] || 0}</span>
-            </button>
-          </li>
-        ))}
       </ul>
     </div>
   );
@@ -533,12 +518,9 @@ function BrowsePageInner({ initialSkills, publisherNames, trustMap }: { initialS
             onToggle={toggleShelf}
             onClear={clearShelves}
             counts={shelfCounts}
-          />
-          <FilterSubShelf
-            shelves={filters.shelves}
-            value={filters.subShelf}
-            onChange={setSubShelf}
-            counts={subShelfCounts}
+            subShelf={filters.subShelf}
+            onSubShelf={setSubShelf}
+            subShelfCounts={subShelfCounts}
           />
           <FilterPublisher
             list={publisherList}
