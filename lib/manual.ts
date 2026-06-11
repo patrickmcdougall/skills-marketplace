@@ -116,8 +116,11 @@ export type CaseStudy = {
   standfirst: string;
   status: "live" | "soon";
 
-  /** The one Cowork/Skills lesson — delivered AFTER the payoff. */
+  /** Stub teaser ("What you'll learn") while a case is in production. */
   concept: { lead: string; body: string };
+
+  /** Live cases: the value you got — rendered as "What you get" bullets. */
+  value?: string[];
 
   /** Present for every case; the protagonist. */
   skill: SkillAnchor;
@@ -642,8 +645,14 @@ export const CASES: CaseStudy[] = [
     status: "live",
     concept: {
       lead: "Cleanup and formatting is rule-based — a perfect handoff.",
-      body: "Three date formats, amounts typed as text, duplicated rows: every fix follows a rule, so none of it needs you. What didn't follow a rule — four duplicates, one broken row — landed in a “Flagged for review” tab instead of being guessed at. And you get a working Excel file, not a picture of one.",
+      body: "Three date formats, amounts typed as text, duplicated rows: every fix follows a rule, so none of it needs you.",
     },
+    value: [
+      "**An hour or two back, every month** — the cleanup follows rules, so it doesn't need you.",
+      "**Nothing silently guessed** — the 5 odd rows went to a “Flagged for review” tab, not into your totals.",
+      "**A real Excel file, not a picture of one** — the formulas work: change a number, the totals update.",
+      "**Repeatable** — next month, same sentence, same clean report.",
+    ],
     skill: {
       skillSlug: "anthropics-skills-xlsx",
       name: "xlsx",
@@ -653,8 +662,8 @@ export const CASES: CaseStudy[] = [
       installCommand: "npx skills add https://github.com/anthropics/skills/tree/main/xlsx",
     },
     scenario: [
-      "You know this file. You download the revenue export from your billing tool and it arrives ugly: a junk title block, headers half missing, dates in three different formats, almost half the amounts typed as text (“R$ 1.234,56”), stray subtotal lines — and a few duplicates hiding somewhere in 220 rows.",
-      "So you fix it by hand: delete the junk, retype the amounts, hunt the duplicates, build the totals. An hour or two, every month. That's the part you hand off — it's repetitive, it follows rules, and you can judge the result at a glance.",
+      "**You download the revenue export** and it arrives ugly: junk rows, dates in three formats, amounts typed as text (“R$ 1.234,56”), duplicates hiding in 220 rows.",
+      "**So you fix it by hand** — delete, retype, hunt duplicates, rebuild the totals. An hour or two, every month.",
     ],
     sentence:
       "Clean this export into a board-ready revenue report — totals by plan and region — and flag anything I should look at.",

@@ -65,11 +65,21 @@ export function CaseArticle({
         </>
       )}
 
-      {/* ── Move 2: the scenario ── */}
+      {/* ── Move 2: the scenario — scannable bullets, not a text blob ── */}
       <h2 className="mn-h2">The scenario</h2>
-      {entry.scenario.map((para, i) => (
-        <p key={i}>{para}</p>
-      ))}
+      {entry.scenario.length > 1 ? (
+        <ul className="mn-list">
+          {entry.scenario.map((para, i) => (
+            <li key={i}>
+              <RichText text={para} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>
+          <RichText text={entry.scenario[0]} />
+        </p>
+      )}
 
       {/* ── Move 3: see it work — the sentence + the result (live only) ── */}
       {isLive && entry.sentence && (
@@ -123,11 +133,26 @@ export function CaseArticle({
         </>
       )}
 
-      {/* ── the concept it teaches (after the payoff) ── */}
-      <h2 className="mn-h2">{isLive ? "What you just learned" : "What you'll learn"}</h2>
-      <p>
-        <b>{entry.concept.lead}</b> {entry.concept.body}
-      </p>
+      {/* ── live: the value you got · stub: what the case will teach ── */}
+      {isLive && entry.value ? (
+        <>
+          <h2 className="mn-h2">What you get</h2>
+          <ul className="mn-list">
+            {entry.value.map((v, i) => (
+              <li key={i}>
+                <RichText text={v} />
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <>
+          <h2 className="mn-h2">What you&apos;ll learn</h2>
+          <p>
+            <b>{entry.concept.lead}</b> {entry.concept.body}
+          </p>
+        </>
+      )}
 
       {/* ── stat strip (live only) ── */}
       {isLive && entry.stats && (
