@@ -43,7 +43,7 @@ The Vercel project is connected to GitHub (`patrickmcdougall/skills-marketplace`
 - **Push to `main` → production** (`claudinho.xyz`), automatically.
 - **Push any other branch → preview deployment** with its own URL (`…-git-<branch>-….vercel.app`). Use a branch to dogfood before going live.
 - **Never run `vercel --prod` (or `vercel` deploy) from local.** It ships the entire working tree — including untracked / WIP files — and overrides whatever git deployed. That is exactly how unfinished work has leaked to prod. Git is the source of truth: **prod = `main`**.
-- WIP that must stay off prod: keep it on a branch, or behind a gate (e.g. the Manual's `MANUAL_ENABLED` in `lib/manual.ts` — live in dev/preview, 404 in production until launch).
+- WIP that must stay off prod: keep it on a branch, or behind an env-keyed gate (pattern: the Manual's pre-launch `MANUAL_ENABLED` gate, now flipped — see git history of `lib/manual.ts`).
 - `.env.local` carries a stale `VERCEL_ENV="production"`; env-based gates must also key on `NODE_ENV` so they don't trip in local dev.
 
 ---
@@ -52,6 +52,7 @@ The Vercel project is connected to GitHub (`patrickmcdougall/skills-marketplace`
 
 ### Working
 - Routes: `/` (landing), `/skills` (browse), `/skills/[slug]` (detail), `/creators`, `/creators/[handle]`, `/i/[slug]` (install counter + packager)
+- **The Manual** (`/manual`) — education hub, launched 2026-06-11: Getting started · Cowork features (real sanitized screenshots) · Skills · Examples (3 live cases from real skill runs: xlsx board report, pptx deck, competitor profile). Content model `lib/manual.ts`, components `components/manual/`, CSS prefix `.mn-`. Case production line + writing rules documented in `~/Documents/Claude/Projects/Skills marketplace/playbook/CONTENT-PLAN.md`.
 - 929+ skills pre-packaged as `.skill` files in Supabase Storage; on-demand packaging for the rest
 - Browse wired to Supabase (`getBrowseSkills()` in `lib/db.ts`) — not mock data
 - AI content pipeline live: `display_title`, `display_description`, `best_for`, `shelf`, `sub_shelf`, `tags` generated for skills with `content_status = 'ok'`

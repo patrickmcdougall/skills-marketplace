@@ -895,10 +895,6 @@ export const LIVE_CASE_COUNT = CASES.filter((p) => p.status === "live").length;
 export const TOTAL_TOPICS =
   START_PAGES.length + 1 + FEATURES.length + SKILLS_PAGES.length + CASES.length;
 
-// Work-in-progress gate. The Manual is live in local dev and Vercel preview
-// builds, but hidden in production (routes 404, nav link removed) until launch.
-// Disabled only on a real production deployment — keyed on NODE_ENV too because
-// .env.local here carries a stale VERCEL_ENV="production" that would otherwise
-// switch it off in local dev. Flip on launch by removing this gate.
-export const MANUAL_ENABLED =
-  process.env.NODE_ENV !== "production" || process.env.VERCEL_ENV !== "production";
+// LAUNCHED 2026-06-11. To take the Manual off production again, restore the
+// env-keyed gate (see git history) or set this to false on a branch.
+export const MANUAL_ENABLED = true;
