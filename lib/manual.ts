@@ -329,6 +329,7 @@ export const FEATURES: CoworkFeature[] = [
         "**Add context** — drag files in, or use the + button. Ongoing work? Pick it under “Work in a project” so Claude starts with the background.",
         "**Describe the outcome, not the steps** — and ask Claude to check with you before it starts.",
       ] },
+      { kind: "p", text: "**Good practice:** unless it's a true one-off, start the task inside a Project — Claude begins with the files and history already known instead of from zero. [More on Projects](/manual/features/projects)." },
       { kind: "p", text: "Keep one task per job. Recent tasks stay in the sidebar, so a clean task-per-job history doubles as a to-do list you can reopen." },
       { kind: "p", text: "See it in action: [the board-report example](/manual/clean-a-messy-export) starts exactly like this — one task, one file, one sentence." },
     ],
