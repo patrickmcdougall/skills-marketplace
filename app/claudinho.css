@@ -3619,3 +3619,27 @@ a.mn-feat:hover .mn-feat-name { color: var(--accent-2); }
   margin-top: 2px;
   margin-bottom: 6px;
 }
+
+/* tip aside — outlined, accent bar; lighter sibling of the filled callout */
+.mn-tip {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r-card);
+  padding: 14px 18px;
+  margin: 20px 0 18px;
+}
+.mn-tip-label {
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  flex: none;
+}
+.mn-tip p { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--ink-2); }
+.mn-tip p b { color: var(--ink); }

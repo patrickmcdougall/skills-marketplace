@@ -21,6 +21,7 @@ export type RichBlock =
   | { kind: "list"; items: string[] }
   | { kind: "h2"; text: string }
   | { kind: "callout"; title: string; text: string }
+  | { kind: "tip"; text: string; label?: string }
   | { kind: "surface-grid"; rows: SurfaceRow[] }
   | { kind: "feature-list"; features: CoworkFeature[] }
   | { kind: "cowork-walkthrough"; intro?: string; steps: CoworkStep[] };
@@ -329,7 +330,7 @@ export const FEATURES: CoworkFeature[] = [
         "**Add context** — drag files in, or use the + button. Ongoing work? Pick it under “Work in a project” so Claude starts with the background.",
         "**Describe the outcome, not the steps** — and ask Claude to check with you before it starts.",
       ] },
-      { kind: "p", text: "**Good practice:** unless it's a true one-off, start the task inside a Project — Claude begins with the files and history already known instead of from zero. [More on Projects](/manual/features/projects)." },
+      { kind: "tip", text: "Unless it's a true one-off, start the task inside a Project — Claude begins with the files and history already known instead of from zero. [More on Projects](/manual/features/projects)." },
       { kind: "p", text: "Keep one task per job. Recent tasks stay in the sidebar, so a clean task-per-job history doubles as a to-do list you can reopen." },
       { kind: "p", text: "See it in action: [the board-report example](/manual/clean-a-messy-export) starts exactly like this — one task, one file, one sentence." },
     ],
@@ -378,7 +379,7 @@ export const FEATURES: CoworkFeature[] = [
         "**Type /schedule inside that task** and pick the cadence — daily, weekdays, monthly.",
         "**Find the results under Scheduled** in the sidebar — each run stacks up with a “new” marker.",
       ] },
-      { kind: "p", text: "One thing to know: scheduled tasks run while your computer is on. There's a **Keep awake** switch on the Scheduled page for runs that matter." },
+      { kind: "tip", label: "Good to know", text: "Scheduled tasks run while your computer is on. There's a **Keep awake** switch on the Scheduled page for runs that matter." },
       { kind: "p", text: "Pair it with a [Project](/manual/features/projects): if the export lands in the folder every month, the scheduled [board report](/manual/clean-a-messy-export) builds itself from it." },
     ],
   },
@@ -402,7 +403,7 @@ export const FEATURES: CoworkFeature[] = [
         "**Create one** — Live artifacts → New artifact. Start from a template — “Week at a glance”, “Unread email digest”, “What needs my attention” — or describe your own.",
         "**Keep it open** — it updates from the live data instead of going stale.",
       ] },
-      { kind: "p", text: "Best first move: the **Unread email digest** template — it answers a question you already ask every day." },
+      { kind: "tip", text: "Start with the **Unread email digest** template — it answers a question you already ask every day." },
     ],
   },
   {
@@ -426,7 +427,7 @@ export const FEATURES: CoworkFeature[] = [
         "**Send a task from anywhere** — “get the notes ready for my 10 a.m.” Claude works on your desktop: files, apps, browser.",
         "**Review when you're back** — pick up exactly where you left off.",
       ] },
-      { kind: "p", text: "One rule, worth taking seriously: **pair only a phone you own and trust** — Dispatch gives it a line to your real files and apps. The pairing screen links Anthropic's guide to using it safely. (It's in Beta.)" },
+      { kind: "tip", label: "Important", text: "**Pair only a phone you own and trust** — Dispatch gives it a line to your real files and apps. The pairing screen links Anthropic's guide to using it safely. (It's in Beta.)" },
     ],
   },
   {
@@ -449,7 +450,7 @@ export const FEATURES: CoworkFeature[] = [
         "**Connectors** — one-time logins to the apps you live in.",
         "**Create new skills** — teach Claude your process in plain language: how you write proposals, how the team formats updates. ([Where skills fit in](/manual/skills/where-skills-fit) covers when this beats installing.)",
       ] },
-      { kind: "p", text: "Team tip: install the same skills across the team, and a report comes out the same no matter who asks for it." },
+      { kind: "tip", label: "Team tip", text: "Install the same skills across the team, and a report comes out the same no matter who asks for it." },
     ],
   },
 ];
