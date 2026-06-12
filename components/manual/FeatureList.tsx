@@ -90,7 +90,7 @@ export function FeatureList({ features }: { features: CoworkFeature[] }) {
         );
         // Per-feature guide pages are WIP-gated: rows link in dev/preview,
         // render unlinked in production until each guide ships.
-        return SHOW_WIP ? (
+        return SHOW_WIP || f.guide ? (
           <Link className="mn-feat" href={`/manual/features/${f.slug}`} key={f.slug}>
             {body}
           </Link>

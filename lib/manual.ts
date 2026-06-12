@@ -36,6 +36,8 @@ export type CoworkFeature = {
   text: string;
   /** Concrete "use it for:" example — how someone actually organizes with it. */
   example: string;
+  /** The full guide. A feature page ships to production once this exists. */
+  guide?: RichBlock[];
 };
 
 // One row of the "ways to use Claude" comparison grid (the top-down map on the
@@ -314,6 +316,22 @@ export const FEATURES: CoworkFeature[] = [
     text: "Where everyday work starts. Drop in files, say what you want, Cowork does it.",
     example:
       "“Summarize this contract.” “Draft a renewal email from this thread.” “Compare these three proposals.” One task per job.",
+    guide: [
+      { kind: "h2", text: "When to reach for it" },
+      { kind: "list", items: [
+        "**Any one-off job** — summarize a contract, draft an email from a thread, compare three proposals.",
+        "**The first run of anything** — if the job earns a repeat, you graduate it to a skill or a schedule later.",
+        "**Quick questions about your files** — point at a folder and ask.",
+      ] },
+      { kind: "h2", text: "How to use it" },
+      { kind: "list", items: [
+        "**Open New task** — the box asks “How can I help you today?”",
+        "**Add context** — drag files in, or use the + button. Ongoing work? Pick it under “Work in a project” so Claude starts with the background.",
+        "**Describe the outcome, not the steps** — and ask Claude to check with you before it starts.",
+      ] },
+      { kind: "p", text: "Keep one task per job. Recent tasks stay in the sidebar, so a clean task-per-job history doubles as a to-do list you can reopen." },
+      { kind: "p", text: "See it in action: [the board-report example](/manual/clean-a-messy-export) starts exactly like this — one task, one file, one sentence." },
+    ],
   },
   {
     slug: "projects",
@@ -322,6 +340,22 @@ export const FEATURES: CoworkFeature[] = [
     text: "A Project is a folder on your computer that Cowork works in. Tasks inside it start with the files and history already there — no re-explaining.",
     example:
       "One project per area of your life: the company, each big client, your personal finances. Open the right one and Claude already knows the background.",
+    guide: [
+      { kind: "h2", text: "When to reach for it" },
+      { kind: "list", items: [
+        "**Work that belongs together** — one client, one company area, one ongoing process.",
+        "**Anything you'll come back to** — the Project keeps the files and the history, so nothing gets re-explained.",
+        "**Recurring jobs** — the monthly report lives where last month's files already are.",
+      ] },
+      { kind: "h2", text: "How to use it" },
+      { kind: "list", items: [
+        "**Create one** — Projects → New project. A Project is simply a folder on your computer that Cowork works in.",
+        "**Put the files there** — exports, notes, contracts. Cowork reads and writes the real files in that folder.",
+        "**Start tasks inside it** — pick the project in the “Work in a project” selector and every task starts with the background known.",
+      ] },
+      { kind: "callout", title: "A split that works", text: "One project per area of your life — **the company, each big client, personal finances**. Open the right one and Claude already knows where everything is." },
+      { kind: "p", text: "Pairs naturally with [the board-report example](/manual/clean-a-messy-export): keep each month's export in the project folder and the report builds from where the files already live." },
+    ],
   },
   {
     slug: "scheduled",
@@ -330,6 +364,22 @@ export const FEATURES: CoworkFeature[] = [
     text: "Set a task to repeat on its own — type /schedule in any task. The result is waiting when you sit down.",
     example:
       "A 6 a.m. brief of your calendar and inbox. A Friday team summary. A month-end revenue report that builds itself.",
+    guide: [
+      { kind: "h2", text: "When to reach for it" },
+      { kind: "list", items: [
+        "**The job repeats on a calendar** — a weekly summary, a month-end report, a morning brief.",
+        "**The inputs arrive on their own** — email, calendar, connected apps — so nobody needs to kick it off.",
+        "**You want the result waiting** — done before you sit down, not started when you remember.",
+      ] },
+      { kind: "h2", text: "How to use it" },
+      { kind: "list", items: [
+        "**Build the task once**, normally, until the output looks right.",
+        "**Type /schedule inside that task** and pick the cadence — daily, weekdays, monthly.",
+        "**Find the results under Scheduled** in the sidebar — each run stacks up with a “new” marker.",
+      ] },
+      { kind: "p", text: "One thing to know: scheduled tasks run while your computer is on. There's a **Keep awake** switch on the Scheduled page for runs that matter." },
+      { kind: "p", text: "Pair it with a [Project](/manual/features/projects): if the export lands in the folder every month, the scheduled [board report](/manual/clean-a-messy-export) builds itself from it." },
+    ],
   },
   {
     slug: "live-artifacts",
@@ -338,6 +388,21 @@ export const FEATURES: CoworkFeature[] = [
     text: "A document that keeps itself up to date by pulling from the apps you've connected — instead of a report that's stale the day after.",
     example:
       "A week-at-a-glance page built from your calendar. A running list of emails still waiting on your reply.",
+    guide: [
+      { kind: "h2", text: "When to reach for it" },
+      { kind: "list", items: [
+        "**Information you check repeatedly** — not a report you generate once.",
+        "**The answer keeps changing** — inbox state, this week's calendar, open tickets.",
+        "**One page instead of four apps** open every morning.",
+      ] },
+      { kind: "h2", text: "How to use it" },
+      { kind: "list", items: [
+        "**Connect your apps first** — [Customize](/manual/features/customize) → Connectors (Gmail, calendar, and so on). Live artifacts feed on them.",
+        "**Create one** — Live artifacts → New artifact. Start from a template — “Week at a glance”, “Unread email digest”, “What needs my attention” — or describe your own.",
+        "**Keep it open** — it updates from the live data instead of going stale.",
+      ] },
+      { kind: "p", text: "Best first move: the **Unread email digest** template — it answers a question you already ask every day." },
+    ],
   },
   {
     slug: "dispatch",
@@ -347,6 +412,21 @@ export const FEATURES: CoworkFeature[] = [
     text: "Pair your phone and send tasks to your computer from anywhere. Claude works on your desktop; the result is waiting when you're back.",
     example:
       "On the way to the office: “get the notes ready for my 10 a.m.” Done by the time you arrive.",
+    guide: [
+      { kind: "h2", text: "When to reach for it" },
+      { kind: "list", items: [
+        "**You're away from the desk** but the work — the files, the apps — is on it.",
+        "**Dead time** — the commute, the airport line — and a task you can hand off in one sentence.",
+        "**Start remote, finish at the desk** — the result waits in the same conversation.",
+      ] },
+      { kind: "h2", text: "How to use it" },
+      { kind: "list", items: [
+        "**Pair your phone** — Dispatch → “Pair your phone”. Once.",
+        "**Send a task from anywhere** — “get the notes ready for my 10 a.m.” Claude works on your desktop: files, apps, browser.",
+        "**Review when you're back** — pick up exactly where you left off.",
+      ] },
+      { kind: "p", text: "One rule, worth taking seriously: **pair only a phone you own and trust** — Dispatch gives it a line to your real files and apps. The pairing screen links Anthropic's guide to using it safely. (It's in Beta.)" },
+    ],
   },
   {
     slug: "customize",
@@ -355,6 +435,21 @@ export const FEATURES: CoworkFeature[] = [
     text: "Where your skills and connected apps live. Installed skills land here — and “Create new skills” lets you teach Claude your own process in plain language.",
     example:
       "Add the skills your team uses, so a report comes out the same no matter who asks. Or create one from how YOU write proposals.",
+    guide: [
+      { kind: "h2", text: "When to reach for it" },
+      { kind: "list", items: [
+        "**Right after installing a skill** — Skills is where it lands.",
+        "**Before anything connector-driven** — link Gmail, calendar, Slack here once, and Cowork pulls and pushes without exports.",
+        "**When a process is truly yours** — create a skill from it.",
+      ] },
+      { kind: "h2", text: "How to use it" },
+      { kind: "list", items: [
+        "**Skills** — everything installed from [Claudinho](/skills) shows up here; check or remove anytime.",
+        "**Connectors** — one-time logins to the apps you live in.",
+        "**Create new skills** — teach Claude your process in plain language: how you write proposals, how the team formats updates. ([Where skills fit in](/manual/skills/where-skills-fit) covers when this beats installing.)",
+      ] },
+      { kind: "p", text: "Team tip: install the same skills across the team, and a report comes out the same no matter who asks for it." },
+    ],
   },
 ];
 
@@ -909,4 +1004,9 @@ export const SHOW_WIP =
 /** Cases visible in the current environment (prod = live only). */
 export function visibleCases(): CaseStudy[] {
   return SHOW_WIP ? CASES : CASES.filter((c) => c.status === "live");
+}
+
+/** Feature pages visible in the current environment (prod = guided only). */
+export function visibleFeatures(): CoworkFeature[] {
+  return SHOW_WIP ? FEATURES : FEATURES.filter((f) => f.guide);
 }

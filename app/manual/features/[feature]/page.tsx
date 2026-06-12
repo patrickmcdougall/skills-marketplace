@@ -2,15 +2,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { FEATURES, getFeature, MANUAL_ENABLED, SHOW_WIP } from "@/lib/manual";
+import { FEATURES, getFeature, visibleFeatures, MANUAL_ENABLED, SHOW_WIP } from "@/lib/manual";
+import { GuideBody } from "@/components/manual/GuideBody";
 
 // Per-feature stub pages: a real (sanitized) screenshot of the feature, the
 // one-paragraph description from the overview, and an honest "full guide in
 // production" note until each guide is written.
 
 export function generateStaticParams() {
-  if (!MANUAL_ENABLED || !SHOW_WIP) return [];
-  return FEATURES.map((f) => ({ feature: f.slug }));
+  if (!MANUAL_ENABLED) return [];
+  return visibleFeatures().map((f) => ({ feature: f.slug }));
 }
 
 export async function generateMetadata({
@@ -41,7 +42,7 @@ export default async function FeaturePage({
 }) {
   const { feature } = await params;
   const f = getFeature(feature);
-  if (!f || !SHOW_WIP) notFound();
+  if (!f || (!f.guide && !SHOW_WIP)) notFound();
 
   const idx = FEATURES.findIndex((x) => x.slug === f.slug);
   const next = FEATURES[idx + 1];
@@ -76,10 +77,14 @@ export default async function FeaturePage({
         <figcaption>Real screenshot · Claude desktop app, Cowork — personal details blurred</figcaption>
       </figure>
 
-      <div className="mn-soon">
-        The full guide for {f.name} — what it&apos;s for, when to reach for it, and a worked
-        example — is in production.
-      </div>
+      {f.guide ? (
+        <GuideBody body={f.guide} />
+      ) : (
+        <div className="mn-soon">
+          The full guide for {f.name} — what it&apos;s for, when to reach for it, and a worked
+          example — is in production.
+        </div>
+      )}
 
       <p style={{ marginTop: 24 }}>
         {next ? (
@@ -93,7 +98,7 @@ export default async function FeaturePage({
         )}
       </p>
 
-      <div className="mn-updated">Features · {f.slug} · coming soon</div>
+      <div className="mn-updated">Features · {f.slug}{f.guide ? "" : " · coming soon"}</div>
     </article>
   );
 }

@@ -3,7 +3,7 @@ import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { REAL_STATS } from "@/lib/data";
 import { ManualIndex, type IndexGroup } from "@/components/manual/ManualIndex";
-import { START_PAGES, FEATURES, SKILLS_PAGES, casesByShelf, visibleCases, MANUAL_ENABLED, SHOW_WIP } from "@/lib/manual";
+import { START_PAGES, FEATURES, SKILLS_PAGES, casesByShelf, visibleCases, visibleFeatures, MANUAL_ENABLED } from "@/lib/manual";
 
 // The Manual's left index is shared chrome across every /manual route — so it
 // lives in the layout, rendered once and persisted on client-side navigation.
@@ -24,15 +24,13 @@ function buildIndexGroups(): IndexGroup[] {
     count: FEATURES.length,
     leaves: [
       { href: "/manual/features", label: "At a glance" },
-      // Per-feature guides are WIP: listed in dev/preview, absent in prod
-      // until each is finished (see SHOW_WIP).
-      ...(SHOW_WIP
-        ? FEATURES.map((f) => ({
-            href: `/manual/features/${f.slug}`,
-            label: f.name,
-            dot: "soon" as const,
-          }))
-        : []),
+      // A feature page lists once its guide exists (prod) or always in
+      // dev/preview, where unguided ones carry the "soon" dot.
+      ...visibleFeatures().map((f) => ({
+        href: `/manual/features/${f.slug}`,
+        label: f.name,
+        ...(f.guide ? {} : { dot: "soon" as const }),
+      })),
     ],
   };
 
