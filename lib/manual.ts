@@ -684,7 +684,9 @@ export const CASES: CaseStudy[] = [
     nextCase: "competitor-teardown",
   },
 
-  // ── 03 · Product · soon ──
+  // ── 03 · Product · LIVE — real run of anthropics search-strategy (2026-06-12).
+  // Question decomposed per the skill, real web searches, cited brief with
+  // confidence flags. Artifact: planning folder case-05-research/.
   {
     slug: "question-to-research-brief",
     shelf: "product",
@@ -692,25 +694,86 @@ export const CASES: CaseStudy[] = [
     navLabel: "Question → research brief",
     title: "Go from a question to a sourced research brief",
     standfirst:
-      "You need to understand a new market by end of day — and you'd usually spend it opening tabs, skimming, and pasting links into a doc you'll never fully trust.",
-    status: "soon",
+      "You'd normally lose the day to open tabs and a doc of pasted links you half-trust. One sentence, and every claim comes back with its source.",
+    status: "live",
     concept: {
       lead: "Cowork can fan out, fetch, and cite — not just answer.",
       body: "Every claim traces back to a source you can open.",
     },
+    value: [
+      "**The tab-day back** — the question gets split into the right searches; you read one brief.",
+      "**Every claim linked** — trust the brief, or click through and check it yourself.",
+      "**Confidence labeled** — solid numbers separated from single-source projections. Our run flagged 3 uncertainties instead of smoothing them over.",
+      "**Decision-shaped** — it ends with what this means for you, not a pile of facts.",
+    ],
     skill: {
-      skillSlug: "", // TODO(task-5): real research skill
-      name: "",
-      publisher: "",
-      blurb: "Fans out across the web on a question and returns a structured, cited brief.",
-      installCommand: "",
+      skillSlug: "anthropics-knowledge-work-plugins-search-strategy",
+      name: "search-strategy",
+      publisher: "anthropics",
+      blurb:
+        "Breaks your question into the right searches across sources, then brings back one answer with every claim attributed.",
+      installCommand: "npx skills add https://github.com/anthropics/knowledge-work-plugins/tree/main/search-strategy",
     },
     scenario: [
-      "You need to understand a new market by end of day — and you'd usually spend it opening tabs, skimming, and pasting links into a doc you'll never fully trust.",
+      "**Someone needs an answer with evidence** — a client, the board, your own pricing call.",
+      "**So you open the tabs** — and an hour later you have nine of them, two contradicting numbers, and a doc of links you no longer trust.",
     ],
+    sentence:
+      "Research where Pix is heading versus cards for Brazilian retail — current share, trajectory, what changes in 2026 — cite every claim and flag anything uncertain.",
+    before: {
+      label: "Before — the tab ritual",
+      lines: [
+        "tab: a 2024 stat inside a 2026 argument",
+        "tab: two sites, two different numbers",
+        "doc: links pasted, claims unpinned",
+        "the question, still unanswered: what do we tell the client?",
+      ],
+    },
+    after: {
+      label: "After — one cited brief",
+      rows: [
+        { label: "Headline answer", value: "in one line", dot: "#4571d8" },
+        { label: "Current share", value: "multi-source", dot: "var(--accent)" },
+        { label: "The 2026 story", value: "with timeline", dot: "var(--verified)" },
+        { label: "Flagged (3)", value: "not guessed", dot: "var(--ink-3)" },
+      ],
+      footer: "✓ every claim linked · projections labeled as projections",
+    },
+    stats: [
+      { v: "~½ day", k: "of tab-hopping, back" },
+      { v: "3", k: "uncertainties flagged, 0 smoothed" },
+      { v: "1", k: "sentence typed" },
+    ],
+    howTo: [
+      {
+        title: "Download the skill",
+        body: "[Click here to download it](/i/anthropics-knowledge-work-plugins-search-strategy) — or use the Download button on [its Claudinho page](/skills/anthropics-knowledge-work-plugins-search-strategy). A .skill file lands in your Downloads folder.",
+      },
+      {
+        title: "Drag that file into Cowork",
+        body: "Open your Downloads folder and drag the file into the Claude desktop app window. Steps 1 and 2 are once — from now on you start at step 3.",
+      },
+      {
+        title: "Start a task — no files needed",
+        body: "Just bring the question you actually need answered.",
+      },
+      {
+        title: "Type the sentence",
+        body: "You don't need to mention the skill: Claude recognizes a research question and uses it on its own.",
+        typed:
+          "Research where Pix is heading versus cards for Brazilian retail — current share, trajectory, what changes in 2026 — cite every claim and flag anything uncertain.",
+      },
+      {
+        title: "Read the brief",
+        body: "Claims linked, confidence labeled, flags where the sources disagree. Click any source you want to verify.",
+      },
+    ],
+    nextCase: "interviews-to-findings",
   },
 
-  // ── 04 · Operations · soon ──
+  // ── 04 · Operations · LIVE — real run of anthropics internal-comms (2026-06-12).
+  // 14 fabricated-but-realistic fragments across 3 sources → one 3P update in
+  // the skill's strict format. Artifact: planning folder case-04-digest/.
   {
     slug: "weekly-team-digest",
     shelf: "ops",
@@ -718,19 +781,86 @@ export const CASES: CaseStudy[] = [
     navLabel: "Weekly team digest",
     title: "A weekly team digest from scattered updates",
     standfirst:
-      "Every Monday you reconstruct last week from a dozen Slack channels, a few docs, and your inbox — just to write the update nobody else has time to write.",
-    status: "soon",
+      "Every week someone reassembles what happened from chats, email and docs — just to write the update nobody has time to write. This makes it one sentence.",
+    status: "live",
     concept: {
       lead: "A skill can run on a schedule, unattended.",
-      body: "Set it once and the digest lands in your inbox before you sit down.",
+      body: "Set it once and the digest lands before you sit down.",
     },
-    skill: { skillSlug: "", name: "", publisher: "", blurb: "Pulls the week's Slack threads, docs, and email into one summary and delivers it on a schedule.", installCommand: "" },
-    scenario: [
-      "Every Monday you reconstruct what happened last week from a dozen Slack channels, a few docs, and your inbox — just to write the update nobody else has time to write. It's the same gather-and-summarize loop every time.",
+    value: [
+      "**The Monday hour back** — the gathering was the job, and the gathering is what's handed off.",
+      "**A 30-second read** — the format caps it at Progress, Plans, Problems. No essay.",
+      "**Nothing buried** — our run surfaced 2 problems (a pricing-loss pattern, an audit deadline) that were scattered across three sources.",
+      "**Schedulable** — type /schedule in the task and Friday's digest writes itself. [How Scheduled works](/manual/features/scheduled).",
     ],
+    skill: {
+      skillSlug: "anthropics-skills-internal-comms",
+      name: "internal-comms",
+      publisher: "anthropics",
+      blurb:
+        "A set of formats for internal updates — status reports, leadership updates, newsletters — so the write-up comes out the way companies actually write them.",
+      installCommand: "npx skills add https://github.com/anthropics/skills/tree/main/internal-comms",
+    },
+    scenario: [
+      "**The week happened everywhere** — a dozen chat threads, a few emails, a doc or two.",
+      "**And every Monday someone reassembles it** into the update for leadership. Same gather-and-summarize loop, every week.",
+    ],
+    sentence:
+      "Turn this week's updates in these files into our weekly 3P team update — progress, plans, problems.",
+    before: {
+      label: "Before — 14 fragments, 3 sources",
+      lines: [
+        "[mon 9:12] felipe: pix refunds finally green in staging",
+        "[tue] duda: lost the drogaria deal :( pricing AGAIN",
+        "from marina: we still owe SOC2 evidence, deadline jun 30",
+        "[wed 16:44] ana: the marketplace csv doubled in size lol",
+        "[fri] rafa: demo w/ construmax monday, need eng??",
+      ],
+    },
+    after: {
+      label: "After — one 3P update",
+      rows: [
+        { label: "Progress", value: "4 wins, merged", dot: "#4571d8" },
+        { label: "Plans", value: "4 items, dated", dot: "var(--accent)" },
+        { label: "Problems", value: "2 surfaced", dot: "var(--verified)" },
+        { label: "Read time", value: "~30 seconds", dot: "var(--ink-3)" },
+      ],
+      footer: "✓ 14 fragments in, nothing dropped",
+    },
+    stats: [
+      { v: "~1 hr", k: "per week, back" },
+      { v: "2", k: "problems surfaced, 0 buried" },
+      { v: "1", k: "sentence typed" },
+    ],
+    howTo: [
+      {
+        title: "Download the skill",
+        body: "[Click here to download it](/i/anthropics-skills-internal-comms) — or use the Download button on [its Claudinho page](/skills/anthropics-skills-internal-comms). A .skill file lands in your Downloads folder.",
+      },
+      {
+        title: "Drag that file into Cowork",
+        body: "Open your Downloads folder and drag the file into the Claude desktop app window. Steps 1 and 2 are once — from now on you start at step 3.",
+      },
+      {
+        title: "Start a task and drop the week in",
+        body: "Channel exports, notes, emails — as they are. No tidying first.",
+      },
+      {
+        title: "Type the sentence",
+        body: "You don't need to mention the skill: Claude recognizes an internal update and uses it on its own.",
+        typed: "Turn this week's updates in these files into our weekly 3P team update — progress, plans, problems.",
+      },
+      {
+        title: "Review and send",
+        body: "Thirty seconds to read, so thirty seconds to check. When it earns a repeat, /schedule it for Friday.",
+      },
+    ],
+    nextCase: "question-to-research-brief",
   },
 
-  // ── 05 · Design · soon ──
+  // ── 05 · Design · LIVE — real run of anthropics knowledge-synthesis (2026-06-12).
+  // 5 fabricated-but-realistic interview transcripts → ranked themes with
+  // counts and quotes. Artifact: planning folder case-06-interviews/.
   {
     slug: "interviews-to-findings",
     shelf: "design",
@@ -738,19 +868,86 @@ export const CASES: CaseStudy[] = [
     navLabel: "Interviews → findings",
     title: "Raw interviews → synthesized findings",
     standfirst:
-      "Six user interviews are done. Now comes the part everyone dreads: re-reading all of them to find the patterns before you can say anything.",
-    status: "soon",
+      "The interviews are done. Now someone re-reads all of them before anyone can say what was learned. That re-read is what this removes.",
+    status: "live",
     concept: {
       lead: "Synthesis is a job you delegate, not just a summary.",
       body: "Themes, supporting quotes, and a recommendation — from the transcripts, not your memory.",
     },
-    skill: { skillSlug: "", name: "", publisher: "", blurb: "Reads transcripts and returns themes, supporting quotes, and a recommendation.", installCommand: "" },
-    scenario: [
-      "Six user interviews are done. Now comes the part everyone dreads: re-reading all of them to find the patterns before you can say anything.",
+    value: [
+      "**The re-read days back** — themes come ranked, with the quotes attached.",
+      "**Counted, not vibed** — every theme says how many interviews support it. “3 of 5”, not “everyone says”.",
+      "**Single voices stay single** — a one-person point gets flagged, not promoted to a trend. Our run flagged exactly one.",
+      "**A recommendation, not a recap** — it ends with what to do, in order.",
     ],
+    skill: {
+      skillSlug: "anthropics-knowledge-work-plugins-knowledge-synthesis",
+      name: "knowledge-synthesis",
+      publisher: "anthropics",
+      blurb:
+        "Merges what many sources say into one answer — deduplicated, ranked, confidence-labeled, every quote attributed.",
+      installCommand: "npx skills add https://github.com/anthropics/knowledge-work-plugins/tree/main/knowledge-synthesis",
+    },
+    scenario: [
+      "**Five interviews, 126 minutes of transcripts** — and the patterns are in there somewhere.",
+      "**So someone re-reads everything**, highlighter out, trying to remember if three people said the thing or two.",
+    ],
+    sentence:
+      "Synthesize these five interviews into findings — ranked themes with supporting quotes and counts, flag anything only one person said, end with a recommendation.",
+    before: {
+      label: "Before — 5 transcripts, 126 min",
+      lines: [
+        "int-1 carla: “the POS report never matches the bank one”",
+        "int-3 patricia: “automation of a mess is faster mess”",
+        "int-4 ricardo: “no system flagged it when it mattered”",
+        "your notes: did 3 people say the pix thing, or 2?",
+      ],
+    },
+    after: {
+      label: "After — ranked findings",
+      rows: [
+        { label: "Themes", value: "4, ranked", dot: "#4571d8" },
+        { label: "Support", value: "counted per theme", dot: "var(--accent)" },
+        { label: "Quotes", value: "attributed", dot: "var(--verified)" },
+        { label: "Flagged (1)", value: "single-source", dot: "var(--ink-3)" },
+      ],
+      footer: "✓ 5 interviews → findings + a sequenced recommendation",
+    },
+    stats: [
+      { v: "~1 day", k: "of re-reading, back" },
+      { v: "1", k: "single voice flagged, 0 promoted" },
+      { v: "1", k: "sentence typed" },
+    ],
+    howTo: [
+      {
+        title: "Download the skill",
+        body: "[Click here to download it](/i/anthropics-knowledge-work-plugins-knowledge-synthesis) — or use the Download button on [its Claudinho page](/skills/anthropics-knowledge-work-plugins-knowledge-synthesis). A .skill file lands in your Downloads folder.",
+      },
+      {
+        title: "Drag that file into Cowork",
+        body: "Open your Downloads folder and drag the file into the Claude desktop app window. Steps 1 and 2 are once — from now on you start at step 3.",
+      },
+      {
+        title: "Start a task and drop the transcripts in",
+        body: "All of them — recordings transcribed, notes, whatever you have.",
+      },
+      {
+        title: "Type the sentence",
+        body: "You don't need to mention the skill: Claude recognizes a synthesis job and uses it on its own.",
+        typed:
+          "Synthesize these five interviews into findings — ranked themes with supporting quotes and counts, flag anything only one person said, end with a recommendation.",
+      },
+      {
+        title: "Review the findings",
+        body: "Check the quotes against your memory of the calls — they're attributed, so it takes minutes, not a re-read.",
+      },
+    ],
+    nextCase: "first-pass-financial-model",
   },
 
-  // ── 06 · Finance · soon ──
+  // ── 06 · Finance · LIVE — real run of claude-office-skills financial-modeling
+  // (2026-06-12). 24 raw monthly rows → assumptions-driven .xlsx with working
+  // formulas (math verified independently). Artifact: case-07-model/.
   {
     slug: "first-pass-financial-model",
     shelf: "finance",
@@ -758,19 +955,86 @@ export const CASES: CaseStudy[] = [
     navLabel: "First-pass financial model",
     title: "Build a first-pass financial model from raw data",
     standfirst:
-      "You have a CSV of actuals and a board ask for a forecast — and you're about to rebuild the same spreadsheet structure you build every quarter.",
-    status: "soon",
+      "The board asks for a forecast, and you rebuild the same spreadsheet structure you build every time. This hands you the structure — working.",
+    status: "live",
     concept: {
       lead: "Skills produce real artifacts — a working .xlsx, not a screenshot.",
       body: "You open it and keep going, assumptions and all.",
     },
-    skill: { skillSlug: "", name: "", publisher: "", blurb: "Turns raw numbers into an editable model with assumptions you can change.", installCommand: "" },
-    scenario: [
-      "You have a CSV of actuals and a board ask for a forecast — and you're about to rebuild the same spreadsheet structure you build every quarter.",
+    value: [
+      "**The rebuild evening back** — actuals aggregated, projections wired, structure standard.",
+      "**Assumptions you can argue with** — five blue cells drive the whole model. Change one in the meeting, everything recalculates.",
+      "**A real Excel file with working formulas** — your finance person takes it from here, nothing to re-type.",
+      "**An honest first pass** — the 80% scaffold to refine, not a board-final valuation pretending otherwise.",
     ],
+    skill: {
+      skillSlug: "claude-office-skills-skills-financial-modeling",
+      name: "financial-modeling",
+      publisher: "claude-office-skills",
+      blurb:
+        "Builds assumption-driven financial models — from raw actuals to projections with working formulas, in standard modeling conventions.",
+      installCommand: "npx skills add https://github.com/claude-office-skills/skills/tree/main/financial-modeling",
+    },
+    scenario: [
+      "**You have the raw actuals** — 24 months of revenue and costs in an export, no totals, no structure.",
+      "**And an ask: “can we see three years out?”** So you start rebuilding the same model skeleton you've built before.",
+    ],
+    sentence:
+      "Build a first-pass model from these actuals — 2024–2025 aggregated, 2026–2028 projected, assumptions in their own tab so I can change them.",
+    before: {
+      label: "Before — 24 rows of raw actuals",
+      lines: [
+        "2024-01, 98412, 23117, 38990, 11214, …",
+        "2025-07, 152330, 36110, 47821, 17442, …",
+        "…22 more rows. no totals, no structure",
+        "the ask: “can we see three years out?”",
+      ],
+    },
+    after: {
+      label: "After — an assumptions-driven model",
+      rows: [
+        { label: "Assumptions", value: "5, editable", dot: "#4571d8" },
+        { label: "Actuals", value: "2024–25, aggregated", dot: "var(--accent)" },
+        { label: "Projections", value: "2026–28, formulas", dot: "var(--verified)" },
+        { label: "EBITDA path", value: "29.4% modeled fwd", dot: "var(--ink-3)" },
+      ],
+      footer: "✓ change an assumption — the whole model recalculates",
+    },
+    stats: [
+      { v: "~1 eve.", k: "of structure-building, back" },
+      { v: "5", k: "assumptions, 0 buried constants" },
+      { v: "1", k: "sentence typed" },
+    ],
+    howTo: [
+      {
+        title: "Download the skill",
+        body: "[Click here to download it](/i/claude-office-skills-skills-financial-modeling) — or use the Download button on [its Claudinho page](/skills/claude-office-skills-skills-financial-modeling). A .skill file lands in your Downloads folder.",
+      },
+      {
+        title: "Drag that file into Cowork",
+        body: "Open your Downloads folder and drag the file into the Claude desktop app window. Steps 1 and 2 are once — from now on you start at step 3.",
+      },
+      {
+        title: "Start a task and drop the actuals in",
+        body: "The raw export, as it came out. Monthly is fine.",
+      },
+      {
+        title: "Type the sentence",
+        body: "You don't need to mention the skill: Claude recognizes a modeling job and uses it on its own.",
+        typed:
+          "Build a first-pass model from these actuals — 2024–2025 aggregated, 2026–2028 projected, assumptions in their own tab so I can change them.",
+      },
+      {
+        title: "Open the model and argue with it",
+        body: "That's what the assumptions tab is for — change the growth rate live in the meeting.",
+      },
+    ],
+    nextCase: "proposal-from-call",
   },
 
-  // ── 07 · Sales · soon ──
+  // ── 07 · Sales · LIVE — real run of claude-office-skills proposal-writer
+  // (2026-06-12). One 41-min discovery transcript → real .docx proposal (7
+  // sections) + follow-up email. Artifact: case-08-proposal/.
   {
     slug: "proposal-from-call",
     shelf: "sales",
@@ -778,19 +1042,85 @@ export const CASES: CaseStudy[] = [
     navLabel: "Proposal from a call",
     title: "A proposal drafted from the discovery call",
     standfirst:
-      "The discovery call went well. Now you need a proposal that reflects what they actually said — while it's still fresh and before momentum cools.",
-    status: "soon",
+      "The call went well. Now the proposal has to say what they said, back to them — and drafting that takes the evening. This takes the transcript.",
+    status: "live",
     concept: {
       lead: "One input can become several deliverables.",
       body: "The call becomes the proposal and the follow-up email in one pass.",
     },
-    skill: { skillSlug: "", name: "", publisher: "", blurb: "Turns a call recording into a tailored proposal plus a follow-up email.", installCommand: "" },
-    scenario: [
-      "The discovery call went well. Now you need a proposal that reflects what they actually said — while it's still fresh and before momentum cools.",
+    value: [
+      "**The drafting evening back** — the call already contains the proposal; this extracts it.",
+      "**It says what they said** — their constraint (nothing installs on store machines), their date (the July 2 committee), their fear (adoption) — answered in the design, not boilerplate.",
+      "**Two deliverables from one input** — the proposal and the follow-up email, consistent with each other.",
+      "**A real .docx** — open, adjust the numbers, send.",
     ],
+    skill: {
+      skillSlug: "claude-office-skills-skills-proposal-writer",
+      name: "proposal-writer",
+      publisher: "claude-office-skills",
+      blurb:
+        "Turns discovery material into a structured proposal — executive summary through next steps — in a real document.",
+      installCommand: "npx skills add https://github.com/claude-office-skills/skills/tree/main/proposal-writer",
+    },
+    scenario: [
+      "**The discovery call had everything** — their pain, their constraint, their timeline, their fear.",
+      "**Now it has to come back as a proposal** that proves you heard it — while it's still fresh. That drafting is the evening.",
+    ],
+    sentence:
+      "Draft a proposal from this discovery call — their goals, constraints and timeline reflected back — plus the follow-up email to send with it.",
+    before: {
+      label: "Before — a 41-minute transcript",
+      lines: [
+        "sandra: “I need to stop paying people to compare spreadsheets”",
+        "otavio: nothing installs on POS machines. cloud or nothing",
+        "sandra: committee meets jul 2. budget exists this quarter",
+        "sandra: store staff “allergic to new systems”",
+        "agreed: proposal before jul 2",
+      ],
+    },
+    after: {
+      label: "After — proposal + email",
+      rows: [
+        { label: "Proposal", value: ".docx, 7 sections", dot: "#4571d8" },
+        { label: "Their constraints", value: "answered in design", dot: "var(--accent)" },
+        { label: "Timeline", value: "built to their jul 2", dot: "var(--verified)" },
+        { label: "Follow-up email", value: "ready to send", dot: "var(--ink-3)" },
+      ],
+      footer: "✓ one call → two deliverables, every section traceable",
+    },
+    stats: [
+      { v: "~1 eve.", k: "of drafting, back" },
+      { v: "2", k: "deliverables from 1 input" },
+      { v: "1", k: "sentence typed" },
+    ],
+    howTo: [
+      {
+        title: "Download the skill",
+        body: "[Click here to download it](/i/claude-office-skills-skills-proposal-writer) — or use the Download button on [its Claudinho page](/skills/claude-office-skills-skills-proposal-writer). A .skill file lands in your Downloads folder.",
+      },
+      {
+        title: "Drag that file into Cowork",
+        body: "Open your Downloads folder and drag the file into the Claude desktop app window. Steps 1 and 2 are once — from now on you start at step 3.",
+      },
+      {
+        title: "Start a task and drop the transcript in",
+        body: "The call recording's transcript, or even your raw notes from it.",
+      },
+      {
+        title: "Type the sentence",
+        body: "You don't need to mention the skill: Claude recognizes a proposal job and uses it on its own.",
+        typed:
+          "Draft a proposal from this discovery call — their goals, constraints and timeline reflected back — plus the follow-up email to send with it.",
+      },
+      {
+        title: "Review both, adjust, send",
+        body: "Check the numbers and the names — the structure and the listening are done.",
+      },
+    ],
+    nextCase: "clean-a-messy-export",
   },
 
-  // ── 08 · Finance · soon ──
+  // ── 08 · Finance · LIVE (flagship) ──
   {
     // ★ FLAGSHIP — built from a real run of anthropics/skills xlsx (2026-06-10).
     // Numbers below are the run's actual output, not invented.
@@ -966,7 +1296,7 @@ export const CASES: CaseStudy[] = [
         body: "Same structure every time, so profiles compare side by side. Gaps are marked, not filled in.",
       },
     ],
-    nextCase: "clean-a-messy-export",
+    nextCase: "weekly-team-digest",
   },
 ];
 
