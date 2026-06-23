@@ -287,3 +287,6 @@ Issues found: 4. Critical: 1 (D9 wrong parameter — silent install failure). Hi
 | 10 | Eng | Drawer needs useEffect close on pathname change | Mechanical | P1 completeness | Missing from plan spec; without it drawer persists on navigation | Leave to implementer |
 | 11 | Eng | D7 copy color → modifier class .is-copied | Mechanical | P5 explicit | Inline style would violate no-inline-styles rule; modifier class is right | Inline style |
 | 12 | Eng | SecuritySection hide dp-sec-perms with false && | Mechanical | P5 explicit | Surgical zero-blast-radius fix; preserves data shape comment | Delete file |
+
+- [ ] **site_event abuse protection + retention** — `app/api/event/route.ts`
+  Accepted risk at ship time (2026-06-10, near-zero traffic): the event endpoint is unauthenticated and unthrottled; bot filter is UA-substring only. When traffic grows: add per-IP rate limiting (Vercel WAF rule or token bucket), and a retention cron (`delete from site_event where created_at < now() - interval '90 days'`). Flagged by 3 review specialists + red team.

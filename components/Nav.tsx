@@ -42,12 +42,8 @@ export function Nav({ stats }: NavProps) {
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  // The Manual is a WIP: shown in dev/preview, hidden in production until launch.
-  // Mirrors the server gate (lib/manual MANUAL_ENABLED). NODE_ENV guards
-  // local dev, where a stale NEXT_PUBLIC_VERCEL_ENV would otherwise hide it.
-  const showManual =
-    process.env.NODE_ENV !== "production" ||
-    process.env.NEXT_PUBLIC_VERCEL_ENV !== "production";
+  // The Manual launched 2026-06-11 — link always shown (gate history in git).
+  const showManual = true;
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
 

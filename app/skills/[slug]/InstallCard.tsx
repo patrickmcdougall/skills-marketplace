@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { track, MAX_DETAIL_LEN } from "@/lib/track";
 
 interface InstallCardProps {
   slug: string;
@@ -23,16 +24,21 @@ export function InstallCard({
   const [copied, setCopied] = useState(false);
   const [opening, setOpening] = useState(false);
   const [showFallback, setShowFallback] = useState(false);
+  const [installed, setInstalled] = useState(false);
 
   const copy = () => {
     if (typeof navigator !== "undefined") {
       navigator.clipboard?.writeText(installCommand);
     }
+    track("install_copy_command", slug);
+    setInstalled(true);
     setCopied(true);
     setTimeout(() => setCopied(false), 1400);
   };
 
   const openInClaudeCode = () => {
+    track("install_claude_code", slug);
+    setInstalled(true);
     window.location.href = `claude://install?skill=${encodeURIComponent(installCommand)}`;
     setOpening(true);
     setTimeout(() => {
@@ -47,7 +53,14 @@ export function InstallCard({
     <div className="dp-install">
       {canDownload ? (
         <>
-          <a className="primary" href={`/i/${slug}`}>
+          <a
+            className="primary"
+            href={`/i/${slug}`}
+            onClick={() => {
+              track("install_download", slug);
+              setInstalled(true);
+            }}
+          >
             <span className="arrow">↓</span>
             Download .skill
           </a>
@@ -118,11 +131,104 @@ export function InstallCard({
         </a>
       </div>
 
+      {installed && <FeedbackPrompt slug={slug} />}
+
       {installCount !== undefined && installCount > 0 && (
         <p className="subscript" style={{ marginTop: 4, fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11 }}>
           {installCount.toLocaleString()} install{installCount === 1 ? "" : "s"}
         </p>
       )}
+    </div>
+  );
+}
+
+function FeedbackPrompt({ slug }: { slug: string }) {
+  const storageKey = `claudinho-fb:${slug}`;
+  const [state, setState] = useState<"ask" | "comment" | "done">(() => {
+    try {
+      return localStorage.getItem(storageKey) ? "done" : "ask";
+    } catch {
+      return "ask";
+    }
+  });
+  const [comment, setComment] = useState("");
+  // Re-render removes the buttons, but a rapid double-click lands before
+  // that — guard so one answer can't fire two events.
+  const answered = useRef(false);
+
+  const remember = () => {
+    try {
+      localStorage.setItem(storageKey, "1");
+    } catch {}
+  };
+
+  if (state === "done") {
+    return (
+      <p className="subscript" style={{ marginTop: 8 }}>
+        Thanks for the feedback.
+      </p>
+    );
+  }
+
+  if (state === "comment") {
+    return (
+      <form
+        className="dp-fb-form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (comment.trim()) track("feedback_comment", slug, comment.trim());
+          remember();
+          setState("done");
+        }}
+      >
+        <input
+          type="text"
+          className="dp-fb-input"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="What went wrong? (optional)"
+          aria-label="What went wrong"
+          maxLength={MAX_DETAIL_LEN}
+          autoFocus
+        />
+        <button className="dp-fb-send" type="submit">
+          Send
+        </button>
+      </form>
+    );
+  }
+
+  return (
+    <div className="dp-fb">
+      <span className="subscript">Did the skill work for you?</span>
+      <button
+        type="button"
+        className="dp-fb-btn"
+        aria-label="Yes, it worked"
+        onClick={() => {
+          if (answered.current) return;
+          answered.current = true;
+          track("feedback_up", slug);
+          remember();
+          setState("done");
+        }}
+      >
+        👍
+      </button>
+      <button
+        type="button"
+        className="dp-fb-btn"
+        aria-label="No, something went wrong"
+        onClick={() => {
+          if (answered.current) return;
+          answered.current = true;
+          track("feedback_down", slug);
+          remember();
+          setState("comment");
+        }}
+      >
+        👎
+      </button>
     </div>
   );
 }

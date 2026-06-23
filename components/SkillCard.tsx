@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { fmtCount, PUBLISHERS, type Skill } from "@/lib/data";
+import { fmtCount, PUBLISHERS, subShelfLabel, type Skill } from "@/lib/data";
 import type { SkillTrustStatus } from "@/lib/trust";
 
 interface SkillCardProps {
@@ -62,7 +62,7 @@ export function SkillCard({ skill, context = "shelf", trust }: SkillCardProps) {
           {skill.shelfTitle && (
             <span className="tag tag-shelf">
               {skill.shelfTitle}
-              {skill.subShelf ? ` / ${skill.subShelf}` : ""}
+              {skill.subShelf ? ` / ${subShelfLabel(skill.subShelf)}` : ""}
             </span>
           )}
           {tags.map((t) => (

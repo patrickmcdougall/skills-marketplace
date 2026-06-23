@@ -23,6 +23,15 @@ export function GuideBody({ body }: { body: RichBlock[] }) {
                 {block.text}
               </h2>
             );
+          case "tip":
+            return (
+              <aside className="mn-tip" key={i}>
+                <span className="mn-tip-label">{block.label ?? "Tip"}</span>
+                <p>
+                  <RichText text={block.text} />
+                </p>
+              </aside>
+            );
           case "callout":
             return (
               <div className="mn-callout" key={i}>

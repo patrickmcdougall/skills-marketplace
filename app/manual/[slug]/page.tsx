@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { CASES, getCase, MANUAL_ENABLED } from "@/lib/manual";
+import { getCase, visibleCases, MANUAL_ENABLED, SHOW_WIP } from "@/lib/manual";
 import { CaseArticle, type CaseSignals } from "@/components/manual/CaseArticle";
 import { getSkillBySlug } from "@/lib/db";
 
@@ -9,7 +9,7 @@ export const revalidate = 3600;
 
 export function generateStaticParams() {
   if (!MANUAL_ENABLED) return [];
-  return CASES.map((p) => ({ slug: p.slug }));
+  return visibleCases().map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({
@@ -57,7 +57,7 @@ async function loadSignals(skillSlug: string): Promise<{ signals: CaseSignals; h
 export default async function PlayPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const entry = getCase(slug);
-  if (!entry) notFound();
+  if (!entry || (entry.status !== "live" && !SHOW_WIP)) notFound();
 
   const { signals, href } = await loadSignals(entry.skill.skillSlug);
 

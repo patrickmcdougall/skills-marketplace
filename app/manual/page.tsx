@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { START_PAGES, CASES, LIVE_CASE_COUNT, TOTAL_TOPICS } from "@/lib/manual";
+import { START_PAGES, SKILLS_PAGES, CASES, LIVE_CASE_COUNT, visibleCases, visibleFeatures } from "@/lib/manual";
 
 export const metadata: Metadata = {
   title: "The Manual — Claudinho",
@@ -53,8 +53,9 @@ export default function ManualIndexPage() {
       </div>
 
       <div className="mn-updated">
-        Updated weekly · {TOTAL_TOPICS} topics · {LIVE_CASE_COUNT} live example
-        {LIVE_CASE_COUNT === 1 ? "" : "s"}
+        Updated weekly ·{" "}
+        {START_PAGES.length + 1 + SKILLS_PAGES.length + visibleFeatures().length + visibleCases().length}{" "}
+        topics · {LIVE_CASE_COUNT} live example{LIVE_CASE_COUNT === 1 ? "" : "s"}
       </div>
     </article>
   );

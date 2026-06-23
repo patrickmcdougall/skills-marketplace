@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { isBot } from "@/lib/bot";
 import { packageSkill } from "@/scripts/lib/package-skill";
 
 function serverDb() {
@@ -18,20 +19,6 @@ type ListingRow = {
   bundle_source_ref: string | null;
   distribution_mode: string | null;
 };
-
-// Coarse bot filter — don't count prefetch/crawler hits.
-function isBot(req: NextRequest): boolean {
-  const ua = (req.headers.get("user-agent") ?? "").toLowerCase();
-  return (
-    ua.includes("bot") ||
-    ua.includes("crawler") ||
-    ua.includes("spider") ||
-    ua.includes("prerender") ||
-    ua.includes("prefetch") ||
-    req.headers.get("x-purpose") === "prefetch" ||
-    req.headers.get("purpose") === "prefetch"
-  );
-}
 
 async function incrementInstallCount(db: ReturnType<typeof serverDb>, skillId: string) {
   // V1: read-modify-write is fine at current traffic levels.

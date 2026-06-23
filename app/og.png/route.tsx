@@ -59,7 +59,7 @@ export async function GET() {
             maxWidth: 720,
           }}
         >
-          Every skill is installed, run on a real input, and re-verified weekly.
+          12,000+ community skills, sorted by the job they do. Install in a click — no terminal.
         </div>
 
         {/* url */}

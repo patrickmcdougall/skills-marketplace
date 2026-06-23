@@ -3,7 +3,7 @@ import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { REAL_STATS } from "@/lib/data";
 import { ManualIndex, type IndexGroup } from "@/components/manual/ManualIndex";
-import { START_PAGES, FEATURES, SKILLS_PAGES, casesByShelf, MANUAL_ENABLED } from "@/lib/manual";
+import { START_PAGES, FEATURES, SKILLS_PAGES, casesByShelf, visibleCases, visibleFeatures, MANUAL_ENABLED } from "@/lib/manual";
 
 // The Manual's left index is shared chrome across every /manual route — so it
 // lives in the layout, rendered once and persisted on client-side navigation.
@@ -24,11 +24,12 @@ function buildIndexGroups(): IndexGroup[] {
     count: FEATURES.length,
     leaves: [
       { href: "/manual/features", label: "At a glance" },
-      // Per-feature guides are stubs until written — same "soon" dot as cases.
-      ...FEATURES.map((f) => ({
+      // A feature page lists once its guide exists (prod) or always in
+      // dev/preview, where unguided ones carry the "soon" dot.
+      ...visibleFeatures().map((f) => ({
         href: `/manual/features/${f.slug}`,
         label: f.name,
-        dot: "soon" as const,
+        ...(f.guide ? {} : { dot: "soon" as const }),
       })),
     ],
   };
@@ -42,7 +43,10 @@ function buildIndexGroups(): IndexGroup[] {
     })),
   };
 
-  const byShelf = casesByShelf();
+  const visible = new Set(visibleCases().map((c) => c.slug));
+  const byShelf = casesByShelf()
+    .map((g) => ({ ...g, cases: g.cases.filter((c) => visible.has(c.slug)) }))
+    .filter((g) => g.cases.length > 0);
   const examples: IndexGroup = {
     title: "Examples",
     count: byShelf.reduce((n, g) => n + g.cases.length, 0),
