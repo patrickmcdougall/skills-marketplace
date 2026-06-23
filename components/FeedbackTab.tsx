@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
 
 const ORANGE = "#F25C1F";
 const CREAM = "#efece4";
@@ -15,7 +14,6 @@ export function FeedbackTab() {
   const [contact, setContact] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const pathname = usePathname();
 
   // Focus the textarea when the panel opens; close on Escape.
   useEffect(() => {
@@ -33,10 +31,10 @@ export function FeedbackTab() {
     if (!message.trim() || status === "sending") return;
     setStatus("sending");
     try {
-      const res = await fetch("/api/feedback", {
+      const res = await fetch("/api/event", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, contact, pathname }),
+        body: JSON.stringify({ event: "site_feedback", detail: message, contact }),
       });
       if (!res.ok) throw new Error();
       setStatus("done");

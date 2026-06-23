@@ -86,6 +86,7 @@ describe("POST /api/event", () => {
         event: "install_download",
         skill_slug: "my-skill",
         detail: null,
+        contact: null,
       });
     });
   });
@@ -135,6 +136,7 @@ describe("POST /api/event", () => {
         event: "feedback_up",
         skill_slug: null,
         detail: null,
+        contact: null,
       });
     });
 
@@ -171,6 +173,49 @@ describe("POST /api/event", () => {
       expect(insertMock).toHaveBeenCalledWith(
         expect.objectContaining({ detail: "d".repeat(499) })
       );
+    });
+  });
+
+  describe("site_feedback", () => {
+    it("carries detail (the message) and stores it", async () => {
+      const body = JSON.stringify({ event: "site_feedback", detail: "I wanted a Notion skill" });
+      await POST(makeRequest(body));
+      expect(insertMock).toHaveBeenCalledWith(
+        expect.objectContaining({ event: "site_feedback", detail: "I wanted a Notion skill" })
+      );
+    });
+
+    it("stores optional contact, trimmed", async () => {
+      const body = JSON.stringify({ event: "site_feedback", detail: "hi", contact: "  me@x.com " });
+      await POST(makeRequest(body));
+      expect(insertMock).toHaveBeenCalledWith(
+        expect.objectContaining({ contact: "me@x.com" })
+      );
+    });
+
+    it("caps contact at 320 chars", async () => {
+      const body = JSON.stringify({ event: "site_feedback", detail: "hi", contact: "c".repeat(400) });
+      await POST(makeRequest(body));
+      expect(insertMock).toHaveBeenCalledWith(
+        expect.objectContaining({ contact: "c".repeat(320) })
+      );
+    });
+
+    it("ignores contact on non-feedback events", async () => {
+      const body = JSON.stringify({ event: "install_download", skillSlug: "x", contact: "me@x.com" });
+      await POST(makeRequest(body));
+      expect(insertMock).toHaveBeenCalledWith(
+        expect.objectContaining({ contact: null })
+      );
+    });
+
+    it("returns 500 when the save genuinely fails (so the widget can show an error)", async () => {
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+      insertMock.mockResolvedValueOnce({ error: { message: "db down" } });
+      const res = await POST(makeRequest(JSON.stringify({ event: "site_feedback", detail: "hi" })));
+      expect(res.status).toBe(500);
+      expect(await res.json()).toEqual({ ok: false });
+      spy.mockRestore();
     });
   });
 

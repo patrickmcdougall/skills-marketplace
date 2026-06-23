@@ -9,12 +9,17 @@ export const TRACK_EVENTS = [
   "feedback_up",
   "feedback_down",
   "feedback_comment",
+  "site_feedback",
 ] as const;
 
 export type TrackEvent = (typeof TRACK_EVENTS)[number];
 
 export const MAX_SLUG_LEN = 200;
 export const MAX_DETAIL_LEN = 500;
+export const MAX_CONTACT_LEN = 320;
+
+// Events that legitimately carry a free-text `detail` message.
+export const FREE_TEXT_EVENTS = new Set<string>(["feedback_comment", "site_feedback"]);
 
 export function track(event: TrackEvent, skillSlug?: string, detail?: string) {
   try {
