@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { notifyFeedback } from "@/lib/notify";
 
 function serverDb() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -44,9 +43,6 @@ export async function POST(req: NextRequest) {
   if (error) {
     return Response.json({ error: "Could not save feedback" }, { status: 500 });
   }
-
-  // Best-effort email notification — never blocks or fails the save.
-  await notifyFeedback({ message: message.slice(0, MAX_MESSAGE), contact, pathname, referrer });
 
   return Response.json({ ok: true });
 }
